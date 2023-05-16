@@ -1,4 +1,4 @@
-# AutoIt Chess Variant Converter
+# AutoIt Chess PGN to Variant Converter
 
 This AutoIt script allows you to convert Portable Game Notation (PGN) files into chess variants. It provides a graphical user interface (GUI) for loading PGN files, selecting specific moves, and automatically adding the variant to the JSON file.
 
