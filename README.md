@@ -38,7 +38,7 @@ Special thanks to:
   - and the pgn recorders from various members of the 5d community:
     - Crazy: https://github.com/CrazyPenguin0111/5D-PGN-Recorder
     - Tesseract/Penteract: https://github.com/penteract/5D-PGN-Recorder
-    - NKID00: https://github.com/NKID00/5DChessRecorderCrossplatform/blob/master/Program.cs
+    - NKID00: https://github.com/NKID00/5DChessRecorderCrossplatform/
   
 
 
