@@ -338,6 +338,11 @@ Func _multiversemove(ByRef $i_multiverse,$startmove,$endmove,$movecolor)
 			_multiverseturnadd($i_multiverse,$board,$endtimeline)
 
 		Case Else
+			if ($piece == "w" and $endsquare[1] = 1) Then
+				$board = _pieceadd($board,"q",$endsquare[0]&$endsquare[1])
+			ElseIf ($piece == "W" and $endsquare[1] = 8) Then
+				$board = _pieceadd($board,"Q",$endsquare[0]&$endsquare[1])
+			EndIf
 			_multiverseaddtimelineatturn($i_multiverse,$board,$endboard[1]+1,$newtimelinename)
 			_multiverseturnadd($i_multiverse,$board2,$i_starttimeline)
 	EndSelect
