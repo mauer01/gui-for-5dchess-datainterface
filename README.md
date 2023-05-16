@@ -6,8 +6,8 @@ This AutoIt script allows you to convert Portable Game Notation (PGN) files into
 
 - Load PGN files and extract move data.
 - Choose the turn (white or black) for creating variants.
-- Add chess variants to a JSON file or copy them to the clipboard.
-- Delete variants from the JSON file.
+- Add chess variants to the specified JSON file or copy them to the clipboard.
+- Delete variants from the specified JSON file.
 
 ## Prerequisites
 
