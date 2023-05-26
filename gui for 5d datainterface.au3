@@ -11,7 +11,7 @@ $sleep = 100
 #include <StaticConstants.au3>
 #include <WindowsConstants.au3>
 #include <ColorConstants.au3>
-$ini = @ScriptDir & "\pgn to variant.ini"
+$ini = @ScriptDir & "\gui for datainterface.ini"
 #Region ### START Koda GUI section ### Form=
 $Form1_1 = GUICreate("GUI for Data Interface", 418, 180, 625, 277)
 $b_variantloader = GUICtrlCreateButton("run interface", 328, 40, 75, 25)
