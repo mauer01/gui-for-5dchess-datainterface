@@ -1,13 +1,14 @@
-# AutoIt Chess PGN to Variant Converter
+# AutoIt Graphical Interface for the 5d chess datainterface
 
-This AutoIt script allows you to convert Portable Game Notation (PGN) files into chess variants. It provides a graphical user interface (GUI) for loading PGN files, selecting specific moves, and automatically adding the variant to the JSON file.
+This AutoIt script allows you to convert Portable Game Notation (PGN) files into chess variants. It provides a graphical user interface (GUI) for loading PGN files, selecting specific moves, and automatically adding the variant to the JSON file while also starting them using the data interface. While also giving quick and easy access to the other options the data interface provides.
 
 ## Features
 
 - Load PGN files and extract move data.
 - Choose the turn (white or black) for creating variants.
 - Add chess variants to the specified JSON file or copy them to the clipboard.
-- Delete variants from the specified JSON file.
+- Delete variants from the specified JSON file
+- Start the Data Interface to run the variant or use the other options the data interface provides
 
 ## Prerequisites
 
@@ -17,13 +18,14 @@ This AutoIt script allows you to convert Portable Game Notation (PGN) files into
 
 ## Getting Started
 
-1. Download the `PGN to Variant.exe` from Releases and start it.
+1. Download the `gui for DataInterface` from Releases and start it.
 2. A GUI will appear, allowing you to interact with the script's functionalities.
 3. Use the `Open File` button to select a PGN file.
-4. Choose the turn (white or black) using the drop-down menu, -1 is the complete game, The Checkbox "Black" will have 
-6. Click the "Read File" button to extract move data from the PGN file.
+4. Choose the turn (white or black) using the drop-down menu, -1 is the complete game including black.
+6. Click the `Load File` button to extract move data from the PGN file.
 7. Once the file is loaded, you can add the variant to the .json file or copy the variant to the clipboard.
-8. once you selected the .json you wanna modify you can also delete existing variants from that .json File.
+8. Once you selected the Data interface with its corresponding json file you can add and delete variants directly.
+9. After starting the data interface from within the gui additional options appear to run the specified variant from the list. It also provides with the additional options the data interface gives like changing timers.
 
 ## Contributing
 
@@ -45,5 +47,4 @@ Special thanks to:
 ## Disclaimer
 
 This script is provided as-is without any warranty. Use it at your own risk.
-Currently there are issues with the FEN generation of the non standard boards in the pgn readers (all of them)
-  - any board that has pieces within a row and not the full row will have slightly wrong starting positions which will cascate through the full game.
+It should technically be full profe
