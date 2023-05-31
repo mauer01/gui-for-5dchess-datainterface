@@ -193,7 +193,7 @@ While 1
 			if MsgBox(4,"REALLY???","REALLY REALLY????") = 6 Then
 				local $h_file,$skip = 0,$string = ""
 
-				$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[1-9]+",3)[0]
+				$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
 				_FileReadToArray($f_variantloader,$h_file)
 
 				$k = 0
@@ -235,7 +235,7 @@ While 1
 			EndIf
 		Case $b_run
 			StdinWrite($run,"1" & @LF)
-			$stdinwrite = StringRegExp(GUICtrlRead($c_variants),"[1-9]+",3)
+			$stdinwrite = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)
 			if IsArray($stdinwrite) Then StdinWrite($run, $stdinwrite[0] & @LF)
 		Case $b_timerL
 			_inputbox()
