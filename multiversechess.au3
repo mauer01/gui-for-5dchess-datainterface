@@ -143,7 +143,11 @@ Func _multiversefrompgn($i_filename, $stopmove = -1,$includeblackmove = 1)
 	$i += 1
 	while (StringLeft($f_lines[$i],2) = "1.") = False
 		$fen &= $f_lines[$i] & "|"
+		
 		$i += 1
+		if $i > $f_lines[0] Then
+			ExitLoop
+		EndIf
 	WEnd
 	$fen = StringTrimRight($fen,1)
 	$multiverse = _multiverse_create("custom",$fen)
