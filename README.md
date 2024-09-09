@@ -25,7 +25,8 @@ This AutoIt script allows you to convert Portable Game Notation (PGN) files into
 6. Click the `Load File` button to extract move data from the PGN file.
 7. Once the file is loaded, you can add the variant to the .json file or copy the variant to the clipboard.
 8. Once you selected the Data interface with its corresponding json file you can add and delete variants directly.
-9. After starting the data interface from within the gui additional options appear to run the specified variant from the list. It also provides with the additional options the data interface gives like changing timers.
+9. After starting the data interface from within the gui additional options appear to run the specified variant from the list. It also provides button for the additional options the data interface has like changing timers.
+
 
 ## Contributing
 
@@ -38,11 +39,13 @@ Special thanks to:
   - the AutoIt community for their support and contributions.
   - GHXX Data Interface ("https://github.com/GHXX/FiveDChessDataInterface")
   - and the pgn recorders from various members of the 5d community:
-    - Crazy: https://github.com/CrazyPenguin0111/5D-PGN-Recorder
     - Tesseract/Penteract: https://github.com/penteract/5D-PGN-Recorder
+    - Crazy: https://github.com/CrazyPenguin0111/5D-PGN-Recorder
     - NKID00: https://github.com/NKID00/5DChessRecorderCrossplatform/
   
+## Known Issues
 
+  - Reading the moves from an already saved game may sometimes not work. Especially if its Black who moves first in the loaded game.
 
 ## Disclaimer
 
