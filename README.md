@@ -47,4 +47,3 @@ Special thanks to:
 ## Disclaimer
 
 This script is provided as-is without any warranty. Use it at your own risk.
-It should technically be full profe
