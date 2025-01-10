@@ -1,9 +1,11 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=C:\Program Files (x86)\AutoIt3\Icons\au3.ico
-#AutoIt3Wrapper_Outfile=..\gui for 5d datainterface.exe
+#AutoIt3Wrapper_Outfile=out\gui for 5d datainterface.exe
+#AutoIt3Wrapper_Run_Before=rmdir /S/Q out
+#AutoIt3Wrapper_Run_Before=mkdir out
+#AutoIt3Wrapper_Run_After=copy datainterfacegui.env out/datainterfacegui.env
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
-$sleep = 100
-#include <multiversechess.au3>
+#include <include\multiversechess.au3>
 #include <ButtonConstants.au3>
 #include <ComboConstants.au3>
 #include <EditConstants.au3>
@@ -13,7 +15,8 @@ $sleep = 100
 #include <ColorConstants.au3>
 $ini = @ScriptDir & "\gui for datainterface.ini"
 #Region ### START Koda GUI section ### Form=
-$Form1_1 = GUICreate("GUI for Data Interface", 418, 180, 625, 277)
+$title = "GUI for Data Interface"
+$Form1_1 = GUICreate($title, 418, 180, 625, 277)
 $b_variantloader = GUICtrlCreateButton("run interface", 328, 40, 75, 25)
 $i_file = GUICtrlCreateInput("", 16, 8, 305, 21)
 $b_openfile = GUICtrlCreateButton("OPEN", 328, 8, 75, 25)
@@ -28,7 +31,9 @@ $c_turn = GUICtrlCreateCombo("-1", 56, 40, 57, 25)
 $Label1 = GUICtrlCreateLabel("Move:", 8, 40, 46, 24)
 GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 $b_json = GUICtrlCreateButton("Data Interface", 328, 72, 75, 25)
-$b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
+$b_record = GUICtrlCreateButton("Record a new game", 16, 72, 139, 33)
+;~ $b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
+$b_clip = GUICtrlCreateDummy()
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $r_black = GUICtrlCreateCheckbox("Black", 120, 40, 49, 17)
 
@@ -51,6 +56,7 @@ GUICtrlSetResizing($b_variantloader,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCK
 GUICtrlSetResizing($l_loaded,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($Label1,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_clip,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_record,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_json,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($r_black,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($c_turn,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -75,7 +81,10 @@ $b_timerM = GUICtrlCreateButton("med timer",176,142,60)
 $b_timerS = GUICtrlCreateButton("short timer",241,142,60)
 $b_animation = GUICtrlCreateButton("travel animation",306,142,85)
 $b_close = GUICtrlCreateButton("close",10,142,31)
+$cb_keepgameon = GUICtrlCreateCheckbox("",400,142,20,20)
+GUICtrlSetState($cb_keepgameon,$GUI_UNCHECKED)
 GUICtrlSetState($b_close,$GUI_HIDE)
+GUICtrlSetState($cb_keepgameon,$GUI_HIDE)
 GUICtrlSetState($b_run,$GUI_HIDE)
 GUICtrlSetState($b_timerL,$GUI_HIDE)
 GUICtrlSetState($b_timerM,$GUI_HIDE)
@@ -94,6 +103,7 @@ Return $GUI_RUNDEFMSG
 EndFunc ;==>MY_WM_COMMAND
 global $variantloader = 0,$l_time = 0,$f_variantloader
 $variantnumber = 2
+$gamerecord = 0
 $run = 0
 $running = 0
 $full = 0
@@ -109,13 +119,21 @@ EndIf
 if $variantloader = 1 Then
 	ResizeGUI()
 EndIf
-
+$processname = "5dchesswithmultiversetimetravel.exe"
 While 1
-
+	If (ProcessExists($processname) and (not IsDeclared("location"))) then
+		$location = _ProcessGetLocation($processname)
+	Elseif (ProcessExists($processname) = 0 and IsDeclared("location") <> 0 and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
+		ShellExecute($location)
+	EndIf
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE
 			Exit
+		Case $b_record
+			$gamerecord = Run("5d chess game recorder+.exe user:mauer01","",@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD))
+			GUICtrlSetState($b_record,$GUI_DISABLE)
+			WinSetTitle($Form1_1,WinGetText($Form1_1),$title & " - Recording")
 
 		Case $b_close
 			ProcessClose($run)
@@ -392,6 +410,18 @@ While 1
 		EndIf
 	EndIf
 
+	if ProcessExists($gamerecord) Then
+		$read = StdoutRead($gamerecord)
+		if StringLen($read) Then
+			GUICtrlSetData($i_file,$read)
+			GUICtrlSetState($i_file,$GUI_ENABLE)
+			GUICtrlSetState($b_record,$GUI_ENABLE)
+			GUICtrlSetState($b_openfile,$GUI_ENABLE)
+			WinSetTitle($Form1_1,WinGetText($Form1_1),$title)
+			StdinWrite($gamerecord,"next")
+		EndIf
+	EndIf
+
 WEnd
 
 
@@ -449,14 +479,19 @@ Func _readinput()
 		_FileReadToArray($file,$lines)
 		if $lines[1] = '[Mode "5D"]' Then
 			local $string = "-1|0|"
+
+			#region setstates
 			Guictrlsetcolor($l_loaded,$COLOR_RED)
 			GUICtrlSetData($l_loaded,"unloaded")
 			GUICtrlSetState($b_load,$GUI_ENABLE)
-
 			GUICtrlSetState($c_turn,$GUI_ENABLE)
 			GUICtrlSetState($r_black,$GUI_ENABLE)
-			For $i = 1 to StringRegExp($lines[$lines[0]],"[0-9]+",3)[0]
-				$string &= $i & "|"
+			#EndRegion
+
+			For $i = 1 to $lines[0]
+				if StringRegExp(StringLeft($lines[$i],1),"[0-9]") Then
+					$string &= StringRegExp($lines[$i],"[0-9]+",3)[0] & "|"
+				EndIf
 			Next
 			GUICtrlSetData($c_turn,$string,"-1")
 		EndIf
@@ -496,6 +531,7 @@ Func ResizeGUI2($b = 1)
 		GUICtrlSetState($b_timerS,$GUI_SHOW)
 		GUICtrlSetState($b_animation,$GUI_SHOW)
 		GUICtrlSetState($b_close,$GUI_SHOW)
+		GUICtrlSetState($cb_keepgameon,$GUI_SHOW)
 	Else
 		Local $newWidth = 418
 		Local $newHeight = 180
@@ -507,8 +543,25 @@ Func ResizeGUI2($b = 1)
 		GUICtrlSetState($b_timerS,$GUI_HIDE)
 		GUICtrlSetState($b_animation,$GUI_HIDE)
 		GUICtrlSetState($b_close,$GUI_HIDE)
+		GUICtrlSetState($cb_keepgameon,$GUI_HIDE)
 	EndIf
 EndFunc
 Func _exit()
 	ProcessClose($run)
+	ProcessClose($gamerecord)
+EndFunc
+
+Func _ProcessGetLocation($sProc = @ScriptFullPath)
+    Local $iPID = ProcessExists($sProc)
+    If $iPID = 0 Then Return SetError(1, 0, -1)
+
+    Local $aProc = DllCall('kernel32.dll', 'hwnd', 'OpenProcess', 'int', BitOR(0x0400, 0x0010), 'int', 0, 'int', $iPID)
+    If $aProc[0] = 0 Then Return SetError(1, 0, -1)
+
+    Local $vStruct = DllStructCreate('int[1024]')
+    DllCall('psapi.dll', 'int', 'EnumProcessModules', 'hwnd', $aProc[0], 'ptr', DllStructGetPtr($vStruct), 'int', DllStructGetSize($vStruct), 'int*', 0)
+
+    Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
+    If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
+    Return $aReturn[3]
 EndFunc
