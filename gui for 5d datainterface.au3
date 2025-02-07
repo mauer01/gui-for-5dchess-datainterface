@@ -106,12 +106,15 @@ GUICtrlSetResizing($b_run,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 	$e_json = GUICtrlCreateEdit("", 420, 0, 400, 160)
 	$b_e_close = GUICtrlCreateButton("Close", 420, 160, 75, 20)
 	$b_e_save = GUICtrlCreateButton("Save", 495, 160, 75, 20)
+	$b_e_add = GUICtrlCreateButton("Add", 570, 160, 75, 20)
 	GUICtrlSetResizing($e_json,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 	GUICtrlSetResizing($b_e_close,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 	GUICtrlSetResizing($b_e_save,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+	GUICtrlSetResizing($b_e_add,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 	GUICtrlSetState($b_e_close,$GUI_HIDE)
 	GUICtrlSetState($b_e_save,$GUI_HIDE)
 	GUICtrlSetState($e_json,$GUI_HIDE)
+	GUICtrlSetState($b_e_add,$GUI_HIDE)
 #EndRegion
 #Region Eventhandler for Inputbox
 GUIRegisterMsg(0x0111, "MY_WM_COMMAND")
@@ -162,6 +165,26 @@ While 1
 	Switch $nMsg
 		Case $b_e_close
 			if MsgBox(4,"REALLY???","Without Changing anything????") = 6 Then ResizeGUI3(0)
+		Case $b_e_add
+			If MsgBox(4,"This adds to the everything","pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueCase
+			local $h_file, $input = GUICtrlRead($e_json)
+			_FileReadToArray($f_variantloader,$h_file,0)
+			_ArrayReverse($h_file)
+			For $line In $h_file
+				_ArrayDelete($h_file,0)
+				If StringInStr($line,"}") Then ExitLoop
+			Next
+			_ArrayReverse($h_file)
+			_ArrayAdd($h_file,"   },")
+			_ArrayAdd($h_file,StringSplit($input,@CRLF,3))
+			_ArrayAdd($h_file,"]")
+			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt",2)
+			FileWrite($h_temp,_ArrayToString($h_file,@CRLF))
+			FileClose($h_temp)
+			FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
+			GUISetState(@SW_ENABLE)
+			ResizeGUI3(0)
+
 		Case $b_e_save
 			if MsgBox(4,"This changes the Original","pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueCase
 			local $h_file, $input = StringSplit(GUICtrlRead($e_json),"\r\n",3)
@@ -206,28 +229,30 @@ While 1
 			ResizeGUI3(0)
 		Case $b_jsonentry
 
-			local $h_file,$skip = 0,$string = ""
+			local $h_file,$skip = 0,$string[0]
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
 			_FileReadToArray($f_variantloader,$h_file)
 			$k = 0
-			For $i = 1 to $h_file[0]-1
+			$line = 0
+			For $i = 1 to $h_file[0]
 				If StringInStr($h_file[$i],"Name") > 0 Then
 					$k += 1
 				EndIf
 				If $k = $variantnumber Then
-					$skip = 1
-				EndIf
-				If $k = $variantnumber+1 Then
-					$skip = 0
-				EndIf
-
-				If $skip = 1 Then
-					$string &= $h_file[$i] & "\r\n"
+					$line = $i
+					ExitLoop
 				EndIf
 			Next
-			$string = "  {\r\n" & $string
-			$string = StringTrimRight($string,11)
-			GUICtrlSetData($e_json,StringFormat($string))
+			$k -= 1
+			For $i = $line-1 to $h_file[0]
+				If StringInStr($h_file[$i],"Name") > 0 Then
+					$k += 1
+				EndIf
+				If $k > $variantnumber Then ExitLoop
+				_ArrayAdd($string,$h_file[$i])
+			Next
+			_ArrayDelete($string,UBound($string)-1)
+			GUICtrlSetData($e_json,StringFormat(_ArrayToString($string,"\r\n")))
 			ResizeGUI3()
 
 		Case $GUI_EVENT_CLOSE
@@ -666,15 +691,19 @@ Func ResizeGUI3($b = 1)
 		GUICtrlSetState($e_json,$GUI_SHOW)
 		GUICtrlSetState($b_e_close,$GUI_SHOW)
 		GUICtrlSetState($b_e_save,$GUI_SHOW)
+		GUICtrlSetState($b_e_add,$GUI_SHOW)
 		GUICtrlSetState($c_variants,$GUI_DISABLE)
+		GUICtrlSetState($b_delvar,$GUI_DISABLE)
 	Else
 		local $newWidth = 420
 		Local $pos = WinGetPos($Form1_1)
 		WinMove($Form1_1,"",Default,Default, $newWidth,$pos[3])
-		GUICtrlSetState($e_json,$GUI_SHOW)
-		GUICtrlSetState($b_e_close,$GUI_SHOW)
-		GUICtrlSetState($b_e_save,$GUI_SHOW)
+		GUICtrlSetState($e_json,$GUI_HIDE)
+		GUICtrlSetState($b_e_close,$GUI_HIDE)
+		GUICtrlSetState($b_e_save,$GUI_HIDE)
+		GUICtrlSetState($b_e_add,$GUI_HIDE)
 		GUICtrlSetState($c_variants,$GUI_ENABLE)
+		GUICtrlSetState($b_delvar,$GUI_ENABLE)
 	EndIf
 
 
