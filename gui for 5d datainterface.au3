@@ -16,7 +16,7 @@
 $ini = @ScriptDir & "\gui for datainterface.ini"
 #Region ### START Koda GUI section ### Form=
 $title = "GUI for Data Interface"
-$Form1_1 = GUICreate($title, 418, 180, 625, 277)
+$Form1_1 = GUICreate($title, 418, 210, 625, 277)
 $b_variantloader = GUICtrlCreateButton("run interface", 328, 40, 75, 25)
 $i_file = GUICtrlCreateInput("", 16, 8, 305, 21)
 $b_openfile = GUICtrlCreateButton("OPEN", 328, 8, 75, 25)
@@ -30,7 +30,8 @@ Guictrlsetcolor(-1,$COLOR_RED)
 $c_turn = GUICtrlCreateCombo("-1", 56, 40, 57, 25)
 $Label1 = GUICtrlCreateLabel("Move:", 8, 40, 46, 24)
 GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
-$b_json = GUICtrlCreateButton("Data Interface", 328, 72, 75, 25)
+$b_json = GUICtrlCreateButton("Data Interface", 328, 65, 75, 25)
+$b_jsonentry = GUICtrlCreateButton("Edit Entry", 328, 90, 75, 25)
 $b_record = GUICtrlCreateButton("Record a new game", 16, 72, 139, 33)
 ;~ $b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
 $b_clip = GUICtrlCreateDummy()
@@ -58,6 +59,7 @@ GUICtrlSetResizing($Label1,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_clip,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_record,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_json,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_jsonentry,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($r_black,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($c_turn,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_addvariant,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -70,11 +72,12 @@ GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 GUICtrlSetState($c_variants,$GUI_HIDE)
 GUICtrlSetState($b_delvar,$GUI_HIDE)
 GUICtrlSetState($Label2,$GUI_HIDE)
+GUICtrlSetState($b_jsonentry,$GUI_HIDE)
 GUICtrlSetResizing($c_variants,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_delvar,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($Label2,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 #EndRegion
-
+#Region DataInterfaceButtons
 $b_run = GUICtrlCreateButton("run variant",46,142,60)
 $b_timerL = GUICtrlCreateButton("long timer",111,142,60)
 $b_timerM = GUICtrlCreateButton("med timer",176,142,60)
@@ -90,7 +93,26 @@ GUICtrlSetState($b_timerL,$GUI_HIDE)
 GUICtrlSetState($b_timerM,$GUI_HIDE)
 GUICtrlSetState($b_timerS,$GUI_HIDE)
 GUICtrlSetState($b_animation,$GUI_HIDE)
-
+GUICtrlSetResizing($b_animation,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($cb_keepgameon,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_timerS,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_close,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_timerL,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_timerM,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_run,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+#EndRegion
+#Region Editbox
+	$e_json = GUICtrlCreateEdit("", 420, 0, 400, 160)
+	$b_e_close = GUICtrlCreateButton("Close", 420, 160, 75, 20)
+	$b_e_save = GUICtrlCreateButton("Save", 495, 160, 75, 20)
+	GUICtrlSetResizing($e_json,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+	GUICtrlSetResizing($b_e_close,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+	GUICtrlSetResizing($b_e_save,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+	GUICtrlSetState($b_e_close,$GUI_HIDE)
+	GUICtrlSetState($b_e_save,$GUI_HIDE)
+	GUICtrlSetState($e_json,$GUI_HIDE)
+#EndRegion
+#Region Eventhandler for Inputbox
 GUIRegisterMsg(0x0111, "MY_WM_COMMAND")
 Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 	Local $nID
@@ -101,7 +123,9 @@ Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 	EndIf
 Return $GUI_RUNDEFMSG
 EndFunc ;==>MY_WM_COMMAND
-global $variantloader = 0,$l_time = 0,$f_variantloader
+#EndRegion
+
+global $variantloader = 0,$l_time = 0,$f_variantloader,$sleep=100, $Region = "Data", $value1 = "Interface", $value2 = "Value2"
 $variantnumber = 2
 $gamerecord = 0
 $run = 0
@@ -110,9 +134,11 @@ $full = 0
 $undervalue = 1
 OnAutoItExitRegister("_exit")
 dim $lines
+
 If FileExists($ini) Then
-	$f_variantloader = IniRead($ini,"sdfgf","sdfg","")
+	$f_variantloader = IniRead($ini,$Region,$value1,"")
 	$variantloader = 1
+	$user = IniRead($ini,$Region,$value2,"")
 Else
 	WinMove($Form1_1,"",Default,Default,Default,136)
 EndIf
@@ -128,10 +154,81 @@ While 1
 	EndIf
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
+		Case $b_e_close
+			if MsgBox(4,"REALLY???","Without Changing anything????") = 6 Then ResizeGUI3(0)
+
+		Case $b_e_save
+
+			local $h_file, $input = StringSplit(GUICtrlRead($e_json),"\r\n",3)
+			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
+			_FileReadToArray($f_variantloader,$h_file)
+			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt",2)
+			$k = 0
+			$skip = 0
+			$editzaehler = 0
+			GUISetState(@SW_DISABLE)
+			local $string[0]
+			For $i = 1 to Ubound($h_file)
+				If StringInStr($h_file[$i],"Name") > 0 Then
+					$k += 1
+				EndIf
+				If $k = $variantnumber Then
+					$skip = 1
+				EndIf
+				If $skip = 0 Then
+					_ArrayAdd($string,$h_file[$i])
+				EndIf
+
+				If $k = $variantnumber+1 Then
+					_ArrayDelete($string,UBound($string)-1)
+					$editzaehler = $i
+					ExitLoop
+				EndIf
+			Next
+			$editzaehler -= 1
+			For $line in $input
+				_ArrayAdd($string,$line)
+			Next
+			for $i = $editzaehler to UBound($h_file)-1
+				_ArrayAdd($string,$h_file[$i])
+			Next
+
+			_FileWriteFromArray($h_temp,$string)
+			FileClose($h_temp)
+			FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
+			GUISetState(@SW_ENABLE)
+
+			ResizeGUI3(0)
+		Case $b_jsonentry
+
+			local $h_file,$skip = 0,$string = ""
+			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
+			_FileReadToArray($f_variantloader,$h_file)
+			$k = 0
+			For $i = 1 to $h_file[0]-1
+				If StringInStr($h_file[$i],"Name") > 0 Then
+					$k += 1
+				EndIf
+				If $k = $variantnumber Then
+					$skip = 1
+				EndIf
+				If $k = $variantnumber+1 Then
+					$skip = 0
+				EndIf
+
+				If $skip = 1 Then
+					$string &= $h_file[$i] & "\r\n"
+				EndIf
+			Next
+			$string = "  {\r\n" & $string
+			$string = StringTrimRight($string,11)
+			GUICtrlSetData($e_json,StringFormat($string))
+			ResizeGUI3()
+
 		Case $GUI_EVENT_CLOSE
 			Exit
 		Case $b_record
-			$gamerecord = Run("5d chess game recorder+.exe user:mauer01","",@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD))
+			$gamerecord = Run("5d chess game recorder+.exe user" & $user,"",@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD))
 			GUICtrlSetState($b_record,$GUI_DISABLE)
 			WinSetTitle($Form1_1,WinGetText($Form1_1),$title & " - Recording")
 
@@ -197,7 +294,7 @@ While 1
 				If FileExists($f_variantloader) Then
 					$variantloader = 1
 					If GUICtrlGetState($b_clip) <> 144 Then GUICtrlSetState($b_addvariant,$GUI_ENABLE)
-					IniWrite($ini,"sdfgf","sdfg",$f_variantloader)
+					IniWrite($ini,$Region,$value1,$f_variantloader)
 					ResizeGUI()
 				Else
 					MsgBox(16,"Wrong File","I couldnt find the json file this data interface is using, pls try again")
@@ -390,7 +487,7 @@ While 1
 		$string = ""
 		$data = ""
 		$data2 = ""
-		$f_variantloader = IniRead($ini,"sdfgf","sdfg","")
+		$f_variantloader = IniRead($ini,$Region,$value1,"")
 		$c_time = _ArrayToString(FileGetTime($f_variantloader))
 		if $c_time <> $l_time Then
 			GUICtrlSetData($c_variants,"|")
@@ -510,21 +607,20 @@ Func _IsChecked($idControlID)
 	Return BitAND(GUICtrlRead($idControlID), $GUI_CHECKED) = $GUI_CHECKED
 EndFunc   ;==>_IsChecked
 Func ResizeGUI()
-	Local $newWidth = 418
-	Local $newHeight = 180
+	Local $newHeight = 210
 	Local $pos = WinGetPos($Form1_1)
-	WinMove($Form1_1, "", Default, Default, $newWidth, $newHeight)
+	WinMove($Form1_1, "", Default, Default, $pos[2], $newHeight)
 	Guictrlsetstate($c_variants,$GUI_SHOW)
+	GUICtrlSetState($b_jsonentry,$GUI_SHOW)
 	Guictrlsetstate($Label2,$GUI_SHOW)
 	Guictrlsetstate($b_delvar,$GUI_SHOW)
 EndFunc
 
 Func ResizeGUI2($b = 1)
 	if $b Then
-		Local $newWidth = 418
 		Local $newHeight = 210
 		Local $pos = WinGetPos($Form1_1)
-		WinMove($Form1_1, "", Default, Default, $newWidth, $newHeight)
+		WinMove($Form1_1, "", Default, Default, $pos[2], $newHeight)
 		GUICtrlSetState($b_run,$GUI_SHOW)
 		GUICtrlSetState($b_timerL,$GUI_SHOW)
 		GUICtrlSetState($b_timerM,$GUI_SHOW)
@@ -533,10 +629,9 @@ Func ResizeGUI2($b = 1)
 		GUICtrlSetState($b_close,$GUI_SHOW)
 		GUICtrlSetState($cb_keepgameon,$GUI_SHOW)
 	Else
-		Local $newWidth = 418
-		Local $newHeight = 180
+		Local $newHeight = 210
 		Local $pos = WinGetPos($Form1_1)
-		WinMove($Form1_1, "", Default, Default, $newWidth, $newHeight)
+		WinMove($Form1_1, "", Default, Default, $pos[2], $newHeight)
 		GUICtrlSetState($b_run,$GUI_HIDE)
 		GUICtrlSetState($b_timerL,$GUI_HIDE)
 		GUICtrlSetState($b_timerM,$GUI_HIDE)
@@ -546,6 +641,31 @@ Func ResizeGUI2($b = 1)
 		GUICtrlSetState($cb_keepgameon,$GUI_HIDE)
 	EndIf
 EndFunc
+
+Func ResizeGUI3($b = 1)
+	If $b Then
+
+		local $newWidth = 818
+		Local $pos = WinGetPos($Form1_1)
+		WinMove($Form1_1,"",Default,Default, $newWidth,$pos[3])
+		GUICtrlSetState($e_json,$GUI_SHOW)
+		GUICtrlSetState($b_e_close,$GUI_SHOW)
+		GUICtrlSetState($b_e_save,$GUI_SHOW)
+		GUICtrlSetState($c_variants,$GUI_DISABLE)
+	Else
+		local $newWidth = 418
+		Local $pos = WinGetPos($Form1_1)
+		WinMove($Form1_1,"",Default,Default, $newWidth,$pos[3])
+		GUICtrlSetState($e_json,$GUI_SHOW)
+		GUICtrlSetState($b_e_close,$GUI_SHOW)
+		GUICtrlSetState($b_e_save,$GUI_SHOW)
+		GUICtrlSetState($c_variants,$GUI_ENABLE)
+	EndIf
+
+
+EndFunc
+
+
 Func _exit()
 	ProcessClose($run)
 	ProcessClose($gamerecord)
