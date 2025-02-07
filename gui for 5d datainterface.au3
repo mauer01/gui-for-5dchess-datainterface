@@ -3,7 +3,7 @@
 #AutoIt3Wrapper_Outfile=out\gui for 5d datainterface.exe
 #AutoIt3Wrapper_Run_Before=rmdir /S/Q out
 #AutoIt3Wrapper_Run_Before=mkdir out
-#AutoIt3Wrapper_Run_After=copy datainterfacegui.env out/datainterfacegui.env
+#AutoIt3Wrapper_Run_After=copy "gui for datainterface.ini" "out/gui for datainterface.ini"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <include\multiversechess.au3>
 #include <ButtonConstants.au3>
@@ -16,7 +16,7 @@
 $ini = @ScriptDir & "\gui for datainterface.ini"
 #Region ### START Koda GUI section ### Form=
 $title = "GUI for Data Interface"
-$Form1_1 = GUICreate($title, 418, 210, 625, 277)
+$Form1_1 = GUICreate($title, 420, 210, 625, 277)
 $b_variantloader = GUICtrlCreateButton("run interface", 328, 40, 75, 25)
 $i_file = GUICtrlCreateInput("", 16, 8, 305, 21)
 $b_openfile = GUICtrlCreateButton("OPEN", 328, 8, 75, 25)
@@ -32,7 +32,8 @@ $Label1 = GUICtrlCreateLabel("Move:", 8, 40, 46, 24)
 GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 $b_json = GUICtrlCreateButton("Data Interface", 328, 65, 75, 25)
 $b_jsonentry = GUICtrlCreateButton("Edit Entry", 328, 90, 75, 25)
-$b_record = GUICtrlCreateButton("Record a new game", 16, 72, 139, 33)
+$b_record = GUICtrlCreateButton("Setup Recording Games", 16, 72, 139, 33)
+if recordexists() Then GUICtrlSetData(-1,"Record Game")
 ;~ $b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
 $b_clip = GUICtrlCreateDummy()
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
@@ -125,7 +126,7 @@ Return $GUI_RUNDEFMSG
 EndFunc ;==>MY_WM_COMMAND
 #EndRegion
 
-global $variantloader = 0,$l_time = 0,$f_variantloader,$sleep=100, $Region = "Data", $value1 = "Interface", $value2 = "Value2"
+global $variantloader = 0,$l_time = 0,$f_variantloader,$sleep=100, $Region = "Data", $value1 = "Interface", $value2 = "User"
 $variantnumber = 2
 $gamerecord = 0
 $run = 0
@@ -152,13 +153,17 @@ While 1
 	Elseif (ProcessExists($processname) = 0 and IsDeclared("location") <> 0 and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
 		ShellExecute($location)
 	EndIf
+	If GUICtrlRead($b_record) = "Setup Recording Games" Then
+		If recordexists() Then
+			GUICtrlSetData($b_record,"Record Game")
+		EndIf
+	EndIf
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
 		Case $b_e_close
 			if MsgBox(4,"REALLY???","Without Changing anything????") = 6 Then ResizeGUI3(0)
-
 		Case $b_e_save
-
+			if MsgBox(4,"This changes the Original","pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueCase
 			local $h_file, $input = StringSplit(GUICtrlRead($e_json),"\r\n",3)
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
 			_FileReadToArray($f_variantloader,$h_file)
@@ -168,7 +173,7 @@ While 1
 			$editzaehler = 0
 			GUISetState(@SW_DISABLE)
 			local $string[0]
-			For $i = 1 to Ubound($h_file)
+			For $i = 1 to Ubound($h_file)-1
 				If StringInStr($h_file[$i],"Name") > 0 Then
 					$k += 1
 				EndIf
@@ -179,7 +184,7 @@ While 1
 					_ArrayAdd($string,$h_file[$i])
 				EndIf
 
-				If $k = $variantnumber+1 Then
+				If $k = $variantnumber+1 or $i = UBound($h_file)-1 Then
 					_ArrayDelete($string,UBound($string)-1)
 					$editzaehler = $i
 					ExitLoop
@@ -228,10 +233,20 @@ While 1
 		Case $GUI_EVENT_CLOSE
 			Exit
 		Case $b_record
-			$gamerecord = Run("5d chess game recorder+.exe user" & $user,"",@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD))
-			GUICtrlSetState($b_record,$GUI_DISABLE)
-			WinSetTitle($Form1_1,WinGetText($Form1_1),$title & " - Recording")
-
+			If Not recordexists() Then
+				MsgBox(64,"Setup Recording Software","you need my recorder+ and at best penteracts 5DPGNRecorderAndTimeReminder")
+			ElseIf GUICtrlRead($b_record) = "Record Game" Then
+				$gamerecord = Run("5d chess game recorder+.exe user" & $user,"",@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD))
+				If @error then
+					MsgBox(16,"","error in opening the recorder+.exe")
+					ContinueCase
+				EndIf
+				GUICtrlSetData($b_record,"Stop Recording")
+				WinSetTitle($Form1_1,WinGetText($Form1_1),$title & " - Recording")
+			ElseIf GUICtrlRead($b_record) = "Stop Recording" Then
+				ProcessClose($gamerecord)
+				GUICtrlSetData($b_record,"Record Game")
+			EndIf
 		Case $b_close
 			ProcessClose($run)
 			$undervalue = 0
@@ -512,7 +527,7 @@ While 1
 		if StringLen($read) Then
 			GUICtrlSetData($i_file,$read)
 			GUICtrlSetState($i_file,$GUI_ENABLE)
-			GUICtrlSetState($b_record,$GUI_ENABLE)
+			GUICtrlSetData($b_record,"Record Game")
 			GUICtrlSetState($b_openfile,$GUI_ENABLE)
 			WinSetTitle($Form1_1,WinGetText($Form1_1),$title)
 			StdinWrite($gamerecord,"next")
@@ -653,7 +668,7 @@ Func ResizeGUI3($b = 1)
 		GUICtrlSetState($b_e_save,$GUI_SHOW)
 		GUICtrlSetState($c_variants,$GUI_DISABLE)
 	Else
-		local $newWidth = 418
+		local $newWidth = 420
 		Local $pos = WinGetPos($Form1_1)
 		WinMove($Form1_1,"",Default,Default, $newWidth,$pos[3])
 		GUICtrlSetState($e_json,$GUI_SHOW)
@@ -684,4 +699,10 @@ Func _ProcessGetLocation($sProc = @ScriptFullPath)
     Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
     If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
     Return $aReturn[3]
+EndFunc
+
+Func recordexists()
+	If not FileExists("5d chess game recorder+.exe") then Return False
+	If not FileExists("5DPGNRecorderAndTimeReminder.exe") then Return False
+	Return True
 EndFunc
