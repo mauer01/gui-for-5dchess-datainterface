@@ -166,7 +166,7 @@ While 1
 		Case $b_e_close
 			if MsgBox(4,"REALLY???","Without Changing anything????") = 6 Then ResizeGUI3(0)
 		Case $b_e_add
-			If MsgBox(4,"This adds to the everything","pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueCase
+			If MsgBox(4,"This adds to the everything","pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
 			local $h_file, $input = GUICtrlRead($e_json)
 			_FileReadToArray($f_variantloader,$h_file,0)
 			_ArrayReverse($h_file)
@@ -186,7 +186,7 @@ While 1
 			ResizeGUI3(0)
 
 		Case $b_e_save
-			if MsgBox(4,"This changes the Original","pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueCase
+			if MsgBox(4,"This changes the Original","pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
 			local $h_file, $input = StringSplit(GUICtrlRead($e_json),"\r\n",3)
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
 			_FileReadToArray($f_variantloader,$h_file)
