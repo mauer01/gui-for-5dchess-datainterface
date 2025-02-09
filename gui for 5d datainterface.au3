@@ -207,20 +207,28 @@ While 1
 					_ArrayAdd($string,$h_file[$i])
 				EndIf
 
-				If $k = $variantnumber+1 or $i = UBound($h_file)-1 Then
+				If $k = $variantnumber+1 Then
 					_ArrayDelete($string,UBound($string)-1)
 					$editzaehler = $i
 					ExitLoop
 				EndIf
 			Next
-			$editzaehler -= 1
-			For $line in $input
-				_ArrayAdd($string,$line)
-			Next
-			for $i = $editzaehler to UBound($h_file)-1
-				_ArrayAdd($string,$h_file[$i])
-			Next
+			If $editzaehler > 0 Then
+				$editzaehler -= 1
+				For $line in $input
+					_ArrayAdd($string,$line)
+				Next
+				for $i = $editzaehler to UBound($h_file)-1
+					_ArrayAdd($string,$h_file[$i])
+				Next
 
+			Else
+				_ArrayDelete($string,UBound($string)-1)
+				For $line in $input
+					_ArrayAdd($string,$line)
+				Next
+				_ArrayAdd($string,"]")
+			EndIf
 			_FileWriteFromArray($h_temp,$string)
 			FileClose($h_temp)
 			FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
