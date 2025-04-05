@@ -21,101 +21,101 @@ $b_variantloader = GUICtrlCreateButton("run interface", 328, 40, 75, 25)
 $i_file = GUICtrlCreateInput("", 16, 8, 305, 21)
 $b_openfile = GUICtrlCreateButton("OPEN", 328, 8, 75, 25)
 $b_load = GUICtrlCreateButton("Load File", 170, 40, 67, 25)
-GUICtrlSetState($b_variantloader,$GUI_DISABLE)
+GUICtrlSetState($b_variantloader, $GUI_DISABLE)
 $b_addvariant = GUICtrlCreateButton("add variant", 160, 72, 155, 33)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $l_loaded = GUICtrlCreateLabel("unloaded", 248, 40, 67, 25)
 GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
-Guictrlsetcolor(-1,$COLOR_RED)
+GUICtrlSetColor(-1, $COLOR_RED)
 $c_turn = GUICtrlCreateCombo("-1", 56, 40, 57, 25)
 $Label1 = GUICtrlCreateLabel("Move:", 8, 40, 46, 24)
 GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 $b_json = GUICtrlCreateButton("Data Interface", 328, 65, 75, 25)
 $b_jsonentry = GUICtrlCreateButton("Edit Entry", 328, 90, 75, 25)
 $b_record = GUICtrlCreateButton("Setup Recording Games", 16, 72, 139, 33)
-if recordexists() Then GUICtrlSetData(-1,"Record Game")
+If recordexists() Then GUICtrlSetData(-1, "Record Game")
 ;~ $b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
 $b_clip = GUICtrlCreateDummy()
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $r_black = GUICtrlCreateCheckbox("Black", 120, 40, 49, 17)
 
-GUICtrlSetState($b_addvariant,$GUI_DISABLE)
-GUICtrlSetState($r_black,$GUI_DISABLE)
-GUICtrlSetState($b_clip,$GUI_DISABLE)
-GUICtrlSetState($b_load,$GUI_DISABLE)
-GUICtrlSetState($c_turn,$GUI_DISABLE)
-GUICtrlSetState($b_addvariant,$GUI_DISABLE)
+GUICtrlSetState($b_addvariant, $GUI_DISABLE)
+GUICtrlSetState($r_black, $GUI_DISABLE)
+GUICtrlSetState($b_clip, $GUI_DISABLE)
+GUICtrlSetState($b_load, $GUI_DISABLE)
+GUICtrlSetState($c_turn, $GUI_DISABLE)
+GUICtrlSetState($b_addvariant, $GUI_DISABLE)
 GUISetState(@SW_SHOW)
 #EndRegion ### END Koda GUI section ###
 $text = GUICtrlRead($i_file)
 $time = ""
 $delay = ""
 #Region set resizing
-GUICtrlSetResizing($b_load,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($i_file,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_openfile,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_variantloader,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($l_loaded,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($Label1,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_clip,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_record,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_json,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_jsonentry,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($r_black,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($c_turn,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_addvariant,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-#EndRegion
+GUICtrlSetResizing($b_load, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($i_file, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_openfile, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_variantloader, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($l_loaded, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($Label1, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_clip, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_record, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_json, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_jsonentry, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($r_black, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($c_turn, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_addvariant, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+#EndRegion set resizing
 #Region bonus stuff
-$c_variants = GUICtrlCreateCombo("", 56, 112, 249, 25,BITOr($WS_VSCROLL,$CBS_DROPDOWNLIST))
+$c_variants = GUICtrlCreateCombo("", 56, 112, 249, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 $b_delvar = GUICtrlCreateButton("Delete Variant", 328, 112, 75, 25)
 $Label2 = GUICtrlCreateLabel("Variant:", 7, 112)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
-GUICtrlSetState($c_variants,$GUI_HIDE)
-GUICtrlSetState($b_delvar,$GUI_HIDE)
-GUICtrlSetState($Label2,$GUI_HIDE)
-GUICtrlSetState($b_jsonentry,$GUI_HIDE)
-GUICtrlSetResizing($c_variants,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_delvar,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($Label2,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-#EndRegion
+GUICtrlSetState($c_variants, $GUI_HIDE)
+GUICtrlSetState($b_delvar, $GUI_HIDE)
+GUICtrlSetState($Label2, $GUI_HIDE)
+GUICtrlSetState($b_jsonentry, $GUI_HIDE)
+GUICtrlSetResizing($c_variants, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_delvar, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($Label2, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+#EndRegion bonus stuff
 #Region DataInterfaceButtons
-$b_run = GUICtrlCreateButton("run variant",46,142,60)
-$b_timerL = GUICtrlCreateButton("long timer",111,142,60)
-$b_timerM = GUICtrlCreateButton("med timer",176,142,60)
-$b_timerS = GUICtrlCreateButton("short timer",241,142,60)
-$b_animation = GUICtrlCreateButton("travel animation",306,142,85)
-$b_close = GUICtrlCreateButton("close",10,142,31)
-$cb_keepgameon = GUICtrlCreateCheckbox("",400,142,20,20)
-GUICtrlSetState($cb_keepgameon,$GUI_UNCHECKED)
-GUICtrlSetState($b_close,$GUI_HIDE)
-GUICtrlSetState($cb_keepgameon,$GUI_HIDE)
-GUICtrlSetState($b_run,$GUI_HIDE)
-GUICtrlSetState($b_timerL,$GUI_HIDE)
-GUICtrlSetState($b_timerM,$GUI_HIDE)
-GUICtrlSetState($b_timerS,$GUI_HIDE)
-GUICtrlSetState($b_animation,$GUI_HIDE)
-GUICtrlSetResizing($b_animation,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($cb_keepgameon,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_timerS,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_close,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_timerL,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_timerM,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_run,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-#EndRegion
+$b_run = GUICtrlCreateButton("run variant", 46, 142, 60)
+$b_timerL = GUICtrlCreateButton("long timer", 111, 142, 60)
+$b_timerM = GUICtrlCreateButton("med timer", 176, 142, 60)
+$b_timerS = GUICtrlCreateButton("short timer", 241, 142, 60)
+$b_animation = GUICtrlCreateButton("travel animation", 306, 142, 85)
+$b_close = GUICtrlCreateButton("close", 10, 142, 31)
+$cb_keepgameon = GUICtrlCreateCheckbox("", 400, 142, 20, 20)
+GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
+GUICtrlSetState($b_close, $GUI_HIDE)
+GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
+GUICtrlSetState($b_run, $GUI_HIDE)
+GUICtrlSetState($b_timerL, $GUI_HIDE)
+GUICtrlSetState($b_timerM, $GUI_HIDE)
+GUICtrlSetState($b_timerS, $GUI_HIDE)
+GUICtrlSetState($b_animation, $GUI_HIDE)
+GUICtrlSetResizing($b_animation, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($cb_keepgameon, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_timerS, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_close, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_timerL, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_timerM, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_run, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+#EndRegion DataInterfaceButtons
 #Region Editbox
-	$e_json = GUICtrlCreateEdit("", 420, 0, 400, 160)
-	$b_e_close = GUICtrlCreateButton("Close", 420, 160, 75, 20)
-	$b_e_save = GUICtrlCreateButton("Save", 495, 160, 75, 20)
-	$b_e_add = GUICtrlCreateButton("Add", 570, 160, 75, 20)
-	GUICtrlSetResizing($e_json,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-	GUICtrlSetResizing($b_e_close,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-	GUICtrlSetResizing($b_e_save,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-	GUICtrlSetResizing($b_e_add,BitOr($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-	GUICtrlSetState($b_e_close,$GUI_HIDE)
-	GUICtrlSetState($b_e_save,$GUI_HIDE)
-	GUICtrlSetState($e_json,$GUI_HIDE)
-	GUICtrlSetState($b_e_add,$GUI_HIDE)
-#EndRegion
+$e_json = GUICtrlCreateEdit("", 420, 0, 400, 160)
+$b_e_close = GUICtrlCreateButton("Close", 420, 160, 75, 20)
+$b_e_save = GUICtrlCreateButton("Save", 495, 160, 75, 20)
+$b_e_add = GUICtrlCreateButton("Add", 570, 160, 75, 20)
+GUICtrlSetResizing($e_json, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_e_close, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_e_save, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_e_add, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetState($b_e_close, $GUI_HIDE)
+GUICtrlSetState($b_e_save, $GUI_HIDE)
+GUICtrlSetState($e_json, $GUI_HIDE)
+GUICtrlSetState($b_e_add, $GUI_HIDE)
+#EndRegion Editbox
 #Region Eventhandler for Inputbox
 GUIRegisterMsg(0x0111, "MY_WM_COMMAND")
 Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
@@ -125,11 +125,11 @@ Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 		$text = GUICtrlRead($i_file)
 		_readinput()
 	EndIf
-Return $GUI_RUNDEFMSG
-EndFunc ;==>MY_WM_COMMAND
-#EndRegion
+	Return $GUI_RUNDEFMSG
+EndFunc   ;==>MY_WM_COMMAND
+#EndRegion Eventhandler for Inputbox
 
-global $variantloader = 0,$l_time = 0,$f_variantloader,$sleep=100, $Region = "Data", $value1 = "Interface", $value2 = "User"
+Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User"
 $variantnumber = 2
 $gamerecord = 0
 $run = 0
@@ -137,113 +137,117 @@ $running = 0
 $full = 0
 $undervalue = 1
 OnAutoItExitRegister("_exit")
-dim $lines
+Dim $lines
 
 If FileExists($ini) Then
-	$f_variantloader = IniRead($ini,$Region,$value1,"")
+	$f_variantloader = IniRead($ini, $Region, $value1, "")
 	$variantloader = 1
-	$user = IniRead($ini,$Region,$value2,"")
+	$user = IniRead($ini, $Region, $value2, "")
 Else
-	WinMove($Form1_1,"",Default,Default,Default,136)
+	WinMove($Form1_1, "", Default, Default, Default, 136)
 EndIf
-if $variantloader = 1 Then
+If $variantloader = 1 Then
 	ResizeGUI()
 EndIf
 $processname = "5dchesswithmultiversetimetravel.exe"
+
 While 1
-	If (ProcessExists($processname) and (not IsDeclared("location"))) then
+	If (ProcessExists($processname) And (Not IsDeclared("location"))) Then
 		$location = _ProcessGetLocation($processname)
-	Elseif (ProcessExists($processname) = 0 and IsDeclared("location") <> 0 and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
-		ShellExecute($location)
+	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
+		If ($location = "") Then
+			$location = FileOpenDialog("couldnt automatically fetch 5d chess.exe", "", "executable (*.exe)")
+		Else
+			ShellExecute($location, "~/datainterface/protonhax init %command%")
+		EndIf
 	EndIf
 	If GUICtrlRead($b_record) = "Setup Recording Games" Then
 		If recordexists() Then
-			GUICtrlSetData($b_record,"Record Game")
+			GUICtrlSetData($b_record, "Record Game")
 		EndIf
 	EndIf
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
 		Case $b_e_close
-			if MsgBox(4,"REALLY???","Without Changing anything????") = 6 Then ResizeGUI3(0)
+			If MsgBox(4, "REALLY???", "Without Changing anything????") = 6 Then ResizeGUI3(0)
 		Case $b_e_add
-			If MsgBox(4,"This adds to the everything","pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
-			local $h_file, $input = GUICtrlRead($e_json)
-			_FileReadToArray($f_variantloader,$h_file,0)
+			If MsgBox(4, "This adds to the everything", "pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
+			Local $h_file, $input = GUICtrlRead($e_json)
+			_FileReadToArray($f_variantloader, $h_file, 0)
 			_ArrayReverse($h_file)
 			For $line In $h_file
-				_ArrayDelete($h_file,0)
-				If StringInStr($line,"}") Then ExitLoop
+				_ArrayDelete($h_file, 0)
+				If StringInStr($line, "}") Then ExitLoop
 			Next
 			_ArrayReverse($h_file)
-			_ArrayAdd($h_file,"   },")
-			_ArrayAdd($h_file,StringSplit($input,@CRLF,3))
-			_ArrayAdd($h_file,"]")
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt",2)
-			FileWrite($h_temp,_ArrayToString($h_file,@CRLF))
+			_ArrayAdd($h_file, "   },")
+			_ArrayAdd($h_file, StringSplit($input, @CRLF, 3))
+			_ArrayAdd($h_file, "]")
+			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
+			FileWrite($h_temp, _ArrayToString($h_file, @CRLF))
 			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
+			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
 			GUISetState(@SW_ENABLE)
 			ResizeGUI3(0)
 
 		Case $b_e_save
-			if MsgBox(4,"This changes the Original","pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
-			local $h_file, $input = StringSplit(GUICtrlRead($e_json),"\r\n",3)
-			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
-			_FileReadToArray($f_variantloader,$h_file)
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt",2)
+			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
+			Local $h_file, $input = StringSplit(GUICtrlRead($e_json), "\r\n", 3)
+			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
+			_FileReadToArray($f_variantloader, $h_file)
+			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
 			$k = 0
 			$skip = 0
 			$editzaehler = 0
 			GUISetState(@SW_DISABLE)
-			local $string[0]
-			For $i = 1 to Ubound($h_file)-1
-				If StringInStr($h_file[$i],"Name") > 0 Then
+			Local $string[0]
+			For $i = 1 To UBound($h_file) - 1
+				If StringInStr($h_file[$i], "Name") > 0 Then
 					$k += 1
 				EndIf
 				If $k = $variantnumber Then
 					$skip = 1
 				EndIf
 				If $skip = 0 Then
-					_ArrayAdd($string,$h_file[$i])
+					_ArrayAdd($string, $h_file[$i])
 				EndIf
 
-				If $k = $variantnumber+1 Then
-					_ArrayDelete($string,UBound($string)-1)
+				If $k = $variantnumber + 1 Then
+					_ArrayDelete($string, UBound($string) - 1)
 					$editzaehler = $i
 					ExitLoop
 				EndIf
 			Next
 			If $editzaehler > 0 Then
 				$editzaehler -= 1
-				For $line in $input
-					_ArrayAdd($string,$line)
+				For $line In $input
+					_ArrayAdd($string, $line)
 				Next
-				for $i = $editzaehler to UBound($h_file)-1
-					_ArrayAdd($string,$h_file[$i])
+				For $i = $editzaehler To UBound($h_file) - 1
+					_ArrayAdd($string, $h_file[$i])
 				Next
-
 			Else
-				_ArrayDelete($string,UBound($string)-1)
-				For $line in $input
-					_ArrayAdd($string,$line)
+				_ArrayDelete($string, UBound($string) - 1)
+				For $line In $input
+					_ArrayAdd($string, $line)
 				Next
-				_ArrayAdd($string,"]")
+				_ArrayAdd($string, "]")
 			EndIf
-			_FileWriteFromArray($h_temp,$string)
+			_FileWriteFromArray($h_temp, $string)
 			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
+			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
 			GUISetState(@SW_ENABLE)
 
 			ResizeGUI3(0)
 		Case $b_jsonentry
 
-			local $h_file,$skip = 0,$string[0]
-			$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
-			_FileReadToArray($f_variantloader,$h_file)
+			Local $h_file, $skip = 0, $string[0]
+			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
+			_FileReadToArray($f_variantloader, $h_file)
 			$k = 0
 			$line = 0
-			For $i = 1 to $h_file[0]
-				If StringInStr($h_file[$i],"Name") > 0 Then
+			For $i = 1 To $h_file[0]
+				If StringInStr($h_file[$i], "Name") > 0 Then
 					$k += 1
 				EndIf
 				If $k = $variantnumber Then
@@ -252,100 +256,104 @@ While 1
 				EndIf
 			Next
 			$k -= 1
-			For $i = $line-1 to $h_file[0]
-				If StringInStr($h_file[$i],"Name") > 0 Then
+			For $i = $line - 1 To $h_file[0]
+				If StringInStr($h_file[$i], "Name") > 0 Then
 					$k += 1
 				EndIf
 				If $k > $variantnumber Then ExitLoop
-				_ArrayAdd($string,$h_file[$i])
+				_ArrayAdd($string, $h_file[$i])
 			Next
-			_ArrayDelete($string,UBound($string)-1)
-			GUICtrlSetData($e_json,StringFormat(_ArrayToString($string,"\r\n")))
+			_ArrayDelete($string, UBound($string) - 1)
+			GUICtrlSetData($e_json, StringFormat(_ArrayToString($string, "\r\n")))
 			ResizeGUI3()
 
 		Case $GUI_EVENT_CLOSE
 			Exit
 		Case $b_record
 			If Not recordexists() Then
-				MsgBox(64,"Setup Recording Software","you need my recorder+ and at best penteracts 5DPGNRecorderAndTimeReminder")
+				MsgBox(64, "Setup Recording Software", "you need my recorder+ and at best penteracts 5DPGNRecorderAndTimeReminder")
 			ElseIf GUICtrlRead($b_record) = "Record Game" Then
-				$gamerecord = Run("5d chess game recorder+.exe user" & $user,"",@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD))
-				If @error then
-					MsgBox(16,"","error in opening the recorder+.exe")
+				$gamerecord = Run("5d chess game recorder+.exe user" & $user, "", @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD))
+				If @error Then
+					MsgBox(16, "", "error in opening the recorder+.exe")
 					ContinueCase
 				EndIf
-				GUICtrlSetData($b_record,"Stop Recording")
-				WinSetTitle($Form1_1,WinGetText($Form1_1),$title & " - Recording")
+				GUICtrlSetData($b_record, "Stop Recording")
+				WinSetTitle($Form1_1, WinGetText($Form1_1), $title & " - Recording")
 			ElseIf GUICtrlRead($b_record) = "Stop Recording" Then
 				ProcessClose($gamerecord)
-				GUICtrlSetData($b_record,"Record Game")
+				GUICtrlSetData($b_record, "Record Game")
 			EndIf
 		Case $b_close
 			ProcessClose($run)
 			$undervalue = 0
 		Case $b_load
-			local $file = GUICtrlRead($i_file),$turn = GUICtrlRead($c_turn),$black = _IsChecked($r_black)
-			$multiverse = _multiverse_create("pgn",$file,$turn,$black)
-			GUICtrlSetColor($l_loaded,$COLOR_GREEN)
-			GUICtrlSetData($l_loaded,"LOADED")
-			GUICtrlSetState($b_clip,$GUI_ENABLE)
+
+			Local $file = GUICtrlRead($i_file), $turn = GUICtrlRead($c_turn), $black = _IsChecked($r_black)
+			$multiverse = _multiverse_create("pgn", $file, $turn, $black)
+			GUICtrlSetColor($l_loaded, $COLOR_GREEN)
+			GUICtrlSetData($l_loaded, "LOADED")
+			GUICtrlSetState($b_clip, $GUI_ENABLE)
 			If $variantloader = 1 Then
-				GUICtrlSetState($b_addvariant,$GUI_ENABLE)
+				GUICtrlSetState($b_addvariant, $GUI_ENABLE)
 			EndIf
+			_ArrayDisplay($multiverse[1])
+			_ArrayDisplay($multiverse[2])
+			_ArrayDisplay($multiverse[3])
 		Case $b_openfile
-			GUICtrlSetData($i_file,FileOpenDialog("choose a pgn",@WorkingDir,"Text (*.txt)"))
+			GUICtrlSetData($i_file, FileOpenDialog("choose a pgn", @WorkingDir, "Text (*.txt)"))
 		Case $b_addvariant
-			$asdf = StringSplit(GUICtrlRead($i_file),"\")
-			$asdf = StringTrimRight($asdf[$asdf[0]],4)
-			local $h_file, $input = _multiversetovariant($multiverse,$asdf,"pgn to variant")
-			_FileReadToArray($f_variantloader,$h_file)
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt",2)
+			$asdf = StringSplit(GUICtrlRead($i_file), "\")
+			$asdf = StringTrimRight($asdf[$asdf[0]], 4)
+			Local $h_file, $input = _multiversetovariant($multiverse, $asdf, "pgn to variant")
+			_FileReadToArray($f_variantloader, $h_file)
+			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
 			$k = 1
 			GUISetState(@SW_DISABLE)
-			For $i = 1 to $h_file[0]-1
-				If StringInStr($h_file[$i],"Name") > 0 Then
-					$k+=1
+			For $i = 1 To $h_file[0] - 1
+				If StringInStr($h_file[$i], "Name") > 0 Then
+					$k += 1
 				EndIf
 
-				If $i = $h_file[0]-1 Then
-					FileWriteLine($h_temp,$h_file[$i] & ",")
+				If $i = $h_file[0] - 1 Then
+					FileWriteLine($h_temp, $h_file[$i] & ",")
 				Else
-					FileWriteLine($h_temp,$h_file[$i])
+					FileWriteLine($h_temp, $h_file[$i])
 				EndIf
 
 			Next
-			$input = StringTrimRight($input,2)
-			FileWrite($h_temp,$input & @LF)
-			FileWriteLine($h_temp,$h_file[$i])
+			$input = StringTrimRight($input, 2)
+			FileWrite($h_temp, $input & @LF)
+			FileWriteLine($h_temp, $h_file[$i])
 
 			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
+			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
 			GUISetState(@SW_ENABLE)
 		Case $c_turn
-			GUICtrlSetState($b_clip,$GUI_DISABLE)
-			Guictrlsetcolor($l_loaded,$COLOR_RED)
-			GUICtrlSetState($b_addvariant,$GUI_DISABLE)
-			GUICtrlSetData($l_loaded,"unloaded")
+			GUICtrlSetState($b_clip, $GUI_DISABLE)
+			GUICtrlSetColor($l_loaded, $COLOR_RED)
+			GUICtrlSetState($b_addvariant, $GUI_DISABLE)
+			GUICtrlSetData($l_loaded, "unloaded")
 		Case $r_black
-			GUICtrlSetState($b_clip,$GUI_DISABLE)
-			Guictrlsetcolor($l_loaded,$COLOR_RED)
-			GUICtrlSetState($b_addvariant,$GUI_DISABLE)
-			GUICtrlSetData($l_loaded,"unloaded")
+			GUICtrlSetState($b_clip, $GUI_DISABLE)
+			GUICtrlSetColor($l_loaded, $COLOR_RED)
+			GUICtrlSetState($b_addvariant, $GUI_DISABLE)
+			GUICtrlSetData($l_loaded, "unloaded")
 		Case $b_json
-			$f_variantloader = FileOpenDialog("Select any File in the data interface folder",@WorkingDir,"Files (*.*)")
-			if @error <> 0 Then
-				MsgBox(16,"closed out or not a file","File selection failed pls try again")
+			$f_variantloader = FileOpenDialog("Select any File in the data interface folder", @WorkingDir, "Files (*.*)")
+			If @error <> 0 Then
+				MsgBox(16, "closed out or not a file", "File selection failed pls try again")
 			Else
-				$stringsplit = StringSplit($f_variantloader,"\",2)
-				_ArrayDelete($stringsplit,UBound($stringsplit)-1)
-				$f_variantloader = _ArrayToString($stringsplit,"\") & "\Resources\JsonVariants.json"
+				$stringsplit = StringSplit($f_variantloader, "\", 2)
+				_ArrayDelete($stringsplit, UBound($stringsplit) - 1)
+				$f_variantloader = _ArrayToString($stringsplit, "\") & "\Resources\JsonVariants.json"
 				If FileExists($f_variantloader) Then
 					$variantloader = 1
-					If GUICtrlGetState($b_clip) <> 144 Then GUICtrlSetState($b_addvariant,$GUI_ENABLE)
-					IniWrite($ini,$Region,$value1,$f_variantloader)
+					If GUICtrlGetState($b_clip) <> 144 Then GUICtrlSetState($b_addvariant, $GUI_ENABLE)
+					IniWrite($ini, $Region, $value1, $f_variantloader)
 					ResizeGUI()
 				Else
-					MsgBox(16,"Wrong File","I couldnt find the json file this data interface is using, pls try again")
+					MsgBox(16, "Wrong File", "I couldnt find the json file this data interface is using, pls try again")
 				EndIf
 			EndIf
 
@@ -353,22 +361,22 @@ While 1
 			ClipPut(_multiversetovariant($multiverse))
 
 		Case $b_delvar
-			if MsgBox(4,"REALLY???","REALLY REALLY????") = 6 Then
-				local $h_file,$skip = 0,$string = ""
+			If MsgBox(4, "REALLY???", "REALLY REALLY????") = 6 Then
+				Local $h_file, $skip = 0, $string = ""
 
-				$variantnumber = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)[0]
-				_FileReadToArray($f_variantloader,$h_file)
+				$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
+				_FileReadToArray($f_variantloader, $h_file)
 
 				$k = 0
 				GUISetState(@SW_DISABLE)
-				For $i = 1 to $h_file[0]-1
-					If StringInStr($h_file[$i],"Name") > 0 Then
+				For $i = 1 To $h_file[0] - 1
+					If StringInStr($h_file[$i], "Name") > 0 Then
 						$k += 1
 					EndIf
 					If $k = $variantnumber Then
 						$skip = 1
 					EndIf
-					If $k = $variantnumber+1 Then
+					If $k = $variantnumber + 1 Then
 						$skip = 0
 					EndIf
 
@@ -376,119 +384,119 @@ While 1
 						$string &= $h_file[$i] & @LF
 					EndIf
 				Next
-				while ($string <> "" and StringRight($string,1) <> "}")
-						$string = StringTrimRight($string,1)
+				While ($string <> "" And StringRight($string, 1) <> "}")
+					$string = StringTrimRight($string, 1)
 				WEnd
 				$string &= @LF & "]"
-				FileWrite(@TempDir & "\pgn to variant.txt",$string)
+				FileWrite(@TempDir & "\pgn to variant.txt", $string)
 
-				FileMove(@TempDir & "\pgn to variant.txt",$f_variantloader,1)
+				FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
 				GUISetState(@SW_ENABLE)
 			EndIf
 		Case $b_variantloader
-			$stringsplit = StringSplit($f_variantloader,"\",2)
-			_ArrayDelete($stringsplit,UBound($stringsplit)-1)
-			_ArrayDelete($stringsplit,UBound($stringsplit)-1)
+			$stringsplit = StringSplit($f_variantloader, "\", 2)
+			_ArrayDelete($stringsplit, UBound($stringsplit) - 1)
+			_ArrayDelete($stringsplit, UBound($stringsplit) - 1)
 			$string = _ArrayToString($stringsplit, "\")
 			$string2 = $string & "\DataInterfaceConsole.exe"
 			ResizeGUI2()
-			$run = Run($string2,$string,@SW_HIDE,BitOR($STDOUT_CHILD,$STDIN_CHILD,$STDERR_CHILD))
+			$run = Run($string2, $string, @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD, $STDERR_CHILD))
 			If @error = 0 Then
 				$running = 1
 			EndIf
 		Case $b_run
-			StdinWrite($run,"1" & @LF)
-			$stdinwrite = StringRegExp(GUICtrlRead($c_variants),"[0-9]+",3)
-			if IsArray($stdinwrite) Then StdinWrite($run, $stdinwrite[0] & @LF)
+			StdinWrite($run, "1" & @LF)
+			$stdinwrite = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)
+			If IsArray($stdinwrite) Then StdinWrite($run, $stdinwrite[0] & @LF)
 		Case $b_timerL
 			_inputbox()
-			if ($time and $delay) Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"6" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$time & @LF)
-				While not StringInStr(StdoutRead($run),"Action executed. Returning to menu")
+			If ($time And $delay) Then
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "6" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $time & @LF)
+				While Not StringInStr(StdoutRead($run), "Action executed. Returning to menu")
 					Sleep(10)
 				WEnd
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"7" & @LF)
-				sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "7" & @LF)
+				Sleep($sleep)
 				StdinWrite($run, $delay & @LF)
 			ElseIf $time Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"6" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$time & @LF)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "6" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $time & @LF)
 			ElseIf $delay Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"7" & @LF)
-				sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "7" & @LF)
+				Sleep($sleep)
 				StdinWrite($run, $delay & @LF)
 			EndIf
 
 		Case $b_timerM
 			_inputbox()
-			if ($time and $delay) Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"4" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$time & @LF)
-				sleep($sleep)
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"5" & @LF)
-				sleep($sleep)
+			If ($time And $delay) Then
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "4" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $time & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "5" & @LF)
+				Sleep($sleep)
 				StdinWrite($run, $delay & @LF)
 			ElseIf $time Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"4" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$time & @LF)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "4" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $time & @LF)
 			ElseIf $delay Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"5" & @LF)
-				sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "5" & @LF)
+				Sleep($sleep)
 				StdinWrite($run, $delay & @LF)
 			EndIf
 
 		Case $b_timerS
 			_inputbox()
-			if ($time and $delay) Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"2" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$time & @LF)
-				sleep($sleep)
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
+			If ($time And $delay) Then
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "2" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $time & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
 				StdinWrite($run, $delay & @LF)
 			ElseIf $time Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"2" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$time & @LF)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "2" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $time & @LF)
 			ElseIf $delay Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
 				StdinWrite($run, $delay & @LF)
 			EndIf
 
 		Case $b_animation
-			$animation = InputBox("Force timetravel animation","force the way the game handles the time travel animation" & @LF & "1 or ignore" & @LF & "2 or always_on" & @LF &"3 or  always_off",3)
-			If (not Number($animation)) Then
+			$animation = InputBox("Force timetravel animation", "force the way the game handles the time travel animation" & @LF & "1 or ignore" & @LF & "2 or always_on" & @LF & "3 or  always_off", 3)
+			If (Not Number($animation)) Then
 				Switch $animation
 					Case "ignore"
 						$animation = 1
@@ -497,32 +505,34 @@ While 1
 					Case "always_off"
 						$animation = 3
 					Case Else
-						MsgBox(16,"no valid string","No valid string put in,setting left unchanged")
+						MsgBox(16, "no valid string", "No valid string put in,setting left unchanged")
 						$animation = 0
 				EndSwitch
 			EndIf
-			if ($animation < 4 and $animation) Then
-				StdinWrite($run,"3" & @LF)
-				sleep($sleep)
-				StdinWrite($run,"1" & @LF)
-				sleep($sleep)
-				StdinWrite($run,$animation & @LF)
+			If ($animation < 4 And $animation) Then
+				StdinWrite($run, "3" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, "1" & @LF)
+				Sleep($sleep)
+				StdinWrite($run, $animation & @LF)
 			ElseIf $animation <> 0 Then
-				MsgBox(16,"no valid number","No valid number got parsed, setting left unchanged")
+				MsgBox(16, "no valid number", "No valid number got parsed, setting left unchanged")
 			EndIf
 	EndSwitch
-	if ((Not ProcessExists($run)) and $running) Then
+	If ((Not ProcessExists($run)) And $running) Then
 		$running = 0
-		if $undervalue Then
-			MsgBox(16,"Variant Loader Closed","something caused the Data Interface to exit")
+		If $undervalue Then
+			MsgBox(16, "Variant Loader Closed", "something caused the Data Interface to exit, pls consult logfile")
+			FileWrite(@ScriptDir & "\log.txt", $log)
 			$undervalue = 1
 		EndIf
-		GUICtrlSetState($b_variantloader,$GUI_ENABLE)
-		GUICtrlSetState($b_json,$GUI_ENABLE)
+		GUICtrlSetState($b_variantloader, $GUI_ENABLE)
+		GUICtrlSetState($b_json, $GUI_ENABLE)
 	EndIf
-	if ($running And $full = 0) Then
-		GUICtrlSetState($b_variantloader,$GUI_DISABLE)
-		GUICtrlSetState($b_json,$GUI_DISABLE)
+	If ($running) Then $log &= StdoutRead($run)
+	If ($running And $full = 0) Then
+		GUICtrlSetState($b_variantloader, $GUI_DISABLE)
+		GUICtrlSetState($b_json, $GUI_DISABLE)
 		ResizeGUI2()
 		$full = 1
 	ElseIf ($running = 0 And $full) Then
@@ -530,62 +540,62 @@ While 1
 		$full = 0
 	EndIf
 	If $variantloader = 1 Then
-		if (GUICtrlGetState($b_variantloader) = 144 and $running = 0) Then GUICtrlSetState($b_variantloader,$GUI_ENABLE)
+		If (GUICtrlGetState($b_variantloader) = 144 And $running = 0) Then GUICtrlSetState($b_variantloader, $GUI_ENABLE)
 		$h_file = ""
 		$string = ""
 		$data = ""
 		$data2 = ""
-		$f_variantloader = IniRead($ini,$Region,$value1,"")
+		$f_variantloader = IniRead($ini, $Region, $value1, "")
 		$c_time = _ArrayToString(FileGetTime($f_variantloader))
-		if $c_time <> $l_time Then
-			GUICtrlSetData($c_variants,"|")
+		If $c_time <> $l_time Then
+			GUICtrlSetData($c_variants, "|")
 			$data = _readvariants()
-			$data2 = StringSplit($data,"|")
+			$data2 = StringSplit($data, "|")
 			If $nMsg = $b_delvar Then
-				if $variantnumber-1 = 0 then $variantnumber = 2
-				GUICtrlSetData($c_variants,$data,$data2[$variantnumber-1])
+				If $variantnumber - 1 = 0 Then $variantnumber = 2
+				GUICtrlSetData($c_variants, $data, $data2[$variantnumber - 1])
 			ElseIf $nMsg = $b_addvariant Then
-				GUICtrlSetData($c_variants,$data,$data2[$k])
+				GUICtrlSetData($c_variants, $data, $data2[$k])
 			Else
-				GUICtrlSetData($c_variants,$data,$data2[1])
+				GUICtrlSetData($c_variants, $data, $data2[1])
 			EndIf
 
-			if @error Then MsgBox(0,"",@error)
+			If @error Then MsgBox(0, "", @error)
 			$l_time = _ArrayToString(FileGetTime($f_variantloader))
 		EndIf
 	EndIf
 
-	if ProcessExists($gamerecord) Then
+	If ProcessExists($gamerecord) Then
 		$read = StdoutRead($gamerecord)
-		if StringLen($read) Then
-			GUICtrlSetData($i_file,$read)
-			GUICtrlSetState($i_file,$GUI_ENABLE)
-			GUICtrlSetData($b_record,"Record Game")
-			GUICtrlSetState($b_openfile,$GUI_ENABLE)
-			WinSetTitle($Form1_1,WinGetText($Form1_1),$title)
-			StdinWrite($gamerecord,"next")
+		If StringLen($read) Then
+			GUICtrlSetData($i_file, $read)
+			GUICtrlSetState($i_file, $GUI_ENABLE)
+			GUICtrlSetData($b_record, "Record Game")
+			GUICtrlSetState($b_openfile, $GUI_ENABLE)
+			WinSetTitle($Form1_1, WinGetText($Form1_1), $title)
+			StdinWrite($gamerecord, "next")
 		EndIf
 	EndIf
 
 WEnd
 
 
-func _inputbox()
-	$time = InputBox("Time for each player","Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
-	$delay = InputBox("Delay per active timeline","set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
-	if StringInStr($time,":") Then
-		$string = StringSplit($time,":",2)
-		$string[1] += $string[0]*60
-		$string[2] += $string[1]*60
+Func _inputbox()
+	$time = InputBox("Time for each player", "Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
+	$delay = InputBox("Delay per active timeline", "set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
+	If StringInStr($time, ":") Then
+		$string = StringSplit($time, ":", 2)
+		$string[1] += $string[0] * 60
+		$string[2] += $string[1] * 60
 		$time = $string[2]
 	EndIf
-	if StringInStr($delay,":") Then
-		$string = StringSplit($delay,":",2)
-		$string[1] += $string[0]*60
-		$string[2] += $string[1]*60
+	If StringInStr($delay, ":") Then
+		$string = StringSplit($delay, ":", 2)
+		$string[1] += $string[0] * 60
+		$string[2] += $string[1] * 60
 		$delay = $string[2]
 	EndIf
-	if Number($delay) Then
+	If Number($delay) Then
 		$delay = Execute($delay)
 	EndIf
 	If Number($time) Then
@@ -593,7 +603,7 @@ func _inputbox()
 	EndIf
 
 
-EndFunc
+EndFunc   ;==>_inputbox
 Func _readvariants()
 
 	$regexp = '\"Name": "[^"]+'
@@ -601,56 +611,56 @@ Func _readvariants()
 	$hnd_variantload = FileOpen($f_variantloader)
 	$fileContent = FileRead($hnd_variantload)
 	FileClose($hnd_variantload)
-	$matches = StringRegExp($fileContent,$regexp, 3)
-	$matches2 = StringRegExp($fileContent,$regexp2, 3)
+	$matches = StringRegExp($fileContent, $regexp, 3)
+	$matches2 = StringRegExp($fileContent, $regexp2, 3)
 	$string = ""
 
-	For $i = 0 to UBound($matches)-1
-		$matches[$i] = StringTrimLeft($matches[$i],9)
+	For $i = 0 To UBound($matches) - 1
+		$matches[$i] = StringTrimLeft($matches[$i], 9)
 	Next
 
-	For $i = 0 to UBound($matches2)-1
-		$matches2[$i] = StringTrimLeft($matches2[$i],11)
-		$string &= $i+1 & ".  " & $matches[$i] & " by " & $matches2[$i] & "|"
+	For $i = 0 To UBound($matches2) - 1
+		$matches2[$i] = StringTrimLeft($matches2[$i], 11)
+		$string &= $i + 1 & ".  " & $matches[$i] & " by " & $matches2[$i] & "|"
 	Next
-	$string = StringTrimRight($string,1)
+	$string = StringTrimRight($string, 1)
 	Return $string
-EndFunc
+EndFunc   ;==>_readvariants
 
 Func _readinput()
 	$file = GUICtrlRead($i_file)
-	GUICtrlSetData($c_turn,"")
+	GUICtrlSetData($c_turn, "")
 	If FileGetSize($file) > 0 Then
-		_FileReadToArray($file,$lines)
-		if $lines[1] = '[Mode "5D"]' Then
-			local $string = "-1|0|"
+		_FileReadToArray($file, $lines)
+		If $lines[1] = '[Mode "5D"]' Then
+			Local $string = "-1|0|"
 
-			#region setstates
-			Guictrlsetcolor($l_loaded,$COLOR_RED)
-			GUICtrlSetData($l_loaded,"unloaded")
-			GUICtrlSetState($b_load,$GUI_ENABLE)
-			GUICtrlSetState($c_turn,$GUI_ENABLE)
-			GUICtrlSetState($r_black,$GUI_ENABLE)
-			#EndRegion
+			#Region setstates
+			GUICtrlSetColor($l_loaded, $COLOR_RED)
+			GUICtrlSetData($l_loaded, "unloaded")
+			GUICtrlSetState($b_load, $GUI_ENABLE)
+			GUICtrlSetState($c_turn, $GUI_ENABLE)
+			GUICtrlSetState($r_black, $GUI_ENABLE)
+			#EndRegion setstates
 
-			For $i = 1 to $lines[0]
-				if StringRegExp(StringLeft($lines[$i],1),"[0-9]") Then
-					$string &= StringRegExp($lines[$i],"[0-9]+",3)[0] & "|"
+			For $i = 1 To $lines[0]
+				If StringRegExp(StringLeft($lines[$i], 1), "[0-9]") Then
+					$string &= StringRegExp($lines[$i], "[0-9]+", 3)[0] & "|"
 				EndIf
 			Next
-			GUICtrlSetData($c_turn,$string,"-1")
+			GUICtrlSetData($c_turn, $string, "-1")
 		EndIf
 	Else
-		GUICtrlSetData($c_turn,"")
-		GUICtrlSetState($b_addvariant,$GUI_DISABLE)
-		GUICtrlSetState($r_black,$GUI_DISABLE)
-		GUICtrlSetState($b_clip,$GUI_DISABLE)
-		GUICtrlSetState($b_load,$GUI_DISABLE)
-		GUICtrlSetState($c_turn,$GUI_DISABLE)
-		Guictrlsetcolor($l_loaded,$COLOR_RED)
-		GUICtrlSetData($l_loaded,"unloaded")
+		GUICtrlSetData($c_turn, "")
+		GUICtrlSetState($b_addvariant, $GUI_DISABLE)
+		GUICtrlSetState($r_black, $GUI_DISABLE)
+		GUICtrlSetState($b_clip, $GUI_DISABLE)
+		GUICtrlSetState($b_load, $GUI_DISABLE)
+		GUICtrlSetState($c_turn, $GUI_DISABLE)
+		GUICtrlSetColor($l_loaded, $COLOR_RED)
+		GUICtrlSetData($l_loaded, "unloaded")
 	EndIf
-EndFunc
+EndFunc   ;==>_readinput
 Func _IsChecked($idControlID)
 	Return BitAND(GUICtrlRead($idControlID), $GUI_CHECKED) = $GUI_CHECKED
 EndFunc   ;==>_IsChecked
@@ -658,88 +668,88 @@ Func ResizeGUI()
 	Local $newHeight = 210
 	Local $pos = WinGetPos($Form1_1)
 	WinMove($Form1_1, "", Default, Default, $pos[2], $newHeight)
-	Guictrlsetstate($c_variants,$GUI_SHOW)
-	GUICtrlSetState($b_jsonentry,$GUI_SHOW)
-	Guictrlsetstate($Label2,$GUI_SHOW)
-	Guictrlsetstate($b_delvar,$GUI_SHOW)
-EndFunc
+	GUICtrlSetState($c_variants, $GUI_SHOW)
+	GUICtrlSetState($b_jsonentry, $GUI_SHOW)
+	GUICtrlSetState($Label2, $GUI_SHOW)
+	GUICtrlSetState($b_delvar, $GUI_SHOW)
+EndFunc   ;==>ResizeGUI
 
 Func ResizeGUI2($b = 1)
-	if $b Then
+	If $b Then
 		Local $newHeight = 210
 		Local $pos = WinGetPos($Form1_1)
 		WinMove($Form1_1, "", Default, Default, $pos[2], $newHeight)
-		GUICtrlSetState($b_run,$GUI_SHOW)
-		GUICtrlSetState($b_timerL,$GUI_SHOW)
-		GUICtrlSetState($b_timerM,$GUI_SHOW)
-		GUICtrlSetState($b_timerS,$GUI_SHOW)
-		GUICtrlSetState($b_animation,$GUI_SHOW)
-		GUICtrlSetState($b_close,$GUI_SHOW)
-		GUICtrlSetState($cb_keepgameon,$GUI_SHOW)
+		GUICtrlSetState($b_run, $GUI_SHOW)
+		GUICtrlSetState($b_timerL, $GUI_SHOW)
+		GUICtrlSetState($b_timerM, $GUI_SHOW)
+		GUICtrlSetState($b_timerS, $GUI_SHOW)
+		GUICtrlSetState($b_animation, $GUI_SHOW)
+		GUICtrlSetState($b_close, $GUI_SHOW)
+		GUICtrlSetState($cb_keepgameon, $GUI_SHOW)
 	Else
 		Local $newHeight = 210
 		Local $pos = WinGetPos($Form1_1)
 		WinMove($Form1_1, "", Default, Default, $pos[2], $newHeight)
-		GUICtrlSetState($b_run,$GUI_HIDE)
-		GUICtrlSetState($b_timerL,$GUI_HIDE)
-		GUICtrlSetState($b_timerM,$GUI_HIDE)
-		GUICtrlSetState($b_timerS,$GUI_HIDE)
-		GUICtrlSetState($b_animation,$GUI_HIDE)
-		GUICtrlSetState($b_close,$GUI_HIDE)
-		GUICtrlSetState($cb_keepgameon,$GUI_HIDE)
+		GUICtrlSetState($b_run, $GUI_HIDE)
+		GUICtrlSetState($b_timerL, $GUI_HIDE)
+		GUICtrlSetState($b_timerM, $GUI_HIDE)
+		GUICtrlSetState($b_timerS, $GUI_HIDE)
+		GUICtrlSetState($b_animation, $GUI_HIDE)
+		GUICtrlSetState($b_close, $GUI_HIDE)
+		GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
 	EndIf
-EndFunc
+EndFunc   ;==>ResizeGUI2
 
 Func ResizeGUI3($b = 1)
 	If $b Then
 
-		local $newWidth = 818
+		Local $newWidth = 818
 		Local $pos = WinGetPos($Form1_1)
-		WinMove($Form1_1,"",Default,Default, $newWidth,$pos[3])
-		GUICtrlSetState($e_json,$GUI_SHOW)
-		GUICtrlSetState($b_e_close,$GUI_SHOW)
-		GUICtrlSetState($b_e_save,$GUI_SHOW)
-		GUICtrlSetState($b_e_add,$GUI_SHOW)
-		GUICtrlSetState($c_variants,$GUI_DISABLE)
-		GUICtrlSetState($b_delvar,$GUI_DISABLE)
+		WinMove($Form1_1, "", Default, Default, $newWidth, $pos[3])
+		GUICtrlSetState($e_json, $GUI_SHOW)
+		GUICtrlSetState($b_e_close, $GUI_SHOW)
+		GUICtrlSetState($b_e_save, $GUI_SHOW)
+		GUICtrlSetState($b_e_add, $GUI_SHOW)
+		GUICtrlSetState($c_variants, $GUI_DISABLE)
+		GUICtrlSetState($b_delvar, $GUI_DISABLE)
 	Else
-		local $newWidth = 420
+		Local $newWidth = 420
 		Local $pos = WinGetPos($Form1_1)
-		WinMove($Form1_1,"",Default,Default, $newWidth,$pos[3])
-		GUICtrlSetState($e_json,$GUI_HIDE)
-		GUICtrlSetState($b_e_close,$GUI_HIDE)
-		GUICtrlSetState($b_e_save,$GUI_HIDE)
-		GUICtrlSetState($b_e_add,$GUI_HIDE)
-		GUICtrlSetState($c_variants,$GUI_ENABLE)
-		GUICtrlSetState($b_delvar,$GUI_ENABLE)
+		WinMove($Form1_1, "", Default, Default, $newWidth, $pos[3])
+		GUICtrlSetState($e_json, $GUI_HIDE)
+		GUICtrlSetState($b_e_close, $GUI_HIDE)
+		GUICtrlSetState($b_e_save, $GUI_HIDE)
+		GUICtrlSetState($b_e_add, $GUI_HIDE)
+		GUICtrlSetState($c_variants, $GUI_ENABLE)
+		GUICtrlSetState($b_delvar, $GUI_ENABLE)
 	EndIf
 
 
-EndFunc
+EndFunc   ;==>ResizeGUI3
 
 
 Func _exit()
 	ProcessClose($run)
 	ProcessClose($gamerecord)
-EndFunc
+EndFunc   ;==>_exit
 
 Func _ProcessGetLocation($sProc = @ScriptFullPath)
-    Local $iPID = ProcessExists($sProc)
-    If $iPID = 0 Then Return SetError(1, 0, -1)
+	Local $iPID = ProcessExists($sProc)
+	If $iPID = 0 Then Return SetError(1, 0, -1)
 
-    Local $aProc = DllCall('kernel32.dll', 'hwnd', 'OpenProcess', 'int', BitOR(0x0400, 0x0010), 'int', 0, 'int', $iPID)
-    If $aProc[0] = 0 Then Return SetError(1, 0, -1)
+	Local $aProc = DllCall('kernel32.dll', 'hwnd', 'OpenProcess', 'int', BitOR(0x0400, 0x0010), 'int', 0, 'int', $iPID)
+	If $aProc[0] = 0 Then Return SetError(1, 0, -1)
 
-    Local $vStruct = DllStructCreate('int[1024]')
-    DllCall('psapi.dll', 'int', 'EnumProcessModules', 'hwnd', $aProc[0], 'ptr', DllStructGetPtr($vStruct), 'int', DllStructGetSize($vStruct), 'int*', 0)
+	Local $vStruct = DllStructCreate('int[1024]')
+	DllCall('psapi.dll', 'int', 'EnumProcessModules', 'hwnd', $aProc[0], 'ptr', DllStructGetPtr($vStruct), 'int', DllStructGetSize($vStruct), 'int*', 0)
 
-    Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
-    If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
-    Return $aReturn[3]
-EndFunc
+	Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
+	If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
+	Return $aReturn[3]
+EndFunc   ;==>_ProcessGetLocation
 
 Func recordexists()
-	If not FileExists("5d chess game recorder+.exe") then Return False
-	If not FileExists("5DPGNRecorderAndTimeReminder.exe") then Return False
+	If Not FileExists("5d chess game recorder+.exe") Then Return False
+	If Not FileExists("5DPGNRecorderAndTimeReminder.exe") Then Return False
 	Return True
-EndFunc
+EndFunc   ;==>recordexists
