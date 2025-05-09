@@ -129,7 +129,7 @@ Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 EndFunc   ;==>MY_WM_COMMAND
 #EndRegion Eventhandler for Inputbox
 
-Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User"
+Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User", $JSONCached
 $variantnumber = 2
 $gamerecord = 0
 $run = 0
@@ -173,20 +173,10 @@ While 1
 		Case $b_e_add
 			If MsgBox(4, "This adds to the everything", "pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
 			Local $h_file, $input = GUICtrlRead($e_json)
-			_FileReadToArray($f_variantloader, $h_file, 0)
-			_ArrayReverse($h_file)
-			For $line In $h_file
-				_ArrayDelete($h_file, 0)
-				If StringInStr($line, "}") Then ExitLoop
-			Next
-			_ArrayReverse($h_file)
-			_ArrayAdd($h_file, "   },")
-			_ArrayAdd($h_file, StringSplit($input, @CRLF, 3))
-			_ArrayAdd($h_file, "]")
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
-			FileWrite($h_temp, _ArrayToString($h_file, @CRLF))
-			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+			$newJSON = _JSON_Parse($input)
+			$fullJSON = $JSONCached
+			_ArrayAdd($fullJSON,$newJSON)
+			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
 			ResizeGUI3(0)
 
@@ -194,77 +184,19 @@ While 1
 			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
 			Local $h_file, $input = StringSplit(GUICtrlRead($e_json), "\r\n", 3)
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
-			_FileReadToArray($f_variantloader, $h_file)
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
-			$k = 0
-			$skip = 0
-			$editzaehler = 0
-			GUISetState(@SW_DISABLE)
-			Local $string[0]
-			For $i = 1 To UBound($h_file) - 1
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-				If $k = $variantnumber Then
-					$skip = 1
-				EndIf
-				If $skip = 0 Then
-					_ArrayAdd($string, $h_file[$i])
-				EndIf
-
-				If $k = $variantnumber + 1 Then
-					_ArrayDelete($string, UBound($string) - 1)
-					$editzaehler = $i
-					ExitLoop
-				EndIf
-			Next
-			If $editzaehler > 0 Then
-				$editzaehler -= 1
-				For $line In $input
-					_ArrayAdd($string, $line)
-				Next
-				For $i = $editzaehler To UBound($h_file) - 1
-					_ArrayAdd($string, $h_file[$i])
-				Next
-			Else
-				_ArrayDelete($string, UBound($string) - 1)
-				For $line In $input
-					_ArrayAdd($string, $line)
-				Next
-				_ArrayAdd($string, "]")
-			EndIf
-			_FileWriteFromArray($h_temp, $string)
-			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+			$fullJSON = $JSONCached
+			$newJSON = _JSON_Parse(GUICtrlRead($e_json))
+			$fullJSON[$variantnumber-1] = $newJSON
+			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
-
 			ResizeGUI3(0)
 		Case $b_jsonentry
 
 			Local $h_file, $skip = 0, $string[0]
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
-			_FileReadToArray($f_variantloader, $h_file)
-			$k = 0
-			$line = 0
-			For $i = 1 To $h_file[0]
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-				If $k = $variantnumber Then
-					$line = $i
-					ExitLoop
-				EndIf
-			Next
-			$k -= 1
-			For $i = $line - 1 To $h_file[0]
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-				If $k > $variantnumber Then ExitLoop
-				_ArrayAdd($string, $h_file[$i])
-			Next
-			_ArrayDelete($string, UBound($string) - 1)
-			GUICtrlSetData($e_json, StringFormat(_ArrayToString($string, "\r\n")))
+			$fullJSON = $JSONCached
+			$entry = $fullJSON[$variantnumber-1]
+			GUICtrlSetData($e_json, _JSON_MYGenerate($entry))
 			ResizeGUI3()
 
 		Case $GUI_EVENT_CLOSE
@@ -297,37 +229,16 @@ While 1
 			If $variantloader = 1 Then
 				GUICtrlSetState($b_addvariant, $GUI_ENABLE)
 			EndIf
-			_ArrayDisplay($multiverse[1])
-			_ArrayDisplay($multiverse[2])
-			_ArrayDisplay($multiverse[3])
 		Case $b_openfile
 			GUICtrlSetData($i_file, FileOpenDialog("choose a pgn", @WorkingDir, "Text (*.txt)"))
 		Case $b_addvariant
 			$asdf = StringSplit(GUICtrlRead($i_file), "\")
 			$asdf = StringTrimRight($asdf[$asdf[0]], 4)
 			Local $h_file, $input = _multiversetovariant($multiverse, $asdf, "pgn to variant")
-			_FileReadToArray($f_variantloader, $h_file)
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
-			$k = 1
-			GUISetState(@SW_DISABLE)
-			For $i = 1 To $h_file[0] - 1
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-
-				If $i = $h_file[0] - 1 Then
-					FileWriteLine($h_temp, $h_file[$i] & ",")
-				Else
-					FileWriteLine($h_temp, $h_file[$i])
-				EndIf
-
-			Next
-			$input = StringTrimRight($input, 2)
-			FileWrite($h_temp, $input & @LF)
-			FileWriteLine($h_temp, $h_file[$i])
-
-			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+			$h_file = FileRead($f_variantloader)
+			$fullJSON = $JSONCached
+			_ArrayAdd($fullJSON,$input)
+			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
 		Case $c_turn
 			GUICtrlSetState($b_clip, $GUI_DISABLE)
@@ -362,35 +273,10 @@ While 1
 
 		Case $b_delvar
 			If MsgBox(4, "REALLY???", "REALLY REALLY????") = 6 Then
-				Local $h_file, $skip = 0, $string = ""
-
 				$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
-				_FileReadToArray($f_variantloader, $h_file)
-
-				$k = 0
-				GUISetState(@SW_DISABLE)
-				For $i = 1 To $h_file[0] - 1
-					If StringInStr($h_file[$i], "Name") > 0 Then
-						$k += 1
-					EndIf
-					If $k = $variantnumber Then
-						$skip = 1
-					EndIf
-					If $k = $variantnumber + 1 Then
-						$skip = 0
-					EndIf
-
-					If $skip = 0 Then
-						$string &= $h_file[$i] & @LF
-					EndIf
-				Next
-				While ($string <> "" And StringRight($string, 1) <> "}")
-					$string = StringTrimRight($string, 1)
-				WEnd
-				$string &= @LF & "]"
-				FileWrite(@TempDir & "\pgn to variant.txt", $string)
-
-				FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+				$JSONFull = $JSONCached
+				_ArrayDelete($JSONFull,$variantnumber-1)
+				updateJSONVariants($JSONCached)
 				GUISetState(@SW_ENABLE)
 			EndIf
 		Case $b_variantloader
@@ -548,14 +434,17 @@ While 1
 		$f_variantloader = IniRead($ini, $Region, $value1, "")
 		$c_time = _ArrayToString(FileGetTime($f_variantloader))
 		If $c_time <> $l_time Then
+
 			GUICtrlSetData($c_variants, "|")
 			$data = _readvariants()
 			$data2 = StringSplit($data, "|")
 			If $nMsg = $b_delvar Then
 				If $variantnumber - 1 = 0 Then $variantnumber = 2
 				GUICtrlSetData($c_variants, $data, $data2[$variantnumber - 1])
-			ElseIf $nMsg = $b_addvariant Then
-				GUICtrlSetData($c_variants, $data, $data2[$k])
+			ElseIf $nMsg = $b_addvariant or $nMsg = $b_e_add Then
+				GUICtrlSetData($c_variants, $data, $data2[UBound($data2)-1])
+			ElseIf $nMsg = $b_e_save Then
+				GUICtrlSetData($c_variants, $data, $data2[$variantnumber])
 			Else
 				GUICtrlSetData($c_variants, $data, $data2[1])
 			EndIf
@@ -579,7 +468,9 @@ While 1
 
 WEnd
 
-
+Func _JSON_MYGenerate($string)
+	return _JSON_Generate($string,"  ",@CRLF,""," ","  ",@CRLF)
+EndFunc
 Func _inputbox()
 	$time = InputBox("Time for each player", "Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
 	$delay = InputBox("Delay per active timeline", "set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
@@ -610,6 +501,7 @@ Func _readvariants()
 	$regexp2 = '\"Author": "[^"]+'
 	$hnd_variantload = FileOpen($f_variantloader)
 	$fileContent = FileRead($hnd_variantload)
+	$JSONCached = _JSON_Parse($fileContent)
 	FileClose($hnd_variantload)
 	$matches = StringRegExp($fileContent, $regexp, 3)
 	$matches2 = StringRegExp($fileContent, $regexp2, 3)
@@ -753,3 +645,10 @@ Func recordexists()
 	If Not FileExists("5DPGNRecorderAndTimeReminder.exe") Then Return False
 	Return True
 EndFunc   ;==>recordexists
+
+Func updateJSONVariants($JSON)
+	$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
+	FileWrite($h_temp, _JSON_MYGenerate($JSON))
+	FileClose($h_temp)
+	FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+EndFunc

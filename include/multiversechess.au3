@@ -1,7 +1,7 @@
 #include-once
 #include <Array.au3>
 #include <File.au3>
-
+#include <JSON.au3>
 
 
 Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
@@ -776,8 +776,9 @@ Func _multiversetovariant($i_multiverse, $variant = "automatically generated", $
 	Else
 		$string &= '  "GameBuilderOverride": "GameBuilderOdd"' & @LF
 	EndIf
-	$string &= "  }," & @LF
-	Return $string
+	$string &= "  }" & @LF
+
+	Return _JSON_Parse($string)
 EndFunc   ;==>_multiversetovariant
 
 Func _multiversetopgn($i_multiverse)
