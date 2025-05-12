@@ -21,6 +21,7 @@ $b_variantloader = GUICtrlCreateButton("run interface", 328, 40, 75, 25)
 $i_file = GUICtrlCreateInput("", 16, 8, 305, 21)
 $b_openfile = GUICtrlCreateButton("OPEN", 328, 8, 75, 25)
 $b_load = GUICtrlCreateButton("Load File", 170, 40, 67, 25)
+$b_loadclipboard = GUICtrlCreateButton("Clipboard", 170, 40, 67, 25)
 GUICtrlSetState($b_variantloader, $GUI_DISABLE)
 $b_addvariant = GUICtrlCreateButton("add variant", 160, 72, 155, 33)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
@@ -43,6 +44,8 @@ GUICtrlSetState($b_addvariant, $GUI_DISABLE)
 GUICtrlSetState($r_black, $GUI_DISABLE)
 GUICtrlSetState($b_clip, $GUI_DISABLE)
 GUICtrlSetState($b_load, $GUI_DISABLE)
+GUICtrlSetState($b_load, $GUI_HIDE)
+GUICtrlSetState($b_loadclipboard, $GUI_ENABLE)
 GUICtrlSetState($c_turn, $GUI_DISABLE)
 GUICtrlSetState($b_addvariant, $GUI_DISABLE)
 GUISetState(@SW_SHOW)
@@ -52,6 +55,7 @@ $time = ""
 $delay = ""
 #Region set resizing
 GUICtrlSetResizing($b_load, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_loadclipboard, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($i_file, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_openfile, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_variantloader, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -129,7 +133,7 @@ Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 EndFunc   ;==>MY_WM_COMMAND
 #EndRegion Eventhandler for Inputbox
 
-Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User"
+Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User",$fullJSON
 $variantnumber = 2
 $gamerecord = 0
 $run = 0
@@ -168,103 +172,58 @@ While 1
 	EndIf
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
+		Case $b_loadclipboard
+			Local $pgn = ClipGet()
+			If not StringInStr($pgn,"[Board") Then
+				MsgBox(16,"Error in format","not valid PGN in clipboard")
+				ContinueLoop
+			EndIf
+			$multiverse = _multiverse_create("pgn", $pgn)
+			GUICtrlSetColor($l_loaded, $COLOR_GREEN)
+			GUICtrlSetData($l_loaded, "LOADED")
+			GUICtrlSetState($b_clip, $GUI_ENABLE)
+			If $variantloader = 1 Then
+				GUICtrlSetState($b_addvariant, $GUI_ENABLE)
+			EndIf
 		Case $b_e_close
 			If MsgBox(4, "REALLY???", "Without Changing anything????") = 6 Then ResizeGUI3(0)
 		Case $b_e_add
-			If MsgBox(4, "This adds to the everything", "pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
-			Local $h_file, $input = GUICtrlRead($e_json)
-			_FileReadToArray($f_variantloader, $h_file, 0)
-			_ArrayReverse($h_file)
-			For $line In $h_file
-				_ArrayDelete($h_file, 0)
-				If StringInStr($line, "}") Then ExitLoop
-			Next
-			_ArrayReverse($h_file)
-			_ArrayAdd($h_file, "   },")
-			_ArrayAdd($h_file, StringSplit($input, @CRLF, 3))
-			_ArrayAdd($h_file, "]")
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
-			FileWrite($h_temp, _ArrayToString($h_file, @CRLF))
-			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+			$input = GUICtrlRead($e_json)
+			$newJSON = _JSON_Parse($input)
+			$check = _checkVariant($newJSON)
+			if IsString($check) Then
+				MsgBox(16,"Error in Variant",$check)
+				ContinueLoop
+			EndIf
+			If MsgBox(4, "This adds to the everything", "Confirm To add Variant") <> 6 Then ContinueLoop
+			Local $h_file
+			_ArrayAdd($fullJSON,$newJSON)
+			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
 			ResizeGUI3(0)
 
 		Case $b_e_save
-			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
-			Local $h_file, $input = StringSplit(GUICtrlRead($e_json), "\r\n", 3)
-			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
-			_FileReadToArray($f_variantloader, $h_file)
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
-			$k = 0
-			$skip = 0
-			$editzaehler = 0
-			GUISetState(@SW_DISABLE)
-			Local $string[0]
-			For $i = 1 To UBound($h_file) - 1
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-				If $k = $variantnumber Then
-					$skip = 1
-				EndIf
-				If $skip = 0 Then
-					_ArrayAdd($string, $h_file[$i])
-				EndIf
-
-				If $k = $variantnumber + 1 Then
-					_ArrayDelete($string, UBound($string) - 1)
-					$editzaehler = $i
-					ExitLoop
-				EndIf
-			Next
-			If $editzaehler > 0 Then
-				$editzaehler -= 1
-				For $line In $input
-					_ArrayAdd($string, $line)
-				Next
-				For $i = $editzaehler To UBound($h_file) - 1
-					_ArrayAdd($string, $h_file[$i])
-				Next
-			Else
-				_ArrayDelete($string, UBound($string) - 1)
-				For $line In $input
-					_ArrayAdd($string, $line)
-				Next
-				_ArrayAdd($string, "]")
+			$input = GUICtrlRead($e_json)
+			$newJSON = _JSON_Parse($input)
+			$check = _checkVariant($newJSON)
+			if IsString($check) Then
+				MsgBox(16,"Error in Variant",$check)
+				ContinueLoop
 			EndIf
-			_FileWriteFromArray($h_temp, $string)
-			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replaces it with the new one") <> 6 Then ContinueLoop
+			Local $h_file
+			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
+			$fullJSON[$variantnumber-1] = $newJSON
+			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
-
 			ResizeGUI3(0)
 		Case $b_jsonentry
 
 			Local $h_file, $skip = 0, $string[0]
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
-			_FileReadToArray($f_variantloader, $h_file)
-			$k = 0
-			$line = 0
-			For $i = 1 To $h_file[0]
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-				If $k = $variantnumber Then
-					$line = $i
-					ExitLoop
-				EndIf
-			Next
-			$k -= 1
-			For $i = $line - 1 To $h_file[0]
-				If StringInStr($h_file[$i], "Name") > 0 Then
-					$k += 1
-				EndIf
-				If $k > $variantnumber Then ExitLoop
-				_ArrayAdd($string, $h_file[$i])
-			Next
-			_ArrayDelete($string, UBound($string) - 1)
-			GUICtrlSetData($e_json, StringFormat(_ArrayToString($string, "\r\n")))
+			$fullJSON = _JSONLoad()
+			$entry = $fullJSON[$variantnumber-1]
+			GUICtrlSetData($e_json, _JSON_MYGenerate($entry))
 			ResizeGUI3()
 
 		Case $GUI_EVENT_CLOSE
@@ -297,15 +256,13 @@ While 1
 			If $variantloader = 1 Then
 				GUICtrlSetState($b_addvariant, $GUI_ENABLE)
 			EndIf
-			_ArrayDisplay($multiverse[1])
-			_ArrayDisplay($multiverse[2])
-			_ArrayDisplay($multiverse[3])
 		Case $b_openfile
 			GUICtrlSetData($i_file, FileOpenDialog("choose a pgn", @WorkingDir, "Text (*.txt)"))
 		Case $b_addvariant
 			$asdf = StringSplit(GUICtrlRead($i_file), "\")
+			If $asdf[$asdf[0]] = "" Then $asdf[$asdf[0]] = "clipboard1234"
 			$asdf = StringTrimRight($asdf[$asdf[0]], 4)
-			Local $h_file, $input = _multiversetovariant($multiverse, $asdf, "pgn to variant")
+			Local $h_file, $input = _JSON_MYGenerate(_multiversetovariant($multiverse, $asdf, "pgn to variant"))
 			_FileReadToArray($f_variantloader, $h_file)
 			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
 			$k = 1
@@ -323,7 +280,7 @@ While 1
 
 			Next
 			$input = StringTrimRight($input, 2)
-			FileWrite($h_temp, $input & @LF)
+			FileWrite($h_temp, $input & @LF & "}" & @LF)
 			FileWriteLine($h_temp, $h_file[$i])
 
 			FileClose($h_temp)
@@ -548,14 +505,17 @@ While 1
 		$f_variantloader = IniRead($ini, $Region, $value1, "")
 		$c_time = _ArrayToString(FileGetTime($f_variantloader))
 		If $c_time <> $l_time Then
+
 			GUICtrlSetData($c_variants, "|")
 			$data = _readvariants()
 			$data2 = StringSplit($data, "|")
 			If $nMsg = $b_delvar Then
 				If $variantnumber - 1 = 0 Then $variantnumber = 2
 				GUICtrlSetData($c_variants, $data, $data2[$variantnumber - 1])
-			ElseIf $nMsg = $b_addvariant Then
-				GUICtrlSetData($c_variants, $data, $data2[$k])
+			ElseIf $nMsg = $b_addvariant or $nMsg = $b_e_add Then
+				GUICtrlSetData($c_variants, $data, $data2[UBound($data2)-1])
+			ElseIf $nMsg = $b_e_save Then
+				GUICtrlSetData($c_variants, $data, $data2[$variantnumber])
 			Else
 				GUICtrlSetData($c_variants, $data, $data2[1])
 			EndIf
@@ -579,7 +539,9 @@ While 1
 
 WEnd
 
-
+Func _JSON_MYGenerate($string)
+	return _JSON_Generate($string,"  ",@CRLF,""," ","  ",@CRLF)
+EndFunc
 Func _inputbox()
 	$time = InputBox("Time for each player", "Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
 	$delay = InputBox("Delay per active timeline", "set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
@@ -604,6 +566,11 @@ Func _inputbox()
 
 
 EndFunc   ;==>_inputbox
+Func _JSONLoad()
+	$fileContent = FileRead($f_variantloader)
+	$temp = _JSON_Parse($fileContent)
+	return $temp
+EndFunc
 Func _readvariants()
 
 	$regexp = '\"Name": "[^"]+'
@@ -639,6 +606,9 @@ Func _readinput()
 			GUICtrlSetColor($l_loaded, $COLOR_RED)
 			GUICtrlSetData($l_loaded, "unloaded")
 			GUICtrlSetState($b_load, $GUI_ENABLE)
+			GUICtrlSetState($b_load, $GUI_SHOW)
+			GUICtrlSetState($b_loadclipboard, $GUI_DISABLE)
+			GUICtrlSetState($b_loadclipboard, $GUI_HIDE)
 			GUICtrlSetState($c_turn, $GUI_ENABLE)
 			GUICtrlSetState($r_black, $GUI_ENABLE)
 			#EndRegion setstates
@@ -656,6 +626,9 @@ Func _readinput()
 		GUICtrlSetState($r_black, $GUI_DISABLE)
 		GUICtrlSetState($b_clip, $GUI_DISABLE)
 		GUICtrlSetState($b_load, $GUI_DISABLE)
+		GUICtrlSetState($b_load, $GUI_HIDE)
+		GUICtrlSetState($b_loadclipboard, $GUI_SHOW)
+		GUICtrlSetState($b_loadclipboard, $GUI_ENABLE)
 		GUICtrlSetState($c_turn, $GUI_DISABLE)
 		GUICtrlSetColor($l_loaded, $COLOR_RED)
 		GUICtrlSetData($l_loaded, "unloaded")
@@ -708,6 +681,8 @@ Func ResizeGUI3($b = 1)
 		WinMove($Form1_1, "", Default, Default, $newWidth, $pos[3])
 		GUICtrlSetState($e_json, $GUI_SHOW)
 		GUICtrlSetState($b_e_close, $GUI_SHOW)
+		GUICtrlSetState($b_e_save, $GUI_ENABLE)
+		GUICtrlSetState($b_e_add, $GUI_ENABLE)
 		GUICtrlSetState($b_e_save, $GUI_SHOW)
 		GUICtrlSetState($b_e_add, $GUI_SHOW)
 		GUICtrlSetState($c_variants, $GUI_DISABLE)
@@ -720,6 +695,8 @@ Func ResizeGUI3($b = 1)
 		GUICtrlSetState($b_e_close, $GUI_HIDE)
 		GUICtrlSetState($b_e_save, $GUI_HIDE)
 		GUICtrlSetState($b_e_add, $GUI_HIDE)
+		GUICtrlSetState($b_e_save, $GUI_DISABLE)
+		GUICtrlSetState($b_e_add, $GUI_DISABLE)
 		GUICtrlSetState($c_variants, $GUI_ENABLE)
 		GUICtrlSetState($b_delvar, $GUI_ENABLE)
 	EndIf
@@ -753,3 +730,55 @@ Func recordexists()
 	If Not FileExists("5DPGNRecorderAndTimeReminder.exe") Then Return False
 	Return True
 EndFunc   ;==>recordexists
+
+Func updateJSONVariants($JSON)
+	$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
+	FileWrite($h_temp, _JSON_MYGenerate($JSON))
+	FileClose($h_temp)
+	FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+EndFunc
+
+
+Func _checkVariant($JSON)
+	$initialKeys = MapKeys($JSON)
+	If not _arrayContains($initialKeys, "Name") Then return "No Name"
+	If not _arrayContains($initialKeys, "Author") Then return "No Author"
+	If not _arrayContains($initialKeys, "Timelines") Then return "No Timelines"
+	$timelines = MapKeys($JSON["Timelines"])
+	$counting = 0
+	For $line In $timelines
+		If StringRegExp($line, "^(-?(0|[1-9]\d*))L$") Then
+			$counting += 1
+		EndIf
+	Next
+	If not($counting = UBound($timelines)) Then return "Ungültige Zeitliniennamen"
+	$multiverse = _multiverse_create("variant", $JSON)
+	$multiversum = $multiverse[1]
+	for $i = 0 to UBound($multiversum) -1
+		For $j = 0 to UBound($multiversum,2) -1
+			if not IsArray($multiversum[$i][$j]) then ContinueLoop
+			$board = $multiversum[$i][$j]
+			$boardheight = UBound($board)
+			If $boardheight > 8 Then MsgBox(0,"","")
+			$boardwidth = UBound($board,2)
+			if not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
+			If $boardheight <> $boardwidth Then
+				return "Board at timeline " & $j & " and at position " & $i+1 & " isnt a square"
+			EndIf
+			If $boardheight <> $oldboardheight Then
+				return "Board at timeline " & $j & " and at position " & $i+1 & " has a different height"
+			EndIf
+			$oldboardheight = $boardheight
+		Next
+	Next
+	return true
+EndFunc   ;==>_checkVariant
+
+Func _arrayContains($array, $contains)
+	$bool = False
+	For $ele In $array
+		If $ele = $contains Then $bool = True
+	Next
+	Return $bool
+EndFunc   ;==>_arrayContains
+
