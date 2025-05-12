@@ -89,7 +89,8 @@ Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
 			_ArrayDelete($i_multiverse[3], 0)
 		Case "pgn"
 			$i_multiverse = _multiversefrompgn($opt, $opt2, $opt3)
-
+		Case "variant"
+			_multiversefromvariant($i_multiverse, $opt)
 	EndSwitch
 
 	Return $i_multiverse
@@ -180,6 +181,40 @@ Func _arrayaddcount(ByRef $i_array)
 	$array[0] = UBound($i_array)
 	$i_array = $array
 EndFunc   ;==>_arrayaddcount
+
+Func _multiversefromvariant(ByRef $i_multiverse, $variant)
+	$timelines = MapKeys($variant["Timelines"])
+	If $variant["CosmeticTurnOffset"] Then $i_multiverse[0].cosmeticturnoffset = $variant["CosmeticTurnOffset"]
+	If $variant["GameBuilderOverride"] = "GameBuilderOdd" Then
+		$i_multiverse[0].gamebuilder = 1
+	ElseIf $variant["GameBuilderOverride"] = "GameBuilderEven" Then
+		$i_multiverse[0].gamebuilder = 2
+	Else
+		$i_multiverse[0].gamebuilder = IsEven(UBound($timelines)) - 1 + 2
+	EndIf
+
+	For $i = 0 to UBound($variant["Timelines"])-1
+		$timelinename = $timelines[$i]
+		$timelinetocopy = $variant["Timelines"][$timelinename]
+		$j = 0
+		While $j < UBound($timelinetocopy)
+			If $timelinetocopy[$j] = Null Then
+				$j += 1
+				ContinueLoop
+			EndIf
+			if IsEven($j) Then
+				$movecolor = 1
+			Else
+				$movecolor = 2
+			EndIf
+			$board = _createboard("custom",$timelinetocopy[$j])
+			_multiverse_setboard($i_multiverse,$board,$timelinename,_plyToTurn($j+1),$movecolor)
+			$j += 1
+		WEnd
+	Next
+	$i_multiverse[0].boardheight = UBound($board)
+	$i_multiverse[0].boardwidth = UBound($board)
+EndFunc   ;==>_multiversefromvariant
 
 Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	Local $i = 0, $f_lines, $result, $whiteuser, $blackuser, $date, $time, $event, $game
