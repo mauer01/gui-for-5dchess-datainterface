@@ -174,21 +174,14 @@ While 1
 			$useranswer = 0
 			$input = GUICtrlRead($e_json)
 			$newJSON = _JSON_Parse($input)
-			$error = @error
-			Switch $error
-				Case 1
-					$useranswer = MsgBox(5+21,"Error in Syntax","part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
-				Case 2
-					$useranswer = MsgBox(5+21,"Error in Keys","key name in object part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
-				Case 3
-					$useranswer = MsgBox(5+21,"Error in Keys","value in object is not correct json" & @CRLF & "Do you wanna return to the edit or close out?")
-				Case 4
-					$useranswer = MsgBox(5+21,"Error in Keys","delimiter or object end expected but not gained" & @CRLF & "Do you wanna return to the edit or close out?")
-			EndSwitch
+			$check = _checkVariant($newJSON)
+			if IsString($check) Then
+				MsgBox(16,"Error in Variant",$check)
+				ContinueLoop
+			EndIf
 			If $useranswer = 10 Then
 				ContinueLoop
 			EndIf
-			MsgBox(0,"",$useranswer)
 			Exit
 			If MsgBox(4, "This adds to the everything", "pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
 			Local $h_file
@@ -201,18 +194,12 @@ While 1
 		Case $b_e_save
 			$useranswer = 0
 			$newJSON = _JSON_Parse(GUICtrlRead($e_json))
-			Switch @error
-				Case 1
-					$useranswer = MsgBox(5+21,"Error in Syntax","part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
-				Case 2
-					$useranswer = MsgBox(5+21,"Error in Keys","key name in object part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
-				Case 3
-					$useranswer = MsgBox(5+21,"Error in Keys","value in object is not correct json" & @CRLF & "Do you wanna return to the edit or close out?")
-				Case 4
-					$useranswer = MsgBox(5+21,"Error in Keys","delimiter or object end expected but not gained" & @CRLF & "Do you wanna return to the edit or close out?")
-			EndSwitch
-			If $useranswer = 10 Then ContinueLoop
-			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 or $useranswer Then ContinueLoop
+			$check = _checkVariant($newJSON)
+			if IsString($check) Then
+				MsgBox(16,"Error in Variant",$check)
+				ContinueLoop
+			EndIf
+			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
 			Local $h_file
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
 			$fullJSON = $JSONCached
@@ -682,3 +669,47 @@ Func updateJSONVariants($JSON)
 	FileClose($h_temp)
 	FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
 EndFunc
+
+
+Func _checkVariant($JSON)
+	$initialKeys = MapKeys($JSON)
+	If not _arrayContains($initialKeys, "Name") Then return "No Name"
+	If not _arrayContains($initialKeys, "Author") Then return "No Author"
+	If not _arrayContains($initialKeys, "Timelines") Then return "No Timelines"
+	$timelines = MapKeys($JSON["Timelines"])
+	$counting = 0
+	For $line In $timelines
+		If StringRegExp($line, "-?\d+L") Then
+			$counting += 1
+		EndIf
+	Next
+	If not($counting = UBound($timelines)) Then return "Ungültige Zeitliniennamen"
+	$multiverse = _multiverse_create("variant", $JSON)
+	$multiversum = $multiverse[1]
+	for $i = 0 to UBound($multiversum) -1
+		For $j = 0 to UBound($multiversum,2) -1
+			if not IsArray($multiversum[$i][$j]) then ContinueLoop
+			$board = $multiversum[$i][$j]
+			$boardheight = UBound($board)
+			$boardwidth = UBound($board,2)
+			if not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
+			If $boardheight <> $boardwidth Then
+				return "Board at timeline " & $j & " and at position " & $i-1 & " isnt a square"
+			EndIf
+			If $boardheight <> $oldboardheight Then
+				return "Board at timeline " & $j & " and at position" & $i-1 & " has a different height"
+			EndIf
+			$oldboardheight = $boardheight
+		Next
+	Next
+	return true
+EndFunc   ;==>_checkVariant
+
+Func _arrayContains($array, $contains)
+	$bool = False
+	For $ele In $array
+		If $ele = $contains Then $bool = True
+	Next
+	Return $bool
+EndFunc   ;==>_arrayContains
+
