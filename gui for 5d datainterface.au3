@@ -171,9 +171,27 @@ While 1
 		Case $b_e_close
 			If MsgBox(4, "REALLY???", "Without Changing anything????") = 6 Then ResizeGUI3(0)
 		Case $b_e_add
-			If MsgBox(4, "This adds to the everything", "pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
-			Local $h_file, $input = GUICtrlRead($e_json)
+			$useranswer = 0
+			$input = GUICtrlRead($e_json)
 			$newJSON = _JSON_Parse($input)
+			$error = @error
+			Switch $error
+				Case 1
+					$useranswer = MsgBox(5+21,"Error in Syntax","part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
+				Case 2
+					$useranswer = MsgBox(5+21,"Error in Keys","key name in object part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
+				Case 3
+					$useranswer = MsgBox(5+21,"Error in Keys","value in object is not correct json" & @CRLF & "Do you wanna return to the edit or close out?")
+				Case 4
+					$useranswer = MsgBox(5+21,"Error in Keys","delimiter or object end expected but not gained" & @CRLF & "Do you wanna return to the edit or close out?")
+			EndSwitch
+			If $useranswer = 10 Then
+				ContinueLoop
+			EndIf
+			MsgBox(0,"",$useranswer)
+			Exit
+			If MsgBox(4, "This adds to the everything", "pressing yes here will add the entire edit box behind the last variant") <> 6 Then ContinueLoop
+			Local $h_file
 			$fullJSON = $JSONCached
 			_ArrayAdd($fullJSON,$newJSON)
 			updateJSONVariants($fullJSON)
@@ -181,11 +199,23 @@ While 1
 			ResizeGUI3(0)
 
 		Case $b_e_save
-			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 Then ContinueLoop
-			Local $h_file, $input = StringSplit(GUICtrlRead($e_json), "\r\n", 3)
+			$useranswer = 0
+			$newJSON = _JSON_Parse(GUICtrlRead($e_json))
+			Switch @error
+				Case 1
+					$useranswer = MsgBox(5+21,"Error in Syntax","part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
+				Case 2
+					$useranswer = MsgBox(5+21,"Error in Keys","key name in object part is not json-syntax" & @CRLF & "Do you wanna return to the edit or close out?")
+				Case 3
+					$useranswer = MsgBox(5+21,"Error in Keys","value in object is not correct json" & @CRLF & "Do you wanna return to the edit or close out?")
+				Case 4
+					$useranswer = MsgBox(5+21,"Error in Keys","delimiter or object end expected but not gained" & @CRLF & "Do you wanna return to the edit or close out?")
+			EndSwitch
+			If $useranswer = 10 Then ContinueLoop
+			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replace it with the edit") <> 6 or $useranswer Then ContinueLoop
+			Local $h_file
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
 			$fullJSON = $JSONCached
-			$newJSON = _JSON_Parse(GUICtrlRead($e_json))
 			$fullJSON[$variantnumber-1] = $newJSON
 			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
