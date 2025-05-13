@@ -257,7 +257,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 				$game = StringTrimRight($game, 1)
 				$game = StringTrimLeft($game, 1)
 		EndSwitch
-	Until StringRegExp($f_lines[$i],":\d+:\d+:[wb]\]$")
+	Until StringRegExp($f_lines[$i],":[+-]?\d+:\d+:[wb]\]$")
 	$fen = ""
 	While (StringLeft($f_lines[$i], 2) = "1.") = False
 
