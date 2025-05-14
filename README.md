@@ -6,13 +6,12 @@ This AutoIt script allows you to convert Portable Game Notation (PGN) files into
 
 **PGN Import & Clipboard Loader**
   - Load and parse PGN directly from clipboard or files.
-  - Automatic validation and status indicators.
+  - now also works with variants created via https://adri326.github.io/5dchess-designer/ 
 
 **Variant JSON Management**
   - Add, delete, or overwrite variants in `JsonVariants.json`.
   - Interface to validate JSON structure before saving.
-  - Clipboard export of variant data for easy sharing.
-  - 
+    
 **Recording Integration**
   - Works with `5d chess game recorder+`.(pm me on discord to setup)
   - Start/stop recording from the GUI.
@@ -62,6 +61,7 @@ Contributions are welcome! If you encounter any issues or have suggestions for i
 The AutoIt Chess Variant Converter script was inspired by the need to automate the conversion process for PGN files into chess variants. 
 Special thanks to:
   - the AutoIt community for their support and contributions.
+  - 5dchess variant designers that creates FENS of the variants (https://adri326.github.io/5dchess-designer/)
   - GHXX Data Interface ("https://github.com/GHXX/FiveDChessDataInterface")
   - and the pgn recorders from various members of the 5d community:
     - Tesseract/Penteract: https://github.com/penteract/5D-PGN-Recorder
