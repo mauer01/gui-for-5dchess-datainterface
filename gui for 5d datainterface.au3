@@ -747,7 +747,7 @@ Func _checkVariant($JSON)
 	$timelines = MapKeys($JSON["Timelines"])
 	$counting = 0
 	For $line In $timelines
-		If StringRegExp($line, "^(-?(0|[1-9]\d*))L$") Then
+		If StringRegExp($line, "^([+-]?(0|[1-9]\d*))L$") Then
 			$counting += 1
 		EndIf
 	Next
