@@ -1,6 +1,7 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=C:\Program Files (x86)\AutoIt3\Icons\au3.ico
-#AutoIt3Wrapper_Outfile=out\gui for 5d datainterface.exe
+#AutoIt3Wrapper_Outfile=out\gui-for-5d-datainterface.exe
+#AutoIt3Wrapper_UseUpx=n
 #AutoIt3Wrapper_Run_Before=rmdir /S/Q out
 #AutoIt3Wrapper_Run_Before=mkdir out
 #AutoIt3Wrapper_Run_After=copy "gui for datainterface.ini" "out/gui for datainterface.ini"
@@ -156,13 +157,17 @@ EndIf
 $processname = "5dchesswithmultiversetimetravel.exe"
 
 While 1
-	If (ProcessExists($processname) And (Not IsDeclared("location"))) Then
-		$location = _ProcessGetLocation($processname)
-	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
+	If (ProcessExists($processname) And (Not IsDeclared("location"))) and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED Then
+		If IniRead($ini,$region,"restart","false") = "true" or MsgBox(4,"Restart game on crash","Activating this will restart the game should it crash" & @LF & "It tries to get the filepath via the process first") = 6 Then
+			$location = _ProcessGetLocation($processname)
+			IniWrite($ini,$region,"restart","true")
+		Else
+			GUICtrlSetState($cb_keepgameon,$GUI_UNCHECKED)
+			GUICtrlSetState($cb_keepgameon,$GUI_DISABLE)
+		EndIf
+	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
 		If ($location = "") Then
 			$location = FileOpenDialog("couldnt automatically fetch 5d chess.exe", "", "executable (*.exe)")
-		Else
-			ShellExecute($location, "~/datainterface/protonhax init %command%")
 		EndIf
 	EndIf
 	If GUICtrlRead($b_record) = "Setup Recording Games" Then
