@@ -3,13 +3,13 @@
 #AutoIt3Wrapper_Outfile=out\gui-for-5d-datainterface.exe
 #AutoIt3Wrapper_Res_Comment=5D Chess Variant Manager - Open Source
 #AutoIt3Wrapper_Res_Description=GUI for managing 5D Chess game variants
-#AutoIt3Wrapper_Res_Fileversion=0.0.0.1
-#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
+#AutoIt3Wrapper_Res_Fileversion=1.5.0.0
 #AutoIt3Wrapper_Res_ProductName=5D Chess Data Interface GUI
-#AutoIt3Wrapper_Res_ProductVersion=1.4.0.0
+#AutoIt3Wrapper_Res_ProductVersion=1.5.0.0
 #AutoIt3Wrapper_Res_CompanyName=Mauer01
 #AutoIt3Wrapper_Res_LegalCopyright=MIT License - Copyright (c) 2025 Mauer01
 #AutoIt3Wrapper_Res_SaveSource=y
+#AutoIt3Wrapper_Res_requestedExecutionLevel=asInvoker
 #AutoIt3Wrapper_Run_Before=rmdir /S/Q out
 #AutoIt3Wrapper_Run_Before=mkdir out
 #AutoIt3Wrapper_Run_After=copy "gui for datainterface.ini" "out/gui for datainterface.ini"
@@ -176,8 +176,8 @@ While 1
 	Switch $nMsg
 		Case $b_loadclipboard
 			Local $pgn = ClipGet()
-			If Not StringInStr($pgn, "[Board") Then
-				MsgBox(16, "Error in format", "not valid PGN in clipboard")
+			if Not StringRegExp($pgn, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
+				MsgBox(16, "Error in format", "not valid PGN in clipboard." & @CRLF & "You probably forgot the board fens.")
 				ContinueLoop
 			EndIf
 			$multiverse = _multiverse_create("pgn", $pgn)
@@ -301,7 +301,7 @@ While 1
 				EndIf
 			EndIf
 
-		Case $b_clip	
+		Case $b_clip
 			ClipPut(_JSON_MYGenerate(_multiversetovariant($multiverse, "5D Chess Game", "pgn to variant")))
 
 		Case $b_delvar

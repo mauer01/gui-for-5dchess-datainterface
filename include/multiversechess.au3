@@ -228,11 +228,17 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 			$f_lines = StringSplit($i_pgn, @CRLF, 1)
 	EndSelect
 
+	$lastline = $f_lines[0]
 	If $stopmove = -1 Then
-		$stopmove = StringRegExp($f_lines[$f_lines[0]], "[0-9]+", 3)[0]
+		While not StringRegExp($f_lines[$lastline], "[1-9]+")
+			$lastline -= 1
+		WEnd
+		$stopmove = StringRegExp($f_lines[$lastline], "[1-9]+", 3)[0]
 	EndIf
-	Do
+	While not StringRegExp($f_lines[$i],"\[[a-zA-Z]+")
 		$i += 1
+	WEnd
+	While not StringRegExp($f_lines[$i],":[+-]?\d+:\d+:[wb]\]$")
 		Switch StringRegExp($f_lines[$i], "[a-zA-Z]+", 3)[0]
 			Case "Result"
 				$result = StringRegExp($f_lines[$i], '[01]-[01]', 3)[0]
@@ -257,7 +263,8 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 				$game = StringTrimRight($game, 1)
 				$game = StringTrimLeft($game, 1)
 		EndSwitch
-	Until StringRegExp($f_lines[$i],":[+-]?\d+:\d+:[wb]\]$")
+		$i += 1
+	WEnd
 	$fen = ""
 	While (StringLeft($f_lines[$i], 2) = "1.") = False
 
@@ -265,7 +272,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 
 
 		$i += 1
-		If $i > $f_lines[0] Then
+		If $i > $lastline Then
 			ExitLoop
 		EndIf
 	WEnd
@@ -280,7 +287,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	$multiverse[0].result = $result
 	$multiverse[0].game = $game
 	#EndRegion metadata
-	While ($i <= $f_lines[0] And StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove + 1)
+	While ($i <= $lastline And StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove + 1)
 		$ply = StringSplit($f_lines[$i], "/", 2)
 		If @error = 1 Then $includeblackmove = 0
 		$whitemoves = $ply[0]
