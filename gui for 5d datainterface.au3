@@ -42,10 +42,7 @@ $Label1 = GUICtrlCreateLabel("Move:", 8, 40, 46, 24)
 GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 $b_json = GUICtrlCreateButton("Data Interface", 328, 65, 75, 25)
 $b_jsonentry = GUICtrlCreateButton("Edit Entry", 328, 90, 75, 25)
-$b_record = GUICtrlCreateButton("Setup Recording Games", 16, 72, 139, 33)
-If recordexists() Then GUICtrlSetData(-1, "Record Game")
-;~ $b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
-$b_clip = GUICtrlCreateDummy()
+$b_clip = GUICtrlCreateButton("Copy to Clipboard", 16, 72, 139, 33)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $r_black = GUICtrlCreateCheckbox("Black", 120, 40, 49, 17)
 
@@ -71,7 +68,6 @@ GUICtrlSetResizing($b_variantloader, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOC
 GUICtrlSetResizing($l_loaded, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($Label1, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_clip, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_record, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_json, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_jsonentry, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($r_black, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -144,12 +140,10 @@ EndFunc   ;==>MY_WM_COMMAND
 
 Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User", $fullJSON
 $variantnumber = 2
-$gamerecord = 0
 $run = 0
 $running = 0
 $full = 0
 $undervalue = 1
-OnAutoItExitRegister("_exit")
 Dim $lines
 
 If FileExists($ini) Then
@@ -176,11 +170,6 @@ While 1
 	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
 		If ($location = "") Then
 			$location = FileOpenDialog("couldnt automatically fetch 5d chess.exe", "", "executable (*.exe)")
-		EndIf
-	EndIf
-	If GUICtrlRead($b_record) = "Setup Recording Games" Then
-		If recordexists() Then
-			GUICtrlSetData($b_record, "Record Game")
 		EndIf
 	EndIf
 	$nMsg = GUIGetMsg()
@@ -241,21 +230,6 @@ While 1
 
 		Case $GUI_EVENT_CLOSE
 			Exit
-		Case $b_record
-			If Not recordexists() Then
-				MsgBox(64, "Setup Recording Software", "you need my recorder+ and at best penteracts 5DPGNRecorderAndTimeReminder")
-			ElseIf GUICtrlRead($b_record) = "Record Game" Then
-				$gamerecord = Run("5d chess game recorder+.exe user" & $user, "", @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD))
-				If @error Then
-					MsgBox(16, "", "error in opening the recorder+.exe")
-					ContinueCase
-				EndIf
-				GUICtrlSetData($b_record, "Stop Recording")
-				WinSetTitle($Form1_1, WinGetText($Form1_1), $title & " - Recording")
-			ElseIf GUICtrlRead($b_record) = "Stop Recording" Then
-				ProcessClose($gamerecord)
-				GUICtrlSetData($b_record, "Record Game")
-			EndIf
 		Case $b_close
 			ProcessClose($run)
 			$undervalue = 0
@@ -327,8 +301,8 @@ While 1
 				EndIf
 			EndIf
 
-		Case $b_clip
-			ClipPut(_multiversetovariant($multiverse))
+		Case $b_clip	
+			ClipPut(_JSON_MYGenerate(_multiversetovariant($multiverse, "5D Chess Game", "pgn to variant")))
 
 		Case $b_delvar
 			If MsgBox(4, "REALLY???", "REALLY REALLY????") = 6 Then
@@ -538,23 +512,16 @@ While 1
 		EndIf
 	EndIf
 
-	If ProcessExists($gamerecord) Then
-		$read = StdoutRead($gamerecord)
-		If StringLen($read) Then
-			GUICtrlSetData($i_file, $read)
-			GUICtrlSetState($i_file, $GUI_ENABLE)
-			GUICtrlSetData($b_record, "Record Game")
-			GUICtrlSetState($b_openfile, $GUI_ENABLE)
-			WinSetTitle($Form1_1, WinGetText($Form1_1), $title)
-			StdinWrite($gamerecord, "next")
-		EndIf
-	EndIf
+
 
 WEnd
 
 Func _JSON_MYGenerate($string)
 	Return _JSON_Generate($string, "  ", @CRLF, "", " ", "  ", @CRLF)
 EndFunc   ;==>_JSON_MYGenerate
+
+
+
 Func _inputbox()
 	$time = InputBox("Time for each player", "Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
 	$delay = InputBox("Delay per active timeline", "set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
@@ -718,10 +685,6 @@ Func ResizeGUI3($b = 1)
 EndFunc   ;==>ResizeGUI3
 
 
-Func _exit()
-	ProcessClose($run)
-	ProcessClose($gamerecord)
-EndFunc   ;==>_exit
 
 Func _ProcessGetLocation($sProc = @ScriptFullPath)
 	Local $iPID = ProcessExists($sProc)
@@ -738,11 +701,6 @@ Func _ProcessGetLocation($sProc = @ScriptFullPath)
 	Return $aReturn[3]
 EndFunc   ;==>_ProcessGetLocation
 
-Func recordexists()
-	If Not FileExists("5d chess game recorder+.exe") Then Return False
-	If Not FileExists("5DPGNRecorderAndTimeReminder.exe") Then Return False
-	Return True
-EndFunc   ;==>recordexists
 
 Func updateJSONVariants($JSON)
 	$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
