@@ -14,6 +14,10 @@
 #AutoIt3Wrapper_Run_Before=mkdir out
 #AutoIt3Wrapper_Run_After=copy "gui for datainterface.ini" "out/gui for datainterface.ini"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#cs
+githublink for complete source = https://github.com/mauer01/gui-for-5dchess-datainterface
+#ce
+
 #include <include\multiversechess.au3>
 #include <ButtonConstants.au3>
 #include <ComboConstants.au3>
