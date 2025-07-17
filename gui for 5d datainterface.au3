@@ -1,7 +1,15 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=C:\Program Files (x86)\AutoIt3\Icons\au3.ico
 #AutoIt3Wrapper_Outfile=out\gui-for-5d-datainterface.exe
-#AutoIt3Wrapper_UseUpx=n
+#AutoIt3Wrapper_Res_Comment=5D Chess Variant Manager - Open Source
+#AutoIt3Wrapper_Res_Description=GUI for managing 5D Chess game variants
+#AutoIt3Wrapper_Res_Fileversion=0.0.0.1
+#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
+#AutoIt3Wrapper_Res_ProductName=5D Chess Data Interface GUI
+#AutoIt3Wrapper_Res_ProductVersion=1.4.0.0
+#AutoIt3Wrapper_Res_CompanyName=Mauer01
+#AutoIt3Wrapper_Res_LegalCopyright=MIT License - Copyright (c) 2025 Mauer01
+#AutoIt3Wrapper_Res_SaveSource=y
 #AutoIt3Wrapper_Run_Before=rmdir /S/Q out
 #AutoIt3Wrapper_Run_Before=mkdir out
 #AutoIt3Wrapper_Run_After=copy "gui for datainterface.ini" "out/gui for datainterface.ini"
@@ -134,7 +142,7 @@ Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 EndFunc   ;==>MY_WM_COMMAND
 #EndRegion Eventhandler for Inputbox
 
-Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User",$fullJSON
+Global $variantloader = 0, $log = "", $l_time = 0, $f_variantloader, $sleep = 100, $Region = "Data", $value1 = "Interface", $value2 = "User", $fullJSON
 $variantnumber = 2
 $gamerecord = 0
 $run = 0
@@ -157,15 +165,15 @@ EndIf
 $processname = "5dchesswithmultiversetimetravel.exe"
 
 While 1
-	If (ProcessExists($processname) And (Not IsDeclared("location"))) and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED Then
-		If IniRead($ini,$region,"restart","false") = "true" or MsgBox(4,"Restart game on crash","Activating this will restart the game should it crash" & @LF & "It tries to get the filepath via the process first") = 6 Then
+	If (ProcessExists($processname) And (Not IsDeclared("location"))) And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED Then
+		If IniRead($ini, $Region, "restart", "false") = "true" Or MsgBox(4, "Restart game on crash", "Activating this will restart the game should it crash" & @LF & "It tries to get the filepath via the process first") = 6 Then
 			$location = _ProcessGetLocation($processname)
-			IniWrite($ini,$region,"restart","true")
+			IniWrite($ini, $Region, "restart", "true")
 		Else
-			GUICtrlSetState($cb_keepgameon,$GUI_UNCHECKED)
-			GUICtrlSetState($cb_keepgameon,$GUI_DISABLE)
+			GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
+			GUICtrlSetState($cb_keepgameon, $GUI_DISABLE)
 		EndIf
-	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 and GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
+	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
 		If ($location = "") Then
 			$location = FileOpenDialog("couldnt automatically fetch 5d chess.exe", "", "executable (*.exe)")
 		EndIf
@@ -179,8 +187,8 @@ While 1
 	Switch $nMsg
 		Case $b_loadclipboard
 			Local $pgn = ClipGet()
-			If not StringInStr($pgn,"[Board") Then
-				MsgBox(16,"Error in format","not valid PGN in clipboard")
+			If Not StringInStr($pgn, "[Board") Then
+				MsgBox(16, "Error in format", "not valid PGN in clipboard")
 				ContinueLoop
 			EndIf
 			$multiverse = _multiverse_create("pgn", $pgn)
@@ -196,13 +204,13 @@ While 1
 			$input = GUICtrlRead($e_json)
 			$newJSON = _JSON_Parse($input)
 			$check = _checkVariant($newJSON)
-			if IsString($check) Then
-				MsgBox(16,"Error in Variant",$check)
+			If IsString($check) Then
+				MsgBox(16, "Error in Variant", $check)
 				ContinueLoop
 			EndIf
 			If MsgBox(4, "This adds to the everything", "Confirm To add Variant") <> 6 Then ContinueLoop
 			Local $h_file
-			_ArrayAdd($fullJSON,$newJSON)
+			_ArrayAdd($fullJSON, $newJSON)
 			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
 			ResizeGUI3(0)
@@ -211,14 +219,14 @@ While 1
 			$input = GUICtrlRead($e_json)
 			$newJSON = _JSON_Parse($input)
 			$check = _checkVariant($newJSON)
-			if IsString($check) Then
-				MsgBox(16,"Error in Variant",$check)
+			If IsString($check) Then
+				MsgBox(16, "Error in Variant", $check)
 				ContinueLoop
 			EndIf
 			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replaces it with the new one") <> 6 Then ContinueLoop
 			Local $h_file
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
-			$fullJSON[$variantnumber-1] = $newJSON
+			$fullJSON[$variantnumber - 1] = $newJSON
 			updateJSONVariants($fullJSON)
 			GUISetState(@SW_ENABLE)
 			ResizeGUI3(0)
@@ -227,7 +235,7 @@ While 1
 			Local $h_file, $skip = 0, $string[0]
 			$variantnumber = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0]
 			$fullJSON = _JSONLoad()
-			$entry = $fullJSON[$variantnumber-1]
+			$entry = $fullJSON[$variantnumber - 1]
 			GUICtrlSetData($e_json, _JSON_MYGenerate($entry))
 			ResizeGUI3()
 
@@ -517,8 +525,8 @@ While 1
 			If $nMsg = $b_delvar Then
 				If $variantnumber - 1 = 0 Then $variantnumber = 2
 				GUICtrlSetData($c_variants, $data, $data2[$variantnumber - 1])
-			ElseIf $nMsg = $b_addvariant or $nMsg = $b_e_add Then
-				GUICtrlSetData($c_variants, $data, $data2[UBound($data2)-1])
+			ElseIf $nMsg = $b_addvariant Or $nMsg = $b_e_add Then
+				GUICtrlSetData($c_variants, $data, $data2[UBound($data2) - 1])
 			ElseIf $nMsg = $b_e_save Then
 				GUICtrlSetData($c_variants, $data, $data2[$variantnumber])
 			Else
@@ -545,8 +553,8 @@ While 1
 WEnd
 
 Func _JSON_MYGenerate($string)
-	return _JSON_Generate($string,"  ",@CRLF,""," ","  ",@CRLF)
-EndFunc
+	Return _JSON_Generate($string, "  ", @CRLF, "", " ", "  ", @CRLF)
+EndFunc   ;==>_JSON_MYGenerate
 Func _inputbox()
 	$time = InputBox("Time for each player", "Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
 	$delay = InputBox("Delay per active timeline", "set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
@@ -574,8 +582,8 @@ EndFunc   ;==>_inputbox
 Func _JSONLoad()
 	$fileContent = FileRead($f_variantloader)
 	$temp = _JSON_Parse($fileContent)
-	return $temp
-EndFunc
+	Return $temp
+EndFunc   ;==>_JSONLoad
 Func _readvariants()
 
 	$regexp = '\"Name": "[^"]+'
@@ -741,14 +749,14 @@ Func updateJSONVariants($JSON)
 	FileWrite($h_temp, _JSON_MYGenerate($JSON))
 	FileClose($h_temp)
 	FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
-EndFunc
+EndFunc   ;==>updateJSONVariants
 
 
 Func _checkVariant($JSON)
 	$initialKeys = MapKeys($JSON)
-	If not _arrayContains($initialKeys, "Name") Then return "No Name"
-	If not _arrayContains($initialKeys, "Author") Then return "No Author"
-	If not _arrayContains($initialKeys, "Timelines") Then return "No Timelines"
+	If Not _arrayContains($initialKeys, "Name") Then Return "No Name"
+	If Not _arrayContains($initialKeys, "Author") Then Return "No Author"
+	If Not _arrayContains($initialKeys, "Timelines") Then Return "No Timelines"
 	$timelines = MapKeys($JSON["Timelines"])
 	$counting = 0
 	For $line In $timelines
@@ -756,27 +764,27 @@ Func _checkVariant($JSON)
 			$counting += 1
 		EndIf
 	Next
-	If not($counting = UBound($timelines)) Then return "Ungültige Zeitliniennamen"
+	If Not ($counting = UBound($timelines)) Then Return "Ungültige Zeitliniennamen"
 	$multiverse = _multiverse_create("variant", $JSON)
 	$multiversum = $multiverse[1]
-	for $i = 0 to UBound($multiversum) -1
-		For $j = 0 to UBound($multiversum,2) -1
-			if not IsArray($multiversum[$i][$j]) then ContinueLoop
+	For $i = 0 To UBound($multiversum) - 1
+		For $j = 0 To UBound($multiversum, 2) - 1
+			If Not IsArray($multiversum[$i][$j]) Then ContinueLoop
 			$board = $multiversum[$i][$j]
 			$boardheight = UBound($board)
-			If $boardheight > 8 Then MsgBox(0,"","")
-			$boardwidth = UBound($board,2)
-			if not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
+			If $boardheight > 8 Then MsgBox(0, "", "")
+			$boardwidth = UBound($board, 2)
+			If Not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
 			If $boardheight <> $boardwidth Then
-				return "Board at timeline " & $j & " and at position " & $i+1 & " isnt a square"
+				Return "Board at timeline " & $j & " and at position " & $i + 1 & " isnt a square"
 			EndIf
 			If $boardheight <> $oldboardheight Then
-				return "Board at timeline " & $j & " and at position " & $i+1 & " has a different height"
+				Return "Board at timeline " & $j & " and at position " & $i + 1 & " has a different height"
 			EndIf
 			$oldboardheight = $boardheight
 		Next
 	Next
-	return true
+	Return True
 EndFunc   ;==>_checkVariant
 
 Func _arrayContains($array, $contains)
