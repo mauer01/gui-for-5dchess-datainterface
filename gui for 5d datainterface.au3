@@ -3,17 +3,21 @@
 #AutoIt3Wrapper_Outfile=out\gui-for-5d-datainterface.exe
 #AutoIt3Wrapper_Res_Comment=5D Chess Variant Manager - Open Source
 #AutoIt3Wrapper_Res_Description=GUI for managing 5D Chess game variants
-#AutoIt3Wrapper_Res_Fileversion=0.0.0.1
-#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
+#AutoIt3Wrapper_Res_Fileversion=1.5.0.1
 #AutoIt3Wrapper_Res_ProductName=5D Chess Data Interface GUI
-#AutoIt3Wrapper_Res_ProductVersion=1.4.0.0
+#AutoIt3Wrapper_Res_ProductVersion=1.5.0.1
 #AutoIt3Wrapper_Res_CompanyName=Mauer01
 #AutoIt3Wrapper_Res_LegalCopyright=MIT License - Copyright (c) 2025 Mauer01
 #AutoIt3Wrapper_Res_SaveSource=y
+#AutoIt3Wrapper_Res_requestedExecutionLevel=asInvoker
 #AutoIt3Wrapper_Run_Before=rmdir /S/Q out
 #AutoIt3Wrapper_Run_Before=mkdir out
 #AutoIt3Wrapper_Run_After=copy "gui for datainterface.ini" "out/gui for datainterface.ini"
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#cs
+githublink for complete source = https://github.com/mauer01/gui-for-5dchess-datainterface
+#ce
+
 #include <include\multiversechess.au3>
 #include <ButtonConstants.au3>
 #include <ComboConstants.au3>
@@ -23,6 +27,7 @@
 #include <WindowsConstants.au3>
 #include <ColorConstants.au3>
 $ini = @ScriptDir & "\gui for datainterface.ini"
+$tempFile = @ScriptDir & "\temp-pgn to variant.txt"
 #Region ### START Koda GUI section ### Form=
 $title = "GUI for Data Interface"
 $Form1_1 = GUICreate($title, 420, 210, 625, 277)
@@ -187,8 +192,8 @@ While 1
 	Switch $nMsg
 		Case $b_loadclipboard
 			Local $pgn = ClipGet()
-			If Not StringInStr($pgn, "[Board") Then
-				MsgBox(16, "Error in format", "not valid PGN in clipboard")
+			if Not StringRegExp($pgn, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
+				MsgBox(16, "Error in format", "not valid PGN in clipboard." & @CRLF & "You probably forgot the board fens.")
 				ContinueLoop
 			EndIf
 			$multiverse = _multiverse_create("pgn", $pgn)
@@ -277,7 +282,7 @@ While 1
 			$asdf = StringTrimRight($asdf[$asdf[0]], 4)
 			Local $h_file, $input = _JSON_MYGenerate(_multiversetovariant($multiverse, $asdf, "pgn to variant"))
 			_FileReadToArray($f_variantloader, $h_file)
-			$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
+			$h_temp = FileOpen($tempFile, 2)
 			$k = 1
 			GUISetState(@SW_DISABLE)
 			For $i = 1 To $h_file[0] - 1
@@ -297,7 +302,7 @@ While 1
 			FileWriteLine($h_temp, $h_file[$i])
 
 			FileClose($h_temp)
-			FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+			FileMove($tempFile, $f_variantloader, 1)
 			GUISetState(@SW_ENABLE)
 		Case $c_turn
 			GUICtrlSetState($b_clip, $GUI_DISABLE)
@@ -328,7 +333,7 @@ While 1
 			EndIf
 
 		Case $b_clip
-			ClipPut(_multiversetovariant($multiverse))
+			ClipPut(_JSON_MYGenerate(_multiversetovariant($multiverse, "5D Chess Game", "pgn to variant")))
 
 		Case $b_delvar
 			If MsgBox(4, "REALLY???", "REALLY REALLY????") = 6 Then
@@ -358,9 +363,9 @@ While 1
 					$string = StringTrimRight($string, 1)
 				WEnd
 				$string &= @LF & "]"
-				FileWrite(@TempDir & "\pgn to variant.txt", $string)
+				FileWrite($tempFile, $string)
 
-				FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+				FileMove($tempFile, $f_variantloader, 1)
 				GUISetState(@SW_ENABLE)
 			EndIf
 		Case $b_variantloader
@@ -493,13 +498,17 @@ While 1
 		$running = 0
 		If $undervalue Then
 			MsgBox(16, "Variant Loader Closed", "something caused the Data Interface to exit, pls consult logfile")
-			FileWrite(@ScriptDir & "\log.txt", $log)
+			FileWrite(@ScriptDir & "\log.txt", StringRight($log,10000))
 			$undervalue = 1
 		EndIf
 		GUICtrlSetState($b_variantloader, $GUI_ENABLE)
 		GUICtrlSetState($b_json, $GUI_ENABLE)
 	EndIf
-	If ($running) Then $log &= StdoutRead($run)
+	If ($running) Then
+		$log &= StdoutRead($run)
+		StringRight($log,10000)
+	EndIf
+
 	If ($running And $full = 0) Then
 		GUICtrlSetState($b_variantloader, $GUI_DISABLE)
 		GUICtrlSetState($b_json, $GUI_DISABLE)
@@ -745,10 +754,10 @@ Func recordexists()
 EndFunc   ;==>recordexists
 
 Func updateJSONVariants($JSON)
-	$h_temp = FileOpen(@TempDir & "\pgn to variant.txt", 2)
+	$h_temp = FileOpen($tempFile, 2)
 	FileWrite($h_temp, _JSON_MYGenerate($JSON))
 	FileClose($h_temp)
-	FileMove(@TempDir & "\pgn to variant.txt", $f_variantloader, 1)
+	FileMove($tempFile, $f_variantloader, 1)
 EndFunc   ;==>updateJSONVariants
 
 
