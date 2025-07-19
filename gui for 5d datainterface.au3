@@ -175,7 +175,9 @@ While 1
 	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
 		If ($location = "") Then
 			$location = FileOpenDialog("couldnt automatically fetch 5d chess.exe", "", "executable (*.exe)")
+			If @error Then GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
 		EndIf
+		ShellExecute($location)
 	EndIf
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
