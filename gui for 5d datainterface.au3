@@ -3,9 +3,9 @@
 #AutoIt3Wrapper_Outfile=out\gui-for-5d-datainterface.exe
 #AutoIt3Wrapper_Res_Comment=5D Chess Variant Manager - Open Source
 #AutoIt3Wrapper_Res_Description=GUI for managing 5D Chess game variants
-#AutoIt3Wrapper_Res_Fileversion=1.5.0.1
+#AutoIt3Wrapper_Res_Fileversion=1.5.1.0
 #AutoIt3Wrapper_Res_ProductName=5D Chess Data Interface GUI
-#AutoIt3Wrapper_Res_ProductVersion=1.5.0.1
+#AutoIt3Wrapper_Res_ProductVersion=1.5.1.0
 #AutoIt3Wrapper_Res_CompanyName=Mauer01
 #AutoIt3Wrapper_Res_LegalCopyright=MIT License - Copyright (c) 2025 Mauer01
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -181,7 +181,9 @@ While 1
 	ElseIf (ProcessExists($processname) = 0 And IsDeclared("location") <> 0 And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED) Then
 		If ($location = "") Then
 			$location = FileOpenDialog("couldnt automatically fetch 5d chess.exe", "", "executable (*.exe)")
+			If @error Then GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
 		EndIf
+		ShellExecute($location)
 	EndIf
 	If GUICtrlRead($b_record) = "Setup Recording Games" Then
 		If recordexists() Then
