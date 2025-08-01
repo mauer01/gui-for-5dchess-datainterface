@@ -5,7 +5,7 @@
 
 
 Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
-	Local $i_multiverse[4]
+	Local $i_multiverse[]
 	Local $array[0][0]
 	Local $array2[0]
 	$i_multiverse[3] = $array2
