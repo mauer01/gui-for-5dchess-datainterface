@@ -534,6 +534,7 @@ EndFunc   ;==>_JSON_MYGenerate
 
 
 Func _inputbox()
+	GUISetState(@SW_DISABLE)
 	$time = InputBox("Time for each player", "Set the time each player has in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
 	$delay = InputBox("Delay per active timeline", "set the delay in seconds (reset to reset)" & @LF & "Or use the 00:00:00 (hh:mm:ss) format")
 	If StringInStr($time, ":") Then
@@ -554,7 +555,7 @@ Func _inputbox()
 	If Number($time) Then
 		$time = Execute($time)
 	EndIf
-
+	GUISetState(@SW_ENABLE)
 
 EndFunc   ;==>_inputbox
 Func _JSONLoad()
