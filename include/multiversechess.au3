@@ -269,8 +269,6 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	While (StringLeft($f_lines[$i], 2) = "1.") = False
 
 		$fen &= $f_lines[$i] & "|"
-
-
 		$i += 1
 		If $i > $lastline Then
 			ExitLoop
@@ -309,7 +307,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 		Next
 		If ($includeblackmove = 1 Or StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove) Then
 			$blackmoves = $ply[1]
-			While (StringLeft($blackmoves, 1) = "(") = False
+			While (StringLeft($blackmoves, 1) = "(") = False And ($blackmoves <> "")
 				$blackmoves = StringTrimLeft($blackmoves, 1)
 			WEnd
 			$blackmove = StringRegExp($blackmoves, "[Ta-z0-9->]+", 3)
@@ -321,7 +319,6 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 					$blacksply &= $blackmove[$j + 2] & $blackmove[$j + 3]
 					$j += 2
 				EndIf
-
 				_multiversemove($multiverse, _moveconvert($blacksply, 1), _moveconvert($blacksply, 0), 2)
 			Next
 		EndIf
