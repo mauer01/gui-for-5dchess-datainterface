@@ -287,7 +287,6 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	$multiverse[0].result = $result
 	$multiverse[0].game = $game
 	#EndRegion metadata
-	MsgBox(0,$lastline,$stopmove & "  :stopmove")
 	While ($i <= $lastline And StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove + 1)
 		$ply = StringSplit($f_lines[$i], "/", 2)
 		If @error = 1 Then $includeblackmove = 0
