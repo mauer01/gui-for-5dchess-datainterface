@@ -2,4 +2,4 @@
 !.gitignore
 out
 gui for datainterface.ini
-log.txt
+*log.txt
