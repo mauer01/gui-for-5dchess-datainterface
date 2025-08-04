@@ -285,10 +285,15 @@ While 1
 		Case $b_close
 			_cleanExit($data)
 		Case $b_datainterfaceSetup
-			$folder = FileSelectFolder("Select The DataInterface Folder you want to use", @WorkingDir)
-			If @error Then
-				MsgBox(16, "closed out", "Folder Selection failed")
-				ContinueLoop
+			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _ 
+				@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then 
+				requestDatainterface()
+			Else				
+				$folder = FileSelectFolder("Select The DataInterface Folder you want to use", @WorkingDir)
+				If @error Then
+					MsgBox(16, "closed out", "Folder Selection failed")
+					ContinueLoop
+				EndIf
 			EndIf
 			$data = _loadDataInterface($folder)
 			If @error Then
@@ -299,10 +304,10 @@ While 1
 				$data = _loadDataInterface(StringTrimRight($folder,10))
 				If @error Then 
 					MsgBox(16,"Broken Datainterfacesetup", "Your given datainterface setup might be broken." & @CRLF & "Couldnt find Datainterfaceconsole.exe or jsonVariants.json")
+					ContinueLoop
 				EndIf
 			EndIf
-			ResizeGUIDatainterfaceSetupped()
-			IniWrite($ini,$ini_Region,$value1,$data["workingDir"])
+			IniWrite($ini,$ini_Region,$value1,$folder)
 		Case $b_run_datainterface
 			_runDataInterface($data)
 			if @error then MsgBox(0,"","")
@@ -630,3 +635,40 @@ Func _arrayContains($array, $contains)
 	Return $bool
 EndFunc   ;==>_arrayContains
 
+Func requestDatainterface()
+	InetGet("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest","temp.json")
+	$file = FileRead("temp.json")
+	FileDelete("temp.json")
+	$json = _JSON_parse($file)
+	$assets = $json["assets"]
+	$asset = findStandalone($assets)
+	local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
+	DirCreate($folderDataInterface)
+	InetGet($asset["browser_download_url"],@ScriptDir & "\data.zip")
+	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
+	if @error then ConsoleWrite(@error)
+	_loadDataInterface($folderDataInterface)
+	FileDelete(@ScriptDir & "\data.zip")
+EndFunc
+Func findStandalone($assets)
+	for $asset in $assets
+		for $key in MapKeys($asset)
+			if StringInStr($asset[$key],"standalone") Then return $asset
+		Next
+	Next
+EndFunc
+Func _unZip($sZipFile, $sDestFolder)
+  If Not FileExists($sZipFile) Then Return SetError (1) ; source file does not exists
+  If Not FileExists($sDestFolder) Then
+    If Not DirCreate($sDestFolder) Then Return SetError (2) ; unable to create destination
+  Else
+    If Not StringInStr(FileGetAttrib($sDestFolder), "D") Then Return SetError (3) ; destination not folder
+  EndIf
+  Local $oShell = ObjCreate("shell.application")
+  Local $oZip = $oShell.NameSpace($sZipFile)
+  Local $iZipFileCount = $oZip.items.Count
+  Local $dest = $oShell.NameSpace($sDestFolder)
+  If Not $iZipFileCount Then Return SetError (4) ; zip file empty
+  $dest.copyhere($oZip.items,16)
+  If not ($oZip.items.Count = $dest.items.count) Then SetError(4)
+EndFunc
