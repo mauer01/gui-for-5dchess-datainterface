@@ -5,9 +5,9 @@
 
 
 Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
-	Local $i_multiverse[4]
-	Dim $array[0][0]
-	Dim $array2[0]
+	Local $i_multiverse[]
+	Local $array[0][0]
+	Local $array2[0]
 	$i_multiverse[3] = $array2
 	$i_multiverse[2] = $array
 	$i_multiverse[1] = $array
@@ -97,26 +97,26 @@ Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
 EndFunc   ;==>_multiverse_create
 
 Func _createboard($mode = "standard", $fen = "", $bool = True)
-	Dim $chessboard
+	Local $chessboard
 	Switch $mode
 		Case "standard"
 			For $i = 1 To 8
 				_boardaddcolumn($chessboard)
 				_boardaddrow($chessboard)
 			Next
-			Dim $blackpieces[8] = ["r", "n", "b", "q", "k", "b", "n", "r"]
-			Dim $whitepieces[8] = ["R", "N", "B", "Q", "K", "B", "N", "R"]
+			Local $blackpieces[8] = ["r", "n", "b", "q", "k", "b", "n", "r"]
+			Local $whitepieces[8] = ["R", "N", "B", "Q", "K", "B", "N", "R"]
 
 			For $i = 1 To 8
 				$j = $i - 1
-				$chessboard = _pieceadd($chessboard, $blackpieces[$j], AlphabeticalNumberToLetter($i) & "8")
-				$chessboard = _pieceadd($chessboard, "P", AlphabeticalNumberToLetter($i) & "2")
-				$chessboard = _pieceadd($chessboard, "p", AlphabeticalNumberToLetter($i) & "7")
-				$chessboard = _pieceadd($chessboard, $whitepieces[$j], AlphabeticalNumberToLetter($i) & "1")
+				$chessboard = _pieceadd($chessboard, $blackpieces[$j], _AlphabeticalNumberToLetter($i) & "8")
+				$chessboard = _pieceadd($chessboard, "P", _AlphabeticalNumberToLetter($i) & "2")
+				$chessboard = _pieceadd($chessboard, "p", _AlphabeticalNumberToLetter($i) & "7")
+				$chessboard = _pieceadd($chessboard, $whitepieces[$j], _AlphabeticalNumberToLetter($i) & "1")
 			Next
 		Case "princess"
-			Dim $blackpieces[8] = ["r", "n", "b", "s", "k", "b", "n", "r"]
-			Dim $whitepieces[8] = ["R", "N", "B", "S", "K", "B", "N", "R"]
+			Local $blackpieces[8] = ["r", "n", "b", "s", "k", "b", "n", "r"]
+			Local $whitepieces[8] = ["R", "N", "B", "S", "K", "B", "N", "R"]
 
 			For $i = 1 To 8
 				_boardaddcolumn($chessboard)
@@ -124,14 +124,14 @@ Func _createboard($mode = "standard", $fen = "", $bool = True)
 			Next
 			For $i = 1 To 8
 				$j = $i - 1
-				$chessboard = _pieceadd($chessboard, $blackpieces[$j], AlphabeticalNumberToLetter($i) & "8")
-				$chessboard = _pieceadd($chessboard, "P", AlphabeticalNumberToLetter($i) & "2")
-				$chessboard = _pieceadd($chessboard, "p", AlphabeticalNumberToLetter($i) & "7")
-				$chessboard = _pieceadd($chessboard, $whitepieces[$j], AlphabeticalNumberToLetter($i) & "1")
+				$chessboard = _pieceadd($chessboard, $blackpieces[$j], _AlphabeticalNumberToLetter($i) & "8")
+				$chessboard = _pieceadd($chessboard, "P", _AlphabeticalNumberToLetter($i) & "2")
+				$chessboard = _pieceadd($chessboard, "p", _AlphabeticalNumberToLetter($i) & "7")
+				$chessboard = _pieceadd($chessboard, $whitepieces[$j], _AlphabeticalNumberToLetter($i) & "1")
 			Next
 		Case "dp"
-			Dim $blackpieces[8] = ["r", "q", "b", "n", "k", "b", "n", "r"]
-			Dim $whitepieces[8] = ["R", "Q", "B", "N", "K", "B", "N", "R"]
+			Local $blackpieces[8] = ["r", "q", "b", "n", "k", "b", "n", "r"]
+			Local $whitepieces[8] = ["R", "Q", "B", "N", "K", "B", "N", "R"]
 
 			For $i = 1 To 8
 				_boardaddcolumn($chessboard)
@@ -139,10 +139,10 @@ Func _createboard($mode = "standard", $fen = "", $bool = True)
 			Next
 			For $i = 1 To 8
 				$j = $i - 1
-				$chessboard = _pieceadd($chessboard, $blackpieces[$j], AlphabeticalNumberToLetter($i) & "8")
-				$chessboard = _pieceadd($chessboard, "P", AlphabeticalNumberToLetter($i) & "2")
-				$chessboard = _pieceadd($chessboard, "p", AlphabeticalNumberToLetter($i) & "7")
-				$chessboard = _pieceadd($chessboard, $whitepieces[$j], AlphabeticalNumberToLetter($i) & "1")
+				$chessboard = _pieceadd($chessboard, $blackpieces[$j], _AlphabeticalNumberToLetter($i) & "8")
+				$chessboard = _pieceadd($chessboard, "P", _AlphabeticalNumberToLetter($i) & "2")
+				$chessboard = _pieceadd($chessboard, "p", _AlphabeticalNumberToLetter($i) & "7")
+				$chessboard = _pieceadd($chessboard, $whitepieces[$j], _AlphabeticalNumberToLetter($i) & "1")
 			Next
 		Case "custom"
 			Local $k = 0
@@ -157,11 +157,11 @@ Func _createboard($mode = "standard", $fen = "", $bool = True)
 					$k = 0
 					For $j = 0 To UBound($piece) - 1
 						If Number($piece[$j]) = 1 Then
-							$chessboard = _pieceadd($chessboard, $piece[$j], AlphabeticalNumberToLetter($j + $k + 1) & Abs($i - $row[0]) + 1)
+							$chessboard = _pieceadd($chessboard, $piece[$j], _AlphabeticalNumberToLetter($j + $k + 1) & Abs($i - $row[0]) + 1)
 						ElseIf Number($piece[$j]) > 1 Then
 							$k += Number($piece[$j]) - 1
 						Else
-							$chessboard = _pieceadd($chessboard, $piece[$j], AlphabeticalNumberToLetter($j + $k + 1) & Abs($i - $row[0]) + 1)
+							$chessboard = _pieceadd($chessboard, $piece[$j], _AlphabeticalNumberToLetter($j + $k + 1) & Abs($i - $row[0]) + 1)
 						EndIf
 					Next
 				Next
@@ -190,7 +190,7 @@ Func _multiversefromvariant(ByRef $i_multiverse, $variant)
 	ElseIf $variant["GameBuilderOverride"] = "GameBuilderEven" Then
 		$i_multiverse[0].gamebuilder = 2
 	Else
-		$i_multiverse[0].gamebuilder = IsEven(UBound($timelines)) - 1 + 2
+		$i_multiverse[0].gamebuilder = _IsEven(UBound($timelines)) - 1 + 2
 	EndIf
 
 	For $i = 0 to UBound($variant["Timelines"])-1
@@ -202,7 +202,7 @@ Func _multiversefromvariant(ByRef $i_multiverse, $variant)
 				$j += 1
 				ContinueLoop
 			EndIf
-			if IsEven($j) Then
+			if _IsEven($j) Then
 				$movecolor = 1
 			Else
 				$movecolor = 2
@@ -269,8 +269,6 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	While (StringLeft($f_lines[$i], 2) = "1.") = False
 
 		$fen &= $f_lines[$i] & "|"
-
-
 		$i += 1
 		If $i > $lastline Then
 			ExitLoop
@@ -287,7 +285,6 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	$multiverse[0].result = $result
 	$multiverse[0].game = $game
 	#EndRegion metadata
-	MsgBox(0,$lastline,$stopmove & "  :stopmove")
 	While ($i <= $lastline And StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove + 1)
 		$ply = StringSplit($f_lines[$i], "/", 2)
 		If @error = 1 Then $includeblackmove = 0
@@ -310,7 +307,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 		Next
 		If ($includeblackmove = 1 Or StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove) Then
 			$blackmoves = $ply[1]
-			While (StringLeft($blackmoves, 1) = "(") = False
+			While (StringLeft($blackmoves, 1) = "(") = False And ($blackmoves <> "")
 				$blackmoves = StringTrimLeft($blackmoves, 1)
 			WEnd
 			$blackmove = StringRegExp($blackmoves, "[Ta-z0-9->]+", 3)
@@ -322,7 +319,6 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 					$blacksply &= $blackmove[$j + 2] & $blackmove[$j + 3]
 					$j += 2
 				EndIf
-
 				_multiversemove($multiverse, _moveconvert($blacksply, 1), _moveconvert($blacksply, 0), 2)
 			Next
 		EndIf
@@ -340,7 +336,7 @@ Func _multiverse_setboard(ByRef $i_multiverse, $board, $timelinename, $turn, $co
 	Local $timeline = _multiverse_gettimelinebyname($i_multiverse, $timelinename)
 	If String($timeline) <> "not found" Then
 		If $ply > $maxturns Then
-			Dim $newmultiverse[$ply + 1][$timelines + 1]
+			Local $newmultiverse[$ply + 1][$timelines + 1]
 			For $i = 0 To $timelines
 				For $j = 0 To $maxturns
 					$newmultiverse[$j][$i] = ($i_multiverse[1])[$j][$i]
@@ -362,7 +358,7 @@ EndFunc   ;==>_multiverse_setboard
 
 Func _boardaddrow(ByRef $i_chessboard)
 	Local $count = UBound($i_chessboard, 2)
-	Dim $row[1][$count]
+	Local $row[1][$count]
 	For $i = 0 To UBound($i_chessboard, 2) - 1
 		$row[0][$i] = "1"
 	Next
@@ -373,7 +369,7 @@ Func _boardaddcolumn(ByRef $i_chessboard)
 	Local $rowCount = UBound($i_chessboard)
 	Local $colCount = UBound($i_chessboard, 2) + 1
 
-	Dim $newChessboard[$rowCount][$colCount]
+	Local $newChessboard[$rowCount][$colCount]
 
 	For $i = 0 To $rowCount - 1
 		For $j = 0 To $colCount - 1
@@ -400,7 +396,7 @@ Func _multiverseturnadd(ByRef $i_multiverse, $board, $timeline)
 
 	$rowCount = $c_longesttimeline + $addturn
 	$linecount = $c_width
-	Dim $newmultiverse[$rowCount][$linecount]
+	Local $newmultiverse[$rowCount][$linecount]
 	For $i = 0 To $linecount - 1
 		For $j = 0 To $rowCount - (1 + $addturn)
 			$newmultiverse[$j][$i] = ($i_multiverse[1])[$j][$i]
@@ -424,7 +420,7 @@ Func _multiverseaddtimelineatturn(ByRef $i_multiverse, $board, $ply, $timelinena
 	$rowCount = $c_longesttimeline + $byebye
 	Local $linecount = UBound($i_multiverse[1], 2) + 1
 	Local $linecount2 = $linecount - 1
-	Dim $newmultiverse[$rowCount][$linecount]
+	Local $newmultiverse[$rowCount][$linecount]
 	$newmultiverse[0][$linecount2] = $timelinename
 	For $i = 0 To $linecount2 - 1
 		For $j = 0 To $c_longesttimeline - 1
@@ -457,13 +453,13 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 	$i_startboard[0] = $startarray[0]
 	$i_startboard[1] = _turntoply($startarray[1], $movecolor, $i_multiverse[0].cosmeticturnoffset)
 	$i_startsquare[0] = $startarray[2]
-	$i_startsquarenumber = LetterToAlphabeticalNumber($i_startsquare[0]) - 1
+	$i_startsquarenumber = _LetterToAlphabeticalNumber($i_startsquare[0]) - 1
 	$i_startsquare[1] = $startarray[3]
 	$endboard[0] = $endarray[0]
 	$endboard[1] = _turntoply($endarray[1], $movecolor, $i_multiverse[0].cosmeticturnoffset)
 	$endsquare[0] = $endarray[2]
 	$endsquare[1] = $endarray[3]
-	$endsquarenumber = LetterToAlphabeticalNumber($endsquare[0]) - 1
+	$endsquarenumber = _LetterToAlphabeticalNumber($endsquare[0]) - 1
 	$i_starttimeline = _multiverse_gettimelinebyname($i_multiverse, $i_startboard[0])
 	$endtimeline = _multiverse_gettimelinebyname($i_multiverse, $endboard[0])
 	$piece = (($i_multiverse[1])[$i_startboard[1]][$i_starttimeline])[$i_startsquare[1] - 1][$i_startsquarenumber]
@@ -508,8 +504,8 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 				$rook[0] -= 1
 				$i -= 1
 			WEnd
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], AlphabeticalNumberToLetter($rook[$i] + 1) & $endsquare[1]))
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "R", AlphabeticalNumberToLetter($endsquarenumber + 2) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], _AlphabeticalNumberToLetter($rook[$i] + 1) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "R", _AlphabeticalNumberToLetter($endsquarenumber + 2) & $endsquare[1]))
 
 
 		ElseIf $i_startsquarenumber - $endsquarenumber = -2 Then
@@ -525,8 +521,8 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 				$i += 1
 
 			WEnd
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], AlphabeticalNumberToLetter($rook[1] + 1) & $endsquare[1]))
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "R", AlphabeticalNumberToLetter($endsquarenumber) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], _AlphabeticalNumberToLetter($rook[1] + 1) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "R", _AlphabeticalNumberToLetter($endsquarenumber) & $endsquare[1]))
 
 		EndIf
 
@@ -540,8 +536,8 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 				$i -= 1
 			WEnd
 
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], AlphabeticalNumberToLetter($rook[$i] + 1) & $endsquare[1]))
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "r", AlphabeticalNumberToLetter($endsquarenumber + 2) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], _AlphabeticalNumberToLetter($rook[$i] + 1) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "r", _AlphabeticalNumberToLetter($endsquarenumber + 2) & $endsquare[1]))
 
 
 		ElseIf $i_startsquarenumber - $endsquarenumber = -2 Then
@@ -557,8 +553,8 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 				$i += 1
 
 			WEnd
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], AlphabeticalNumberToLetter($rook[1] + 1) & $endsquare[1]))
-			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "r", AlphabeticalNumberToLetter($endsquarenumber) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], _AlphabeticalNumberToLetter($rook[1] + 1) & $endsquare[1]))
+			_multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "r", _AlphabeticalNumberToLetter($endsquarenumber) & $endsquare[1]))
 
 		EndIf
 
@@ -566,7 +562,7 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 
 	ElseIf $piece == "P" Then
 
-		If $endsquare[1] = 8 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "Q", AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
+		If $endsquare[1] = 8 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "Q", _AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
 
 		If $endsquarenumber & $endsquare[1] = $i_multiverse[0].enpassant Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], $endsquare[0] & $endsquare[1] - 1))
 
@@ -576,7 +572,7 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 
 	ElseIf $piece == "p" Then
 
-		If $endsquare[1] = 1 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "q", AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
+		If $endsquare[1] = 1 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "q", _AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
 
 		If $endsquarenumber & $endsquare[1] = $i_multiverse[0].enpassant Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], $endsquare[0] & $endsquare[1] + 1))
 
@@ -586,7 +582,7 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 
 	ElseIf $piece == "W" Then
 
-		If $endsquare[1] = 8 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "Q", AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
+		If $endsquare[1] = 8 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "Q", _AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
 		If $endsquarenumber & $endsquare[1] = $i_multiverse[0].enpassant Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], $endsquare[0] & $endsquare[1] - 1))
 		If $i_multiverse[0].enpassant <> -1 Then $i_multiverse[0].enpassant = -1
 		If Abs($i_startsquare[1] - $endsquare[1]) = 2 Then $i_multiverse[0].enpassant = $endsquarenumber & $endsquare[1] - 1
@@ -594,7 +590,7 @@ Func _multiversemove(ByRef $i_multiverse, $startmove, $endmove, $movecolor)
 
 	ElseIf $piece == "w" Then
 
-		If $endsquare[1] = 1 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "q", AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
+		If $endsquare[1] = 1 Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _pieceadd(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], "q", _AlphabeticalNumberToLetter($endsquarenumber + 1) & $endsquare[1]))
 		If $endsquarenumber & $endsquare[1] = $i_multiverse[0].enpassant Then _multiverse_changeboard($i_multiverse[1], $i_startboard[1] + 1, $i_starttimeline, _removepiece(($i_multiverse[1])[$i_startboard[1] + 1][$i_starttimeline], $endsquare[0] & $endsquare[1] - 1))
 		If $i_multiverse[0].enpassant <> -1 Then $i_multiverse[0].enpassant = -1
 		If Abs($i_startsquare[1] - $endsquare[1]) = 2 Then $i_multiverse[0].enpassant = $endsquarenumber & $endsquare[1] - 1
@@ -630,7 +626,7 @@ EndFunc   ;==>_multiverse_changeboard
 Func _pieceadd($i_chessboard, $piece, $square)
 	Local $newboard = $i_chessboard
 
-	$y = LetterToAlphabeticalNumber(StringSplit($square, "", 2)[0]) - 1
+	$y = _LetterToAlphabeticalNumber(StringSplit($square, "", 2)[0]) - 1
 	$x = StringSplit($square, "", 2)[1] - 1
 
 	$newboard[$x][$y] = $piece
@@ -640,7 +636,7 @@ EndFunc   ;==>_pieceadd
 Func _removepiece($i_chessboard, $square)
 	Local $newboard = $i_chessboard
 	$xy = StringSplit($square, "", 2)
-	$x = LetterToAlphabeticalNumber($xy[0]) - 1
+	$x = _LetterToAlphabeticalNumber($xy[0]) - 1
 	$y = $xy[1] - 1
 	$newboard[$y][$x] = 1
 	Return $newboard
@@ -649,8 +645,8 @@ EndFunc   ;==>_removepiece
 Func _movepiece($i_chessboard, $i_startsquare, $i_endsquare)
 	Local $start = StringSplit($i_startsquare, "", 2)
 	Local $end = StringSplit($i_endsquare, "", 2)
-	Local $startcol = LetterToAlphabeticalNumber($start[0]) - 1
-	Local $endcol = LetterToAlphabeticalNumber($end[0]) - 1
+	Local $startcol = _LetterToAlphabeticalNumber($start[0]) - 1
+	Local $endcol = _LetterToAlphabeticalNumber($end[0]) - 1
 	Local $startrow = $start[1] - 1
 	Local $endrow = $end[1] - 1
 	$i_chessboard[$endrow][$endcol] = $i_chessboard[$startrow][$startcol]
@@ -661,7 +657,7 @@ EndFunc   ;==>_movepiece
 
 Func _multiversegetlongesttimelines($i_multiverse)
 	Local $c_longesttimeline = UBound($i_multiverse[1]) - 1, $c_width = UBound($i_multiverse[1], 2) - 1
-	Dim $return[1] = [0]
+	Local $return[1] = [0]
 	For $i = 0 To $c_width
 		For $j = $c_longesttimeline To 0 Step -1
 			If (IsArray(($i_multiverse[1])[$j][$i]) And $j = $c_longesttimeline) Then
@@ -713,7 +709,7 @@ Func _moveconvert($move, $startend = 1, $method = 0)
 			If StringRight($ply, 1) = ">" Then
 				$ply &= $move[2] & $move[3]
 			EndIf
-			Dim $fullply[2]
+			Local $fullply[2]
 			$fullply[0] = _moveconvert($ply, 1)
 			$fullply[1] = _moveconvert($ply, 0)
 			Return $fullply
@@ -722,7 +718,7 @@ Func _moveconvert($move, $startend = 1, $method = 0)
 EndFunc   ;==>_moveconvert
 
 Func _chessboard_scanrowforpiece($chessboard, $row, $piece)
-	Dim $squares[1] = [0]
+	Local $squares[1] = [0]
 	For $i = 0 To UBound($chessboard) - 1
 		If $chessboard[$row][$i] == $piece Then
 			_ArrayAdd($squares, $i)
@@ -874,12 +870,12 @@ EndFunc   ;==>_turntoply
 
 Func _plyToTurn($ply)
 	Local $movecolor = 1
-	If IsEven($ply) Then $movecolor = 2
+	If _IsEven($ply) Then $movecolor = 2
 	Return ($ply - $movecolor) / 2 + 1
 EndFunc   ;==>_plyToTurn
 
 #Region stupid stuff
-Func LetterToAlphabeticalNumber($letter)
+Func _LetterToAlphabeticalNumber($letter)
 	$letter = StringUpper($letter) ; Convert to uppercase to handle lowercase letters
 
 	If StringRegExp($letter, "[A-Z]") = 0 Then
@@ -888,18 +884,18 @@ Func LetterToAlphabeticalNumber($letter)
 	EndIf
 
 	Return Asc($letter) - Asc("A") + 1
-EndFunc   ;==>LetterToAlphabeticalNumber
+EndFunc   ;==>_LetterToAlphabeticalNumber
 
-Func AlphabeticalNumberToLetter($number)
+Func _AlphabeticalNumberToLetter($number)
 	If $number < 1 Or $number > 26 Then
 		; Invalid input, not a valid alphabetical number
 		Return ""
 	EndIf
 
 	Return Chr($number + Asc("A") - 1)
-EndFunc   ;==>AlphabeticalNumberToLetter
+EndFunc   ;==>_AlphabeticalNumberToLetter
 
-Func IsEven($number)
+Func _IsEven($number)
 	Return Mod($number, 2) = 0
-EndFunc   ;==>IsEven
+EndFunc   ;==>_IsEven
 #EndRegion stupid stuff
