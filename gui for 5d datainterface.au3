@@ -301,7 +301,8 @@ While 1
 					MsgBox(16,"Broken Datainterfacesetup", "Your given datainterface setup might be broken." & @CRLF & "Couldnt find Datainterfaceconsole.exe or jsonVariants.json")
 				EndIf
 			EndIf
-
+			ResizeGUIDatainterfaceSetupped()
+			IniWrite($ini,$ini_Region,$value1,$data["workingDir"])
 		Case $b_run_datainterface
 			_runDataInterface($data)
 			if @error then MsgBox(0,"","")
