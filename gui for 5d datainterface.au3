@@ -286,7 +286,7 @@ While 1
 			_cleanExit($data)
 		Case $b_datainterfaceSetup
 			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _ 
-				@CRLF &"%localAppdata%\GuiDatainterface\Datainterface") = 6 Then 
+				@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then 
 				requestDatainterface()
 			Else				
 				$folder = FileSelectFolder("Select The DataInterface Folder you want to use", @WorkingDir)
