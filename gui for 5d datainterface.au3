@@ -648,6 +648,7 @@ Func requestDatainterface()
 	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
 	if @error then ConsoleWrite(@error)
 	_loadDataInterface($folderDataInterface)
+	FileDelete(@ScriptDir & "\data.zip")
 EndFunc
 Func findStandalone($assets)
 	for $asset in $assets
