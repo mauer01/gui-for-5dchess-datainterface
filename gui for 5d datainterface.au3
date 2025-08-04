@@ -307,7 +307,8 @@ While 1
 					ContinueLoop
 				EndIf
 			EndIf
-			IniWrite($ini,$ini_Region,$value1,$folder)
+			ResizeGUIDatainterfaceSetupped()
+			IniWrite($ini,$ini_Region,$value1,$data["workingDir"])
 		Case $b_run_datainterface
 			_runDataInterface($data)
 			if @error then MsgBox(0,"","")
