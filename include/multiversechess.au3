@@ -225,7 +225,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 			If (Not IsNumber($i_pgn[0])) Then _arrayaddcount($i_pgn)
 			$f_lines = $i_pgn
 		Case IsString($i_pgn)
-			$f_lines = StringSplit($i_pgn, @CRLF, 1)
+			$f_lines = StringSplit($i_pgn, @LF, 1)
 	EndSelect
 
 	$lastline = $f_lines[0]
