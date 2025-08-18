@@ -105,7 +105,11 @@ $b_datainterfaceChangeTimerS = GUICtrlCreateButton("short timer", 241, 142, 60)
 $b_animation = GUICtrlCreateButton("travel animation", 306, 142, 85)
 $b_close = GUICtrlCreateButton("close", 10, 142, 31)
 $cb_keepgameon = GUICtrlCreateCheckbox("", 400, 142, 20, 20)
+$b_run_pgn = GUICtrlCreateButton("run inputbox pgn",10,172)
+$b_run_loaded_game = GUICtrlCreateButton("run loaded pgn",111,172)
 GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
+GUICtrlSetState($b_run_pgn, BitOR($GUI_HIDE,$GUI_DISABLE))
+GUICtrlSetState($b_run_loaded_game, BitOR($GUI_HIDE,$GUI_DISABLE))
 GUICtrlSetState($b_close, $GUI_HIDE)
 GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
 GUICtrlSetState($b_run_variant, $GUI_HIDE)
@@ -114,6 +118,8 @@ GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_HIDE)
 GUICtrlSetState($b_datainterfaceChangeTimerS, $GUI_HIDE)
 GUICtrlSetState($b_animation, $GUI_HIDE)
 GUICtrlSetResizing($b_animation, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_run_pgn, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_run_loaded_game, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($cb_keepgameon, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_datainterfaceChangeTimerS, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_close, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -284,6 +290,10 @@ While 1
 ;Region ButtonsDatainterface
 		Case $b_close
 			_cleanExit($data)
+		Case $b_run_pgn
+			_runPGN($data,FileRead(GUICtrlRead($i_file)))
+		Case $b_run_loaded_game
+			_runPGN($data,_ArrayToString(_multiversetopgn($multiverse),@LF))
 		Case $b_datainterfaceSetup
 			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _
 				@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then
@@ -477,9 +487,11 @@ Func ResizeGUIDatainterfaceSetupped()
 EndFunc   ;==>ResizeGUIDatainterfaceSetupped
 
 Func ResizeGUIRunningDatainterface($b = 1)
-	Local Const $newHeight = 210, $pos = WinGetPos($Main)
+	Local Const $newHeight = 230, $pos = WinGetPos($Main)
 	If $b Then
 		WinMove($Main, "", Default, Default, $pos[2], $newHeight)
+		GUICtrlSetState($b_run_loaded_game,$GUI_SHOW)
+		GUICtrlSetState($b_run_pgn,$GUI_SHOW)
 		GUICtrlSetState($b_run_datainterface, $GUI_DISABLE)
 		GUICtrlSetState($b_run_variant, $GUI_SHOW)
 		GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_SHOW)
@@ -491,6 +503,8 @@ Func ResizeGUIRunningDatainterface($b = 1)
 	Else
 		WinMove($Main, "", Default, Default, $pos[2], $newHeight)
 		GUICtrlSetState($b_run_datainterface, $GUI_ENABLE)
+		GUICtrlSetState($b_run_loaded_game,$GUI_HIDE)
+		GUICtrlSetState($b_run_pgn,$GUI_HIDE)
 		GUICtrlSetState($b_run_variant, $GUI_HIDE)
 		GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_HIDE)
 		GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_HIDE)
@@ -538,6 +552,7 @@ Func ResizeGUIInputBoxValidated($b = 1)
 		GUICtrlSetColor($l_loaded, $COLOR_RED)
 		GUICtrlSetData($l_loaded, "unloaded")
 		GUICtrlSetState($b_load, $GUI_ENABLE)
+		GUICtrlSetState($b_run_pgn, $GUI_ENABLE)
 		GUICtrlSetState($b_load, $GUI_SHOW)
 		GUICtrlSetState($b_loadclipboard, $GUI_DISABLE)
 		GUICtrlSetState($b_loadclipboard, $GUI_HIDE)
@@ -545,6 +560,7 @@ Func ResizeGUIInputBoxValidated($b = 1)
 		GUICtrlSetState($r_black, $GUI_ENABLE)
 	Else
 		GUICtrlSetData($c_turn, "")
+		GUICtrlSetState($b_run_pgn, $GUI_DISABLE)
 		GUICtrlSetState($b_addvariant, $GUI_DISABLE)
 		GUICtrlSetState($r_black, $GUI_DISABLE)
 		GUICtrlSetState($b_clip, $GUI_DISABLE)
@@ -565,9 +581,11 @@ Func ResizeGUIVariantIsInputbox($b = 1)
 	GUICtrlSetState($b_clip, $GUI_ENABLE)
 	If $data["configured"] Then
 		GUICtrlSetState($b_addvariant, $GUI_ENABLE)
+		GUICtrlSetState($b_run_loaded_game, $GUI_ENABLE)
 	EndIf
 	Else
 	GUICtrlSetState($b_clip, $GUI_DISABLE)
+	GUICtrlSetState($b_run_loaded_game, $GUI_DISABLE)
 	GUICtrlSetColor($l_loaded, $COLOR_RED)
 	GUICtrlSetState($b_addvariant, $GUI_DISABLE)
 	GUICtrlSetData($l_loaded, "unloaded")
