@@ -202,6 +202,13 @@ While 1
 		EndIf
 		ShellExecute($location)
 	EndIf
+	If (ProcessExists($processname) = 1) Then
+		GUICtrlSetState($b_run_pgn,@SW_ENABLE)
+		GUICtrlSetState($b_run_loaded_game,@SW_ENABLE)
+	Else
+		GUICtrlSetState($b_run_pgn,@SW_DISABLE)
+		GUICtrlSetState($b_run_loaded_game,@SW_DISABLE)
+	EndIf
 	$nMsg = GUIGetMsg()
 ;Region Switch
 	Switch $nMsg
