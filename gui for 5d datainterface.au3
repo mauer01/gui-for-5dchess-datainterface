@@ -291,13 +291,9 @@ While 1
 		Case $b_close
 			_cleanExit($data)
 		Case $b_run_pgn
-			$m = FileRead(GUICtrlRead($i_file))
-			MsgBox(0,"",$m)
-			_runPGN($data,$m)
+			_runPGN($data,FileRead(GUICtrlRead($i_file)))
 		Case $b_run_loaded_game
-			$m = _ArrayToString(_multiversetopgn($multiverse),@LF)
-			MsgBox(0,"",$m)
-			_runPGN($data,$m)
+			_runPGN($data,_ArrayToString(_multiversetopgn($multiverse),@LF))
 		Case $b_datainterfaceSetup
 			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _
 				@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then
