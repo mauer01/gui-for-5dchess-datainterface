@@ -39,8 +39,10 @@ Func _cleanExit(ByRef $data)
 EndFunc
 Func _checkIsRunning(ByRef $data)
     if ProcessExists($data["pid"]) Then
-        $data["log"] &= StdoutRead($data["pid"])
-        StringRight($data["log"],10000)
+        $new = StdoutRead($data["pid"])
+        $data["log"] &= $new
+        ConsoleWrite($new)
+        $data["log"] = StringRight($data["log"],10000)
     Else
         $data["isRunning"] = False
         if $data["wasRunning"] = True Then
@@ -66,7 +68,7 @@ EndFunc
 
 Func _settingOptions(ByRef $data, $setting, $opt, $sleep = 100)
     $run = $data["pid"]
-	StdinWrite($run, "3" & @LF)
+	StdinWrite($run, "4" & @LF)
 	Sleep($sleep)
 	StdinWrite($run, "" & $setting & @LF)
 	Sleep($sleep)
@@ -74,9 +76,23 @@ Func _settingOptions(ByRef $data, $setting, $opt, $sleep = 100)
 EndFunc
 
 Func _waitForResponse(ByRef $data,$response)
-    While Not StringInStr(StdoutRead($data["pid"]), $response)
-		Sleep(10)
+    $new = StdoutRead($data["pid"])
+    While Not StringInStr($new, $response)
+        $new = StdoutRead($data["pid"])
+		ConsoleWrite($new)
+        Sleep(10)
     WEnd
+EndFunc
+Func _runPGN(ByRef $data, $pgn)
+    $run = $data["pid"]
+    StdinWrite($run, "3" & @LF)
+    _waitForResponse($data, "Discord")
+    $pgn = StringSplit($pgn,@LF,2)
+    for $line in $pgn
+        StdinWrite($run, $line & @LF)
+        Sleep(10)
+    Next
+    StdinWrite($run,@LF)
 EndFunc
 
 Func _runVariant(ByRef $data, $variant)
