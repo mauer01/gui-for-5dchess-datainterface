@@ -40,7 +40,8 @@ EndFunc
 Func _checkIsRunning(ByRef $data)
     if ProcessExists($data["pid"]) Then
         $new = StdoutRead($data["pid"])
-        $data["log"] &= $new
+        $err = StderrRead($data["pid"])
+        $data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
         ConsoleWrite($new)
         $data["log"] = StringRight($data["log"],10000)
     Else
