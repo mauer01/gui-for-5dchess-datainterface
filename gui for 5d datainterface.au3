@@ -316,9 +316,17 @@ While 1
 		Case $b_close
 			_cleanExit($data)
 		Case $b_run_pgn
-			_runPGN($data,FileRead(GUICtrlRead($i_file)))
+			If ProcessExists($processname) then
+				_runPGN($data,FileRead(GUICtrlRead($i_file)))
+			Else
+				ContinueLoop
+			EndIf
 		Case $b_run_loaded_game
-			_runPGN($data,_ArrayToString(_multiversetopgn($multiverse),@LF))
+			If ProcessExists($processname) then
+				_runPGN($data,_ArrayToString(_multiversetopgn($multiverse),@LF))
+			Else
+				ContinueLoop
+			EndIf
 		Case $b_datainterfaceSetup
 			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _
 				@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then
