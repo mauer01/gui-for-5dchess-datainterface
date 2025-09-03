@@ -76,6 +76,15 @@ Func _settingOptions(ByRef $data, $setting, $opt, $sleep = 100)
 	StdinWrite($run, "" & $opt & @LF)
 EndFunc
 
+Func _optionsOrTriggers(ByRef $data, $setting, $opt = False, $sleep = 100)
+    $run = $data["pid"]
+	StdinWrite($run, "5" & @LF)
+	Sleep($sleep)
+	StdinWrite($run, "" & $setting & @LF)
+	Sleep($sleep)
+    If $opt Then StdinWrite($run, "" & $opt & @LF)
+EndFunc
+
 Func _waitForResponse(ByRef $data,$response)
     $new = StdoutRead($data["pid"])
     While Not StringInStr($new, $response)
