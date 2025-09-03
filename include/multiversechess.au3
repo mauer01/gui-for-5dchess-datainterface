@@ -245,7 +245,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 			Case "Date"
 				$date = StringRegExp($f_lines[$i], '[0-9]+.[0-9]+.[0-9]+', 3)[0]
 			Case "Time"
-				$time = StringRegExp($f_lines[$i], '[0-9]+:[0-9]+:[0-9]+ \(\+[0-9]+:[0-9]+\)', 3)[0]
+				$time = StringRegExp($f_lines[$i], '[0-9]+:[0-9]+:[0-9]+ \([\+\-][0-9]+:[0-9]+\)', 3)[0]
 			Case "White"
 				$whiteuser = StringRegExp($f_lines[$i], '"(.)+"', 2)[0]
 				$whiteuser = StringTrimRight($whiteuser, 1)
