@@ -6,7 +6,8 @@ This AutoIt script allows you to convert Portable Game Notation (PGN) files into
 
 **PGN Import & Clipboard Loader**
   - Load and parse PGN directly from clipboard or files.
-  - now also works with variants created via https://adri326.github.io/5dchess-designer/ 
+  - now also works with variants created via https://adri326.github.io/5dchess-designer/
+  - Since the Datainterface has now a direct pgn reading interface using the run pgn by input box will also show arrows
 
 **Variant JSON Management**
   - Add, delete, or overwrite variants in `JsonVariants.json`.
