@@ -32,8 +32,8 @@ $ini = @ScriptDir & "\gui for datainterface.ini"
 
 Func _myExit()
 	_CloseAllDatainterfaces()
-	exit
-EndFunc
+	Exit
+EndFunc   ;==>_myExit
 #Region ### START Koda GUI section ### Form=
 $title = "GUI for Data Interface"
 $Main = GUICreate($title, 420, 210, 625, 277)
@@ -89,6 +89,9 @@ $c_variants = GUICtrlCreateCombo("", 56, 112, 249, 25, BitOR($WS_VSCROLL, $CBS_D
 $b_delvar = GUICtrlCreateButton("Delete Variant", 328, 112, 75, 25)
 $Label2 = GUICtrlCreateLabel("Variant:", 7, 112)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
+$Label3 = GUICtrlCreateLabel("jsonVariants: ", 7, 115, 100, 25)
+GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
+$c_json_files = GUICtrlCreateCombo("", 88, 110, 220, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 GUICtrlSetState($c_variants, $GUI_HIDE)
 GUICtrlSetState($b_delvar, $GUI_HIDE)
 GUICtrlSetState($Label2, $GUI_HIDE)
@@ -98,21 +101,21 @@ GUICtrlSetResizing($b_delvar, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($Label2, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 #EndRegion bonus stuff
 #Region DataInterfaceButtons
-$b_run_variant = GUICtrlCreateButton("run variant", 46, 142, 60)
-$b_datainterfaceChangeTimerL = GUICtrlCreateButton("long timer", 111, 142, 60)
-$b_datainterfaceChangeTimerM = GUICtrlCreateButton("med timer", 176, 142, 60)
-$b_datainterfaceChangeTimerS = GUICtrlCreateButton("short timer", 241, 142, 60)
-$b_animation = GUICtrlCreateButton("travel animation", 306, 142, 85)
-$b_close = GUICtrlCreateButton("close", 10, 142, 31)
-$cb_keepgameon = GUICtrlCreateCheckbox("", 400, 142, 20, 20)
-$b_run_pgn = GUICtrlCreateButton("run inputbox pgn",10,172)
-$b_run_loaded_game = GUICtrlCreateButton("run loaded pgn",111,172)
-$b_insertCode = GUICtrlCreateButton("insert code",190,172,70)
-$b_resumeGame = GUICtrlCreateButton("resume game",270,172,75)
-$b_undoMove = GUICtrlCreateCheckbox("undo move",351,172)
+$b_run_variant = GUICtrlCreateButton("run variant", 46, 192, 60)
+$b_datainterfaceChangeTimerL = GUICtrlCreateButton("long timer", 111, 192, 60)
+$b_datainterfaceChangeTimerM = GUICtrlCreateButton("med timer", 176, 192, 60)
+$b_datainterfaceChangeTimerS = GUICtrlCreateButton("short timer", 241, 192, 60)
+$b_animation = GUICtrlCreateButton("travel animation", 306, 192, 85)
+$b_close = GUICtrlCreateButton("close", 10, 192, 31)
+$cb_keepgameon = GUICtrlCreateCheckbox("", 400, 192, 20, 20)
+$b_run_pgn = GUICtrlCreateButton("run inputbox pgn", 10, 222)
+$b_run_loaded_game = GUICtrlCreateButton("run loaded pgn", 111, 222)
+$b_insertCode = GUICtrlCreateButton("insert code", 190, 222, 70)
+$b_resumeGame = GUICtrlCreateButton("resume game", 270, 222, 75)
+$b_undoMove = GUICtrlCreateCheckbox("undo move", 351, 222)
 GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
-GUICtrlSetState($b_run_pgn, BitOR($GUI_HIDE,$GUI_DISABLE))
-GUICtrlSetState($b_run_loaded_game, BitOR($GUI_HIDE,$GUI_DISABLE))
+GUICtrlSetState($b_run_pgn, BitOR($GUI_HIDE, $GUI_DISABLE))
+GUICtrlSetState($b_run_loaded_game, BitOR($GUI_HIDE, $GUI_DISABLE))
 GUICtrlSetState($b_insertCode, $GUI_HIDE)
 GUICtrlSetState($b_resumeGame, $GUI_HIDE)
 GUICtrlSetState($b_undoMove, $GUI_HIDE)
@@ -157,9 +160,9 @@ Func MY_WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
 	Local $nID
 	$nID = BitAND($wParam, 0x0000FFFF)
 	$newinput = GUICtrlRead($i_file)
-	If $nID = $i_file and $oldinput <> $newinput Then
+	If $nID = $i_file And $oldinput <> $newinput Then
 		If FileExists($newinput) Then
-			if _readinput() then ResizeGUIInputBoxValidated(1)
+			If _readinput() Then ResizeGUIInputBoxValidated(1)
 		Else
 			ResizeGUIInputBoxValidated(0)
 		EndIf
@@ -179,8 +182,8 @@ $full = 0
 
 If FileExists($ini) Then
 	$data = _loadDataInterface(IniRead($ini, $ini_Region, $value1, ""))
-	if @error = 1 Then
-		MsgBox(16,"Inifile failed to Load","pls setup your datainterface again.")
+	If @error = 1 Then
+		MsgBox(16, "Inifile failed to Load", "pls setup your datainterface again.")
 	EndIf
 	$user = IniRead($ini, $ini_Region, $value2, "")
 Else
@@ -192,9 +195,9 @@ EndIf
 $processname = "5dchesswithmultiversetimetravel.exe"
 
 While 1
-;Region Stuff to regular Check on
+	;Region Stuff to regular Check on
 	$__num2 = StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)
-	if IsArray($__num2) then $variantnumber = $__num2[0]
+	If IsArray($__num2) Then $variantnumber = $__num2[0]
 
 	If (ProcessExists($processname) And (Not IsDeclared("location"))) And GUICtrlRead($cb_keepgameon) = $GUI_CHECKED Then
 		If IniRead($ini, $ini_Region, "restart", "false") = "true" Or MsgBox(4, "Restart game on crash", "Activating this will restart the game should it crash" & @LF & "It tries to get the filepath via the process first") = 6 Then
@@ -212,23 +215,23 @@ While 1
 		ShellExecute($location)
 	EndIf
 	$nMsg = GUIGetMsg()
-;Region Switch
+	;Region Switch
 	Switch $nMsg
 		Case $GUI_EVENT_CLOSE
 			_myExit()
-			Case $b_loadclipboard
-				$_pgn = ClipGet()
-				if Not StringRegExp($_pgn, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
-					MsgBox(16, "Error in format", "not valid PGN in clipboard." & @CRLF & "You probably forgot the board fens.")
-					ContinueLoop
-				EndIf
-				$multiverse = _multiverse_create("pgn", $_pgn)
-				$multiverse["Name"] = "from ClipBoard"
-				ResizeGUIVariantIsInputbox()
-				If $variantloader = 1 Then
-					GUICtrlSetState($b_addvariant, $GUI_ENABLE)
-				EndIf
-;Region EditBox
+		Case $b_loadclipboard
+			$_pgn = ClipGet()
+			If Not StringRegExp($_pgn, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
+				MsgBox(16, "Error in format", "not valid PGN in clipboard." & @CRLF & "You probably forgot the board fens.")
+				ContinueLoop
+			EndIf
+			$multiverse = _multiverse_create("pgn", $_pgn)
+			$multiverse["Name"] = "from ClipBoard"
+			ResizeGUIVariantIsInputbox()
+			If $variantloader = 1 Then
+				GUICtrlSetState($b_addvariant, $GUI_ENABLE)
+			EndIf
+			;Region EditBox
 		Case $b_e_close
 			If MsgBox(4, "REALLY???", "Without Changing anything????") = 6 Then ResizeGUIEditBox(0)
 		Case $b_e_add
@@ -262,18 +265,18 @@ While 1
 			$entry = $fullJSON[$variantnumber - 1]
 			GUICtrlSetData($e_json, _JSON_MYGenerate($entry))
 			ResizeGUIEditBox()
-;Region JSON Manipulations
+			;Region JSON Manipulations
 		Case $b_load
 			$pgn = GUICtrlRead($i_file)
 			$multiverse = _multiverse_create("pgn", $pgn, GUICtrlRead($c_turn), _IsChecked($r_black))
 			$name = StringSplit($pgn, "\")
-			$multiverse["Name"]  = StringTrimRight($name[$name[0]], 4)
+			$multiverse["Name"] = StringTrimRight($name[$name[0]], 4)
 			ResizeGUIVariantIsInputbox()
 
 		Case $b_openfile
 			GUICtrlSetData($i_file, FileOpenDialog("choose a pgn", @WorkingDir, "Text (*.txt)"))
 		Case $b_addvariant
-			If not MapExists($multiverse,"Name") Then
+			If Not MapExists($multiverse, "Name") Then
 				$name = InputBox("Name couldnt be autogenerated", "Please provide a name for", "Clipboard")
 				If $name = "" Then
 					$name = "failed to name"
@@ -296,24 +299,24 @@ While 1
 				_removeVariantFromJson($data, StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0])
 
 			EndIf
-;Region ButtonsDatainterface
+			;Region ButtonsDatainterface
 		Case $b_close
 			_cleanExit($data)
 		Case $b_run_pgn
-			If ProcessExists($processname) then
-				_runPGN($data,FileRead(GUICtrlRead($i_file)))
+			If ProcessExists($processname) Then
+				_runPGN($data, FileRead(GUICtrlRead($i_file)))
 			Else
 				ContinueLoop
 			EndIf
 		Case $b_run_loaded_game
-			If ProcessExists($processname) then
-				_runPGN($data,_ArrayToString(_multiversetopgn($multiverse),@LF))
+			If ProcessExists($processname) Then
+				_runPGN($data, _ArrayToString(_multiversetopgn($multiverse), @LF))
 			Else
 				ContinueLoop
 			EndIf
 		Case $b_datainterfaceSetup
 			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _
-				@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then
+					@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then
 				requestDatainterface()
 				$folder = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
 			Else
@@ -325,77 +328,77 @@ While 1
 			EndIf
 			$data = _loadDataInterface($folder)
 			If @error Then
-				If not StringInStr($folder,"\Resources") Then
-					MsgBox(16,"Wrong Folder","The chosen Folder doesnt contain the datainterface please Try Again")
+				If Not StringInStr($folder, "\Resources") Then
+					MsgBox(16, "Wrong Folder", "The chosen Folder doesnt contain the datainterface please Try Again")
 					ContinueLoop
 				EndIf
-				$data = _loadDataInterface(StringTrimRight($folder,10))
+				$data = _loadDataInterface(StringTrimRight($folder, 10))
 				If @error Then
-					MsgBox(16,"Broken Datainterfacesetup", "Your given datainterface setup might be broken." & @CRLF & "Couldnt find Datainterfaceconsole.exe or jsonVariants.json")
+					MsgBox(16, "Broken Datainterfacesetup", "Your given datainterface setup might be broken." & @CRLF & "Couldnt find Datainterfaceconsole.exe or jsonVariants.json")
 					ContinueLoop
 				EndIf
 			EndIf
 			ResizeGUIDatainterfaceSetupped()
-			IniWrite($ini,$ini_Region,$value1,$data["workingDir"])
+			IniWrite($ini, $ini_Region, $value1, $data["workingDir"])
 		Case $b_run_datainterface
 			_runDataInterface($data)
-			if @error then MsgBox(0,"","")
+			If @error Then MsgBox(0, "", "")
 
-			if $data["isRunning"] then ResizeGUIRunningDatainterface()
+			If $data["isRunning"] Then ResizeGUIRunningDatainterface()
 		Case $b_run_variant
-			_runVariant($data,$variantnumber)
+			_runVariant($data, $variantnumber)
 
 		Case $b_datainterfaceChangeTimerL
 			$stuff = _inputbox()
 			$time = $stuff["time"]
 			$delay = $stuff["delay"]
 			If ($time And $delay) Then
-				_settingOptions($data,6,$time)
-				_waitForResponse($data,"Action executed. Returning to menu")
-				_settingOptions($data,7,$delay)
+				_settingOptions($data, 6, $time)
+				_waitForResponse($data, "Action executed. Returning to menu")
+				_settingOptions($data, 7, $delay)
 			ElseIf $time Then
-				_settingOptions($data,6,$time)
+				_settingOptions($data, 6, $time)
 			ElseIf $delay Then
-				_settingOptions($data,7,$time)
+				_settingOptions($data, 7, $time)
 			EndIf
 		Case $b_datainterfaceChangeTimerM
 			$stuff = _inputbox()
 			$time = $stuff["time"]
 			$delay = $stuff["delay"]
 			If ($time And $delay) Then
-				_settingOptions($data,4,$time)
-				_waitForResponse($data,"Action executed. Returning to menu")
-				_settingOptions($data,5,$delay)
+				_settingOptions($data, 4, $time)
+				_waitForResponse($data, "Action executed. Returning to menu")
+				_settingOptions($data, 5, $delay)
 			ElseIf $time Then
-				_settingOptions($data,4,$time)
+				_settingOptions($data, 4, $time)
 			ElseIf $delay Then
-				_settingOptions($data,5,$delay)
+				_settingOptions($data, 5, $delay)
 			EndIf
 		Case $b_datainterfaceChangeTimerS
 			$stuff = _inputbox()
 			$time = $stuff["time"]
 			$delay = $stuff["delay"]
 			If ($time And $delay) Then
-				_settingOptions($data,2,$time)
-				_waitForResponse($data,"Action executed. Returning to menu")
-				_settingOptions($data,3,$delay)
+				_settingOptions($data, 2, $time)
+				_waitForResponse($data, "Action executed. Returning to menu")
+				_settingOptions($data, 3, $delay)
 			ElseIf $time Then
-				_settingOptions($data,2,$time)
+				_settingOptions($data, 2, $time)
 			ElseIf $delay Then
-				_settingOptions($data,3,$delay)
+				_settingOptions($data, 3, $delay)
 			EndIf
 		Case $b_undoMove
 			If GUICtrlRead($b_undoMove) = $GUI_CHECKED Then
-				_optionsOrTriggers($data,1,1)
+				_optionsOrTriggers($data, 1, 1)
 			Else
-				_optionsOrTriggers($data,1,2)
+				_optionsOrTriggers($data, 1, 2)
 			EndIf
 		Case $b_resumeGame
-			_optionsOrTriggers($data,3)
+			_optionsOrTriggers($data, 3)
 		Case $b_insertCode
 			$code = ClipGet()
 			If StringInStr($code, ":") Then
-				_optionsOrTriggers($data,2,$code)
+				_optionsOrTriggers($data, 2, $code)
 			Else
 				MsgBox(16, "No valid code", "No valid code in clipboard")
 			EndIf
@@ -415,18 +418,18 @@ While 1
 				EndSwitch
 			EndIf
 			If ($animation < 4 And $animation) Then
-				_settingOptions($data,1,$animation)
+				_settingOptions($data, 1, $animation)
 			ElseIf $animation <> 0 Then
 				MsgBox(16, "no valid number", "No valid number got parsed, setting left unchanged")
 			EndIf
-;Region End AND ENDSWITCH
+			;Region End AND ENDSWITCH
 	EndSwitch
-;Region looped that needs to be at the end
+	;Region looped that needs to be at the end
 	_checkIsRunning($data)
 	If $data["configured"] Then
 		If (GUICtrlGetState($b_run_datainterface) = 144 And $data["isRunning"] = False) Then ResizeGUIRunningDatainterface(0)
 		$variantsobj = _loadVariants($data)
-		if $variantsobj["true"] Then
+		If $variantsobj["true"] Then
 			$string = $variantsobj["string"]
 			$array = $variantsobj["array"]
 			GUICtrlSetData($c_variants, "|")
@@ -475,7 +478,7 @@ Func _inputbox()
 	Local $stuff = []
 	$stuff["time"] = $time
 	$stuff["delay"] = $delay
-	return $stuff
+	Return $stuff
 
 EndFunc   ;==>_inputbox
 Func _JSONLoad()
@@ -487,7 +490,7 @@ EndFunc   ;==>_JSONLoad
 
 Func _readinput()
 	$file = GUICtrlRead($i_file)
-	local $lines
+	Local $lines
 	GUICtrlSetData($c_turn, "")
 	If FileGetSize($file) > 0 Then
 		_FileReadToArray($file, $lines)
@@ -500,9 +503,9 @@ Func _readinput()
 				EndIf
 			Next
 			GUICtrlSetData($c_turn, $string, "-1")
-			return True
+			Return True
 		EndIf
-		return False
+		Return False
 	EndIf
 EndFunc   ;==>_readinput
 Func _IsChecked($idControlID)
@@ -519,11 +522,11 @@ Func ResizeGUIDatainterfaceSetupped()
 EndFunc   ;==>ResizeGUIDatainterfaceSetupped
 
 Func ResizeGUIRunningDatainterface($b = 1)
-	Local Const $newHeight = 230, $pos = WinGetPos($Main)
+	Local Const $newHeight = 280, $pos = WinGetPos($Main)
 	If $b Then
 		WinMove($Main, "", Default, Default, $pos[2], $newHeight)
-		GUICtrlSetState($b_run_loaded_game,$GUI_SHOW)
-		GUICtrlSetState($b_run_pgn,$GUI_SHOW)
+		GUICtrlSetState($b_run_loaded_game, $GUI_SHOW)
+		GUICtrlSetState($b_run_pgn, $GUI_SHOW)
 		GUICtrlSetState($b_run_datainterface, $GUI_DISABLE)
 		GUICtrlSetState($b_run_variant, $GUI_SHOW)
 		GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_SHOW)
@@ -541,8 +544,8 @@ Func ResizeGUIRunningDatainterface($b = 1)
 		GUICtrlSetState($b_insertCode, $GUI_ENABLE)
 		GUICtrlSetState($b_resumeGame, $GUI_ENABLE)
 		GUICtrlSetState($b_undoMove, $GUI_ENABLE)
-		GUICtrlSetState($b_run_loaded_game,$GUI_HIDE)
-		GUICtrlSetState($b_run_pgn,$GUI_HIDE)
+		GUICtrlSetState($b_run_loaded_game, $GUI_HIDE)
+		GUICtrlSetState($b_run_pgn, $GUI_HIDE)
 		GUICtrlSetState($b_run_variant, $GUI_HIDE)
 		GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_HIDE)
 		GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_HIDE)
@@ -550,6 +553,9 @@ Func ResizeGUIRunningDatainterface($b = 1)
 		GUICtrlSetState($b_animation, $GUI_HIDE)
 		GUICtrlSetState($b_close, $GUI_HIDE)
 		GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
+		GUICtrlSetState($b_insertCode, $GUI_HIDE)
+		GUICtrlSetState($b_resumeGame, $GUI_HIDE)
+		GUICtrlSetState($b_undoMove, $GUI_HIDE)
 	EndIf
 EndFunc   ;==>ResizeGUIRunningDatainterface
 
@@ -586,7 +592,7 @@ Func ResizeGUIEditBox($b = 1)
 EndFunc   ;==>ResizeGUIEditBox
 
 Func ResizeGUIInputBoxValidated($b = 1)
-	if $b Then
+	If $b Then
 		GUICtrlSetColor($l_loaded, $COLOR_RED)
 		GUICtrlSetData($l_loaded, "unloaded")
 		GUICtrlSetState($b_load, $GUI_ENABLE)
@@ -610,25 +616,25 @@ Func ResizeGUIInputBoxValidated($b = 1)
 		GUICtrlSetColor($l_loaded, $COLOR_RED)
 		GUICtrlSetData($l_loaded, "unloaded")
 	EndIf
-EndFunc
+EndFunc   ;==>ResizeGUIInputBoxValidated
 
 Func ResizeGUIVariantIsInputbox($b = 1)
-	if $b Then
-	GUICtrlSetColor($l_loaded, $COLOR_GREEN)
-	GUICtrlSetData($l_loaded, "LOADED")
-	GUICtrlSetState($b_clip, $GUI_ENABLE)
-	If $data["configured"] Then
-		GUICtrlSetState($b_addvariant, $GUI_ENABLE)
-		GUICtrlSetState($b_run_loaded_game, $GUI_ENABLE)
-	EndIf
+	If $b Then
+		GUICtrlSetColor($l_loaded, $COLOR_GREEN)
+		GUICtrlSetData($l_loaded, "LOADED")
+		GUICtrlSetState($b_clip, $GUI_ENABLE)
+		If $data["configured"] Then
+			GUICtrlSetState($b_addvariant, $GUI_ENABLE)
+			GUICtrlSetState($b_run_loaded_game, $GUI_ENABLE)
+		EndIf
 	Else
-	GUICtrlSetState($b_clip, $GUI_DISABLE)
-	GUICtrlSetState($b_run_loaded_game, $GUI_DISABLE)
-	GUICtrlSetColor($l_loaded, $COLOR_RED)
-	GUICtrlSetState($b_addvariant, $GUI_DISABLE)
-	GUICtrlSetData($l_loaded, "unloaded")
+		GUICtrlSetState($b_clip, $GUI_DISABLE)
+		GUICtrlSetState($b_run_loaded_game, $GUI_DISABLE)
+		GUICtrlSetColor($l_loaded, $COLOR_RED)
+		GUICtrlSetState($b_addvariant, $GUI_DISABLE)
+		GUICtrlSetData($l_loaded, "unloaded")
 	EndIf
-EndFunc
+EndFunc   ;==>ResizeGUIVariantIsInputbox
 
 Func _ProcessGetLocation($sProc = @ScriptFullPath)
 	Local $iPID = ProcessExists($sProc)
@@ -662,7 +668,7 @@ Func _checkVariant($JSON)
 		EndIf
 	Next
 	If Not ($counting = UBound($timelines)) Then Return "Ungültige Zeitliniennamen"
-	local $multiverse = _multiverse_create("variant", $JSON)
+	Local $multiverse = _multiverse_create("variant", $JSON)
 	$multiversum = $multiverse[1]
 	For $i = 0 To UBound($multiversum) - 1
 		For $j = 0 To UBound($multiversum, 2) - 1
@@ -693,39 +699,39 @@ Func _arrayContains($array, $contains)
 EndFunc   ;==>_arrayContains
 
 Func requestDatainterface()
-	InetGet("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest","temp.json")
+	InetGet("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", "temp.json")
 	$file = FileRead("temp.json")
 	FileDelete("temp.json")
-	$json = _JSON_parse($file)
-	$assets = $json["assets"]
+	$JSON = _JSON_parse($file)
+	$assets = $JSON["assets"]
 	$asset = findStandalone($assets)
-	local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
+	Local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
 	DirCreate($folderDataInterface)
-	InetGet($asset["browser_download_url"],@ScriptDir & "\data.zip")
+	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
 	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
-	if @error then ConsoleWrite(@error)
+	If @error Then ConsoleWrite(@error)
 	_loadDataInterface($folderDataInterface)
 	FileDelete(@ScriptDir & "\data.zip")
-EndFunc
+EndFunc   ;==>requestDatainterface
 Func findStandalone($assets)
-	for $asset in $assets
-		for $key in MapKeys($asset)
-			if StringInStr($asset[$key],"standalone") Then return $asset
+	For $asset In $assets
+		For $key In MapKeys($asset)
+			If StringInStr($asset[$key], "standalone") Then Return $asset
 		Next
 	Next
-EndFunc
+EndFunc   ;==>findStandalone
 Func _unZip($sZipFile, $sDestFolder)
-  If Not FileExists($sZipFile) Then Return SetError (1) ; source file does not exists
-  If Not FileExists($sDestFolder) Then
-    If Not DirCreate($sDestFolder) Then Return SetError (2) ; unable to create destination
-  Else
-    If Not StringInStr(FileGetAttrib($sDestFolder), "D") Then Return SetError (3) ; destination not folder
-  EndIf
-  Local $oShell = ObjCreate("shell.application")
-  Local $oZip = $oShell.NameSpace($sZipFile)
-  Local $iZipFileCount = $oZip.items.Count
-  Local $dest = $oShell.NameSpace($sDestFolder)
-  If Not $iZipFileCount Then Return SetError (4) ; zip file empty
-  $dest.copyhere($oZip.items,16)
-  If not ($oZip.items.Count = $dest.items.count) Then SetError(4)
-EndFunc
+	If Not FileExists($sZipFile) Then Return SetError(1)    ; source file does not exists
+	If Not FileExists($sDestFolder) Then
+		If Not DirCreate($sDestFolder) Then Return SetError(2)      ; unable to create destination
+	Else
+		If Not StringInStr(FileGetAttrib($sDestFolder), "D") Then Return SetError(3)      ; destination not folder
+	EndIf
+	Local $oShell = ObjCreate("shell.application")
+	Local $oZip = $oShell.NameSpace($sZipFile)
+	Local $iZipFileCount = $oZip.items.Count
+	Local $dest = $oShell.NameSpace($sDestFolder)
+	If Not $iZipFileCount Then Return SetError(4)    ; zip file empty
+	$dest.copyhere($oZip.items, 16)
+	If Not ($oZip.items.Count = $dest.items.count) Then SetError(4)
+EndFunc   ;==>_unZip
