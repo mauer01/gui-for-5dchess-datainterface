@@ -8,132 +8,132 @@
 Const $__tempFile = @ScriptDir & "\temp-pgn to variant.txt"
 Global $__PIDArray[0] = []
 Func _loadDataInterface($filepath)
-    local $data[]
-    $data["isRunning"] = False
-    $data["wasRunning"] = False
-    $data["filePath"] = $filepath & "\DataInterfaceConsole.exe"
-    $data["workingDir"] = $filepath
-    $data["jsonFile"] = $filepath & "\Resources\jsonVariants.json"
-    $data["jsonFileLastChanged"] = ""
-    $data["log"] = ""
-    $data["crashed"] = False
-    $data["pid"] = ""
-    $data["configured"] = True
-    If Not FileExists($data["filePath"]) or Not FileExists($data["jsonFile"]) Then SetError(1)
-    return $data
-EndFunc
+	Local $data[]
+	$data["isRunning"] = False
+	$data["wasRunning"] = False
+	$data["filePath"] = $filepath & "\DataInterfaceConsole.exe"
+	$data["workingDir"] = $filepath
+	$data["jsonFile"] = $filepath & "\Resources\jsonVariants.json"
+	$data["jsonFileLastChanged"] = ""
+	$data["log"] = ""
+	$data["crashed"] = False
+	$data["pid"] = ""
+	$data["configured"] = True
+	If Not FileExists($data["filePath"]) Or Not FileExists($data["jsonFile"]) Then SetError(1)
+	Return $data
+EndFunc   ;==>_loadDataInterface
 Func _runDataInterface(ByRef $data)
-    $pid = Run($data["filePath"], $data["workingDir"], @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD, $STDERR_CHILD))
-    $data["pid"] = $pid
-    $data["isRunning"] = True
-    $data["wasRunning"] = True
-    _ArrayAdd($__PIDArray,$data["pid"])
-EndFunc
+	$pid = Run($data["filePath"], $data["workingDir"], @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD, $STDERR_CHILD))
+	$data["pid"] = $pid
+	$data["isRunning"] = True
+	$data["wasRunning"] = True
+	_ArrayAdd($__PIDArray, $data["pid"])
+EndFunc   ;==>_runDataInterface
 Func _cleanExit(ByRef $data)
-    _checkIsRunning($data)
-    If $data["isRunning"] Then
-        $data["wasRunning"] = False
-        $data["isRunning"] = False
-        _ProcessClose($data["pid"])
-    EndIf
-EndFunc
+	_checkIsRunning($data)
+	If $data["isRunning"] Then
+		$data["wasRunning"] = False
+		$data["isRunning"] = False
+		_ProcessClose($data["pid"])
+	EndIf
+EndFunc   ;==>_cleanExit
 Func _checkIsRunning(ByRef $data)
-    if ProcessExists($data["pid"]) Then
-        $new = StdoutRead($data["pid"])
-        $err = StderrRead($data["pid"])
-        $data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
-        ConsoleWrite($new)
-        $data["log"] = StringRight($data["log"],10000)
-    Else
-        $data["isRunning"] = False
-        if $data["wasRunning"] = True Then
-            $data["wasRunning"] = False
-            $data["crashed"] = True
-            MsgBox(16, "DataInterface", "Datainterface closed unexpectidly" & @CRLF & "Logfile might provide data")
-            FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
-        EndIf
-    EndIf
-EndFunc
+	If ProcessExists($data["pid"]) Then
+		$new = StdoutRead($data["pid"])
+		$err = StderrRead($data["pid"])
+		$data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
+		ConsoleWrite($new)
+		$data["log"] = StringRight($data["log"], 10000)
+	Else
+		$data["isRunning"] = False
+		If $data["wasRunning"] = True Then
+			$data["wasRunning"] = False
+			$data["crashed"] = True
+			MsgBox(16, "DataInterface", "Datainterface closed unexpectidly" & @CRLF & "Logfile might provide data")
+			FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
+		EndIf
+	EndIf
+EndFunc   ;==>_checkIsRunning
 Func _CloseAllDatainterfaces()
-    for $pid in $__PIDArray
-        if ProcessExists($pid) then
-            $processname = _ProcessGetName($pid)
-            if $processname = "DataInterfaceConsole.exe" Then
-                _ProcessClose($pid)
-            EndIf
-        EndIf
-    Next
-    _ArrayDelete($__PIDArray,UBound($__PIDArray))
-EndFunc
+	For $pid In $__PIDArray
+		If ProcessExists($pid) Then
+			$processname = _ProcessGetName($pid)
+			If $processname = "DataInterfaceConsole.exe" Then
+				_ProcessClose($pid)
+			EndIf
+		EndIf
+	Next
+	_ArrayDelete($__PIDArray, UBound($__PIDArray))
+EndFunc   ;==>_CloseAllDatainterfaces
 
 
 Func _settingOptions(ByRef $data, $setting, $opt, $sleep = 100)
-    $run = $data["pid"]
+	$run = $data["pid"]
 	StdinWrite($run, "4" & @LF)
 	Sleep($sleep)
 	StdinWrite($run, "" & $setting & @LF)
 	Sleep($sleep)
 	StdinWrite($run, "" & $opt & @LF)
-EndFunc
+EndFunc   ;==>_settingOptions
 
 Func _optionsOrTriggers(ByRef $data, $setting, $opt = False, $sleep = 100)
-    $run = $data["pid"]
+	$run = $data["pid"]
 	StdinWrite($run, "5" & @LF)
 	Sleep($sleep)
 	StdinWrite($run, "" & $setting & @LF)
 	Sleep($sleep)
-    If $opt Then StdinWrite($run, "" & $opt & @LF)
-EndFunc
+	If $opt Then StdinWrite($run, "" & $opt & @LF)
+EndFunc   ;==>_optionsOrTriggers
 
-Func _waitForResponse(ByRef $data,$response)
-    $new = StdoutRead($data["pid"])
-    While Not StringInStr($new, $response)
-        $new = StdoutRead($data["pid"])
+Func _waitForResponse(ByRef $data, $response)
+	$new = StdoutRead($data["pid"])
+	While Not StringInStr($new, $response)
+		$new = StdoutRead($data["pid"])
 		ConsoleWrite($new)
-        Sleep(10)
-    WEnd
-EndFunc
+		Sleep(10)
+	WEnd
+EndFunc   ;==>_waitForResponse
 Func _runPGN(ByRef $data, $pgn)
-    $run = $data["pid"]
-    StdinWrite($run, "3" & @LF)
-    _waitForResponse($data, "Discord")
-    $pgn = StringSplit($pgn,@LF,2)
-    for $line in $pgn
-        StdinWrite($run, $line & @LF)
-        Sleep(10)
-    Next
-    StdinWrite($run,@LF)
-EndFunc
+	$run = $data["pid"]
+	StdinWrite($run, "3" & @LF)
+	_waitForResponse($data, "Discord")
+	$pgn = StringSplit($pgn, @LF, 2)
+	For $line In $pgn
+		StdinWrite($run, $line & @LF)
+		Sleep(10)
+	Next
+	StdinWrite($run, @LF)
+EndFunc   ;==>_runPGN
 
 Func _runVariant(ByRef $data, $variant)
-    $run = $data["pid"]
-    StdinWrite($run, "1" & @LF)
-    StdinWrite($run, $variant & @LF)
-EndFunc
+	$run = $data["pid"]
+	StdinWrite($run, "1" & @LF)
+	StdinWrite($run, $variant & @LF)
+EndFunc   ;==>_runVariant
 
 
 Func _loadVariants(ByRef $data)
-    Local $variantsstring, $variantsarray
-    $f_variantloader = $data["jsonFile"]
-    $time = _ArrayToString(FileGetTime($f_variantloader))
-    If $time <> $data["jsonFileLastChanged"] Then
-        $data["jsonFileLastChanged"] = $time
+	Local $variantsstring, $variantsarray
+	$f_variantloader = $data["jsonFile"]
+	$time = _ArrayToString(FileGetTime($f_variantloader))
+	If $time <> $data["jsonFileLastChanged"] Then
+		$data["jsonFileLastChanged"] = $time
 
-        $variantsstring = _readvariants($data)
-        $variantsarray = StringSplit($variantsstring, "|")
-        local $variants[]
-        $variants["string"] = $variantsstring
-        $variants["array"] = $variantsarray
-        $variants["true"] = True
-        Return $variants
-    EndIf
-    local $j[]
-    $j["true"] = False
-    Return $j
-EndFunc
+		$variantsstring = _readvariants($data)
+		$variantsarray = StringSplit($variantsstring, "|")
+		Local $variants[]
+		$variants["string"] = $variantsstring
+		$variants["array"] = $variantsarray
+		$variants["true"] = True
+		Return $variants
+	EndIf
+	Local $j[]
+	$j["true"] = False
+	Return $j
+EndFunc   ;==>_loadVariants
 
 Func _readvariants(ByRef $data)
-    $f_variantloader = $data["jsonFile"]
+	$f_variantloader = $data["jsonFile"]
 	$regexp = '\"Name": "[^"]+'
 	$regexp2 = '\"Author": "[^"]+'
 	$hnd_variantload = FileOpen($f_variantloader)
@@ -166,62 +166,62 @@ EndFunc   ;==>updateJSONVariants
 
 Func _JSON_MYGenerate($string)
 	Return _JSON_Generate($string, "  ", @CRLF, "", " ", "  ", @CRLF)
-EndFunc
+EndFunc   ;==>_JSON_MYGenerate
 
 
 Func _addVariantToJson(ByRef $data, $variant, $name)
-    Local $h_file
-    _FileReadToArray($data["jsonFile"], $h_file)
-    $h_temp = FileOpen($__tempFile, 2)
-    GUISetState(@SW_DISABLE)
-    For $i = 1 To $h_file[0] - 1
-        If $i = $h_file[0] - 1 Then
-            FileWriteLine($h_temp, $h_file[$i] & ",")
-        Else
-            FileWriteLine($h_temp, $h_file[$i])
-        EndIf
-    Next
-    $variant = StringTrimRight($variant, 2)
-    FileWrite($h_temp, $variant & @LF & "}" & @LF)
-    FileWriteLine($h_temp, $h_file[$i])
+	Local $h_file
+	_FileReadToArray($data["jsonFile"], $h_file)
+	$h_temp = FileOpen($__tempFile, 2)
+	GUISetState(@SW_DISABLE)
+	For $i = 1 To $h_file[0] - 1
+		If $i = $h_file[0] - 1 Then
+			FileWriteLine($h_temp, $h_file[$i] & ",")
+		Else
+			FileWriteLine($h_temp, $h_file[$i])
+		EndIf
+	Next
+	$variant = StringTrimRight($variant, 2)
+	FileWrite($h_temp, $variant & @LF & "}" & @LF)
+	FileWriteLine($h_temp, $h_file[$i])
 
-    FileClose($h_temp)
-    FileMove($__tempFile, $data["jsonFile"], 1)
+	FileClose($h_temp)
+	FileMove($__tempFile, $data["jsonFile"], 1)
 
-EndFunc
+EndFunc   ;==>_addVariantToJson
 
-func _removeVariantFromJson(ByRef $data, $variant )
-    Local $h_file, $skip = 0, $string = ""
-    _FileReadToArray($data["jsonFile"], $h_file)
+Func _removeVariantFromJson(ByRef $data, $variant)
+	Local $h_file, $skip = 0, $string = ""
+	_FileReadToArray($data["jsonFile"], $h_file)
 
-    $k = 0
-    GUISetState(@SW_DISABLE)
-    For $i = 1 To $h_file[0] - 1
-        If StringInStr($h_file[$i], "Name") > 0 Then
-            $k += 1
-        EndIf
-        If $k = $variant Then
-            $skip = 1
-        EndIf
-        If $k = $variant + 1 Then
-            $skip = 0
-        EndIf
+	$k = 0
+	GUISetState(@SW_DISABLE)
+	For $i = 1 To $h_file[0] - 1
+		If StringInStr($h_file[$i], "Name") > 0 Then
+			$k += 1
+		EndIf
+		If $k = $variant Then
+			$skip = 1
+		EndIf
+		If $k = $variant + 1 Then
+			$skip = 0
+		EndIf
 
-        If $skip = 0 Then
-            $string &= $h_file[$i] & @LF
-        EndIf
-    Next
-    While ($string <> "" And StringRight($string, 1) <> "}")
-        $string = StringTrimRight($string, 1)
-    WEnd
-    $string &= @LF & "]"
-    FileWrite($__tempFile, $string)
-    FileMove($__tempFile, $data["jsonFile"], 1)
-    GUISetState(@SW_ENABLE)
-EndFunc
+		If $skip = 0 Then
+			$string &= $h_file[$i] & @LF
+		EndIf
+	Next
+	While ($string <> "" And StringRight($string, 1) <> "}")
+		$string = StringTrimRight($string, 1)
+	WEnd
+	$string &= @LF & "]"
+	FileWrite($__tempFile, $string)
+	FileMove($__tempFile, $data["jsonFile"], 1)
+	GUISetState(@SW_ENABLE)
+EndFunc   ;==>_removeVariantFromJson
 
-func _ProcessClose($pid)
-    If _ProcessGetName($pid) = "DataInterfaceConsole.exe" Then
-        ProcessClose($pid)
-    EndIf
-EndFunc
+Func _ProcessClose($pid)
+	If _ProcessGetName($pid) = "DataInterfaceConsole.exe" Then
+		ProcessClose($pid)
+	EndIf
+EndFunc   ;==>_ProcessClose
