@@ -285,12 +285,16 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 	$multiverse[0].result = $result
 	$multiverse[0].game = $game
 	#EndRegion metadata
+	$brokenWhiteMoves = False
 	While ($i <= $lastline And StringRegExp($f_lines[$i], "[0-9]+", 3)[0] <> $stopmove + 1)
 		$ply = StringSplit($f_lines[$i], "/", 2)
 		If @error = 1 Then $includeblackmove = 0
 		$whitemoves = $ply[0]
-
 		While (StringLeft($whitemoves, 1) = "(") = False
+			if $whitemoves = "" then 
+				$brokenWhiteMoves = True
+				ExitLoop 
+			EndIf
 			$whitemoves = StringTrimLeft($whitemoves, 1)
 		WEnd
 
@@ -324,7 +328,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 		EndIf
 		$i += 1
 	WEnd
-
+	if $brokenWhiteMoves then $multiverse["brokenWhite"] = True
 	Return $multiverse
 EndFunc   ;==>_multiversefrompgn
 
@@ -780,6 +784,7 @@ Func _multiverse_removeemptytimelines($i_multiverse)
 EndFunc   ;==>_multiverse_removeemptytimelines
 
 Func _multiversetovariant($i_multiverse, $variant = "automatically generated", $author = "mauer01s crazy progammingskillz")
+	if $i_multiverse["brokenWhite"] Then $variant &= ":noWhiteMove"
 	$i_multiverse[1] = _multiverse_removeemptytimelines($i_multiverse)
 	Local $string = "  {" & @LF & "    " & '"Name": "' & $variant & '",' & @LF & "    " & '"Author": "' & $author & '",' & @LF & "    " & '"Timelines": {' & @LF
 	Local $timelines = UBound($i_multiverse[1], 2) - 1

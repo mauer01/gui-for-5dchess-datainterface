@@ -111,9 +111,15 @@ $b_close = GUICtrlCreateButton("close", 10, 142, 31)
 $cb_keepgameon = GUICtrlCreateCheckbox("", 400, 142, 20, 20)
 $b_run_pgn = GUICtrlCreateButton("run inputbox pgn",10,172)
 $b_run_loaded_game = GUICtrlCreateButton("run loaded pgn",111,172)
+$b_insertCode = GUICtrlCreateButton("insert code",190,172,70)
+$b_resumeGame = GUICtrlCreateButton("resume game",270,172,75)
+$b_undoMove = GUICtrlCreateCheckbox("undo move",351,172)
 GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
 GUICtrlSetState($b_run_pgn, BitOR($GUI_HIDE,$GUI_DISABLE))
 GUICtrlSetState($b_run_loaded_game, BitOR($GUI_HIDE,$GUI_DISABLE))
+GUICtrlSetState($b_insertCode, $GUI_HIDE)
+GUICtrlSetState($b_resumeGame, $GUI_HIDE)
+GUICtrlSetState($b_undoMove, $GUI_HIDE)
 GUICtrlSetState($b_close, $GUI_HIDE)
 GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
 GUICtrlSetState($b_run_variant, $GUI_HIDE)
@@ -122,6 +128,9 @@ GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_HIDE)
 GUICtrlSetState($b_datainterfaceChangeTimerS, $GUI_HIDE)
 GUICtrlSetState($b_animation, $GUI_HIDE)
 GUICtrlSetResizing($b_animation, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_insertCode, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_resumeGame, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_undoMove, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_run_pgn, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_run_loaded_game, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($cb_keepgameon, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -400,6 +409,21 @@ While 1
 			ElseIf $delay Then
 				_settingOptions($data,3,$delay)
 			EndIf
+		Case $b_undoMove
+			If GUICtrlRead($b_undoMove) = $GUI_CHECKED Then
+				_optionsOrTriggers($data,1,1)
+			Else
+				_optionsOrTriggers($data,1,2)
+			EndIf
+		Case $b_resumeGame
+			_optionsOrTriggers($data,3)
+		Case $b_insertCode
+			$code = ClipGet()
+			If StringInStr($code, ":") Then
+				_optionsOrTriggers($data,2,$code)
+			Else
+				MsgBox(16, "No valid code", "No valid code in clipboard")
+			EndIf
 		Case $b_animation
 			$animation = InputBox("Force timetravel animation", "force the way the game handles the time travel animation" & @LF & "1 or ignore" & @LF & "2 or always_on" & @LF & "3 or  always_off", 3)
 			If (Not Number($animation)) Then
@@ -542,9 +566,15 @@ Func ResizeGUIRunningDatainterface($b = 1)
 		GUICtrlSetState($b_animation, $GUI_SHOW)
 		GUICtrlSetState($b_close, $GUI_SHOW)
 		GUICtrlSetState($cb_keepgameon, $GUI_SHOW)
+		GUICtrlSetState($b_insertCode, $GUI_SHOW)
+		GUICtrlSetState($b_resumeGame, $GUI_SHOW)
+		GUICtrlSetState($b_undoMove, $GUI_SHOW)
 	Else
 		WinMove($Main, "", Default, Default, $pos[2], $newHeight)
 		GUICtrlSetState($b_run_datainterface, $GUI_ENABLE)
+		GUICtrlSetState($b_insertCode, $GUI_ENABLE)
+		GUICtrlSetState($b_resumeGame, $GUI_ENABLE)
+		GUICtrlSetState($b_undoMove, $GUI_ENABLE)
 		GUICtrlSetState($b_run_loaded_game,$GUI_HIDE)
 		GUICtrlSetState($b_run_pgn,$GUI_HIDE)
 		GUICtrlSetState($b_run_variant, $GUI_HIDE)
