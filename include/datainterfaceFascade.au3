@@ -4,9 +4,11 @@
 #include <File.au3>
 #include <Process.au3>
 #include <JSON.au3>
+#include <moreArray.au3>
 
 Const $__tempFile = @ScriptDir & "\temp-pgn to variant.txt"
 Global $__PIDArray[0] = []
+Global $__emptyArray[0] = []
 Func _loadDataInterface($filepath)
 	Local $data[]
 	$data["isRunning"] = False
@@ -19,9 +21,29 @@ Func _loadDataInterface($filepath)
 	$data["crashed"] = False
 	$data["pid"] = ""
 	$data["configured"] = True
+	$data["jsonFiles"] = $__emptyArray
+	$data["lastFileList"] = $__emptyArray
 	If Not FileExists($data["filePath"]) Or Not FileExists($data["jsonFile"]) Then SetError(1)
 	Return $data
 EndFunc   ;==>_loadDataInterface
+
+Func _updateJsonFiles(ByRef $data)
+	Local $files = _FileListToArray($data["workingDir"] & "\Resources", "*.json", 1, 1)
+	If $files[0] > 1 And Not _arrayCountEquals($files, $data["lastFileList"]) Then
+		$data["jsonFiles"] = $__emptyArray
+		For $file In $files
+			Local $fullpath = StringSplit($file, "\", 1)
+			$newFile = $fullpath[UBound($fullpath) - 1]
+			If $newFile <> "jsonVariants.json" And StringInStr($newFile, ".json") Then
+				_ArrayAdd($data["jsonFiles"], StringReplace($newFile, ".json", ""))
+			EndIf
+		Next
+		$data["lastFileList"] = $files
+		Return 1
+	EndIf
+	Return 0
+EndFunc   ;==>_updateJsonFiles
+
 Func _runDataInterface(ByRef $data)
 	$pid = Run($data["filePath"], $data["workingDir"], @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD, $STDERR_CHILD))
 	$data["pid"] = $pid
@@ -29,6 +51,7 @@ Func _runDataInterface(ByRef $data)
 	$data["wasRunning"] = True
 	_ArrayAdd($__PIDArray, $data["pid"])
 EndFunc   ;==>_runDataInterface
+
 Func _cleanExit(ByRef $data)
 	_checkIsRunning($data)
 	If $data["isRunning"] Then
@@ -118,13 +141,13 @@ Func _loadVariants(ByRef $data)
 	$time = _ArrayToString(FileGetTime($f_variantloader))
 	If $time <> $data["jsonFileLastChanged"] Then
 		$data["jsonFileLastChanged"] = $time
-
 		$variantsstring = _readvariants($data)
 		$variantsarray = StringSplit($variantsstring, "|")
 		Local $variants[]
 		$variants["string"] = $variantsstring
 		$variants["array"] = $variantsarray
 		$variants["true"] = True
+		_syncActiveJsonFile($data)
 		Return $variants
 	EndIf
 	Local $j[]
@@ -225,3 +248,42 @@ Func _ProcessClose($pid)
 		ProcessClose($pid)
 	EndIf
 EndFunc   ;==>_ProcessClose
+
+
+
+Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
+	If $name = "" Then Return
+	For $item In $data["jsonFiles"]
+		$newName = StringReplace($item, "  ACTIVE", "")
+		If $newName = $name Then
+			MsgBox(16, "Error", "A file with this name already exists")
+			Return
+		EndIf
+		$item = $newName
+	Next
+	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $name & "  ACTIVE.json", 1)
+EndFunc   ;==>_createNewJsonFile
+
+Func _changeActiveJsonFile(ByRef $data, $name)
+	$activeFile = _find($data["jsonFiles"], "_stringinstringcallback", "ACTIVE")
+	FileMove($data["workingDir"] & "\Resources\" & $activeFile & ".json", $data["workingDir"] & "\Resources\" & StringReplace($activeFile, "  ACTIVE", "") & ".json", 1)
+	FileMove($data["workingDir"] & "\Resources\" & $name & ".json", $data["workingDir"] & "\Resources\" & $name & "  ACTIVE.json", 1)
+	FileCopy($data["workingDir"] & "\Resources\" & $name & "  ACTIVE.json", $data["jsonFile"], 1)
+EndFunc   ;==>_changeActiveJsonFile
+
+Func _changeNameOfJsonFile(ByRef $data, $oldName, $newName)
+	If StringInStr($oldName, "  ACTIVE") And Not StringInStr($newName, "  ACTIVE") Then
+		$newName &= "  ACTIVE"
+	EndIf
+	FileMove($data["workingDir"] & "\Resources\" & $oldName & ".json", $data["workingDir"] & "\Resources\" & $newName & ".json", 1)
+EndFunc   ;==>_changeNameOfJsonFile
+
+
+Func _syncActiveJsonFile(ByRef $data)
+	Local $activeFile = _find($data["jsonFiles"], "_stringinstringcallback", "  ACTIVE")
+	If Not $activeFile Then Return
+	If Not (FileGetSize($data["workingDir"] & "\Resources\" & $activeFile & ".json") <> FileGetSize($data["jsonFile"])) Then
+		Return
+	EndIf
+	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $activeFile & ".json", 1)
+EndFunc   ;==>_syncActiveJsonFile
