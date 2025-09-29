@@ -89,16 +89,27 @@ $c_variants = GUICtrlCreateCombo("", 56, 112, 249, 25, BitOR($WS_VSCROLL, $CBS_D
 $b_delvar = GUICtrlCreateButton("Delete Variant", 328, 112, 75, 25)
 $Label2 = GUICtrlCreateLabel("Variant:", 7, 112)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
-$Label3 = GUICtrlCreateLabel("jsonVariants: ", 7, 115, 100, 25)
+$Label3 = GUICtrlCreateLabel("jsonVariants: ", 7, 145, 100, 25)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
-$c_json_files = GUICtrlCreateCombo("", 88, 110, 220, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
+$c_json_files = GUICtrlCreateCombo("", 88, 140, 220, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
+$b_copyJson = GUICtrlCreateButton("Copy JsonFile", 7, 170, 75, 25)
+$b_renameJson = GUICtrlCreateButton("Rename JsonFile", 85, 170, 100, 25)
+GUICtrlSetState($c_json_files, $GUI_HIDE)
+GUICtrlSetState($Label3, $GUI_HIDE)
 GUICtrlSetState($c_variants, $GUI_HIDE)
+GUICtrlSetState($b_copyJson, $GUI_HIDE)
+GUICtrlSetState($b_renameJson, $GUI_HIDE)
 GUICtrlSetState($b_delvar, $GUI_HIDE)
 GUICtrlSetState($Label2, $GUI_HIDE)
 GUICtrlSetState($b_json_edit, $GUI_HIDE)
 GUICtrlSetResizing($c_variants, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_delvar, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_copyJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_renameJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($Label2, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($c_json_files, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($Label3, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+
 #EndRegion bonus stuff
 #Region DataInterfaceButtons
 $b_run_variant = GUICtrlCreateButton("run variant", 46, 192, 60)
@@ -422,13 +433,44 @@ While 1
 			ElseIf $animation <> 0 Then
 				MsgBox(16, "no valid number", "No valid number got parsed, setting left unchanged")
 			EndIf
+		Case $c_json_files
+			$selected = GUICtrlRead($c_json_files)
+			_changeActiveJsonFile($data, $selected)
 			;Region End AND ENDSWITCH
+		Case $b_copyJson
+			$selected = GUICtrlRead($c_json_files)
+			GUISetState(@SW_DISABLE)
+			_createNewJsonFile($data, InputBox("Copy JsonFile", "Please provide a name for the copied jsonfile", StringReplace($selected, "  ACTIVE", "") & "_copy"))
+			GUISetState(@SW_ENABLE)
+			WinActivate($Main)
+
+		Case $b_renameJson
+			$selected = GUICtrlRead($c_json_files)
+			GUISetState(@SW_DISABLE)
+			$newName = InputBox("Rename JsonFile", "Please provide a new name for the jsonfile", StringReplace($selected, "  ACTIVE", ""))
+			If @error Or $newName = "" Or $newName = $selected Then
+				GUISetState(@SW_ENABLE)
+				ContinueLoop
+			EndIf
+			_changeNameOfJsonFile($data, $selected, $newName)
+			GUISetState(@SW_ENABLE)
+			WinActivate($Main)
 	EndSwitch
 	;Region looped that needs to be at the end
 	_checkIsRunning($data)
 	If $data["configured"] Then
 		If (GUICtrlGetState($b_run_datainterface) = 144 And $data["isRunning"] = False) Then ResizeGUIRunningDatainterface(0)
 		$variantsobj = _loadVariants($data)
+		$changed = _updateJsonFiles($data)
+		If $changed Then
+			If $data["jsonFiles"] <> False Then
+				GUICtrlSetData($c_json_files, "|")
+				$active = _find($data["jsonFiles"], "_stringinstringcallback", "  ACTIVE")
+				If @error Then _createNewJsonFile($data)
+				$tempstring = _ArrayToString($data["jsonFiles"], "|", Default, Default, "|")
+				GUICtrlSetData($c_json_files, $tempstring, $active)
+			EndIf
+		EndIf
 		If $variantsobj["true"] Then
 			$string = $variantsobj["string"]
 			$array = $variantsobj["array"]
@@ -445,11 +487,14 @@ While 1
 			EndIf
 		EndIf
 	EndIf
+
 WEnd
 ;Region StartOfFunctions
 
 
-
+Func _stringinstringcallback($e, $string)
+	Return StringInStr($e, $string)
+EndFunc   ;==>_stringinstringcallback
 
 
 Func _inputbox()
@@ -475,6 +520,7 @@ Func _inputbox()
 		$time = Execute($time)
 	EndIf
 	GUISetState(@SW_ENABLE)
+	WinActivate($Main)
 	Local $stuff = []
 	$stuff["time"] = $time
 	$stuff["delay"] = $delay
@@ -512,13 +558,19 @@ Func _IsChecked($idControlID)
 	Return BitAND(GUICtrlRead($idControlID), $GUI_CHECKED) = $GUI_CHECKED
 EndFunc   ;==>_IsChecked
 Func ResizeGUIDatainterfaceSetupped()
-	Local $newHeight = 210
+	Local $newHeight = 280
 	Local $pos = WinGetPos($Main)
 	WinMove($Main, "", Default, Default, $pos[2], $newHeight)
 	GUICtrlSetState($c_variants, $GUI_SHOW)
 	GUICtrlSetState($b_json_edit, $GUI_SHOW)
 	GUICtrlSetState($Label2, $GUI_SHOW)
+	GUICtrlSetState($c_json_files, $GUI_SHOW)
+	GUICtrlSetState($Label3, $GUI_SHOW)
+	GUICtrlSetState($b_renameJson, $GUI_SHOW)
 	GUICtrlSetState($b_delvar, $GUI_SHOW)
+	GUICtrlSetState($b_copyJson, $GUI_SHOW)
+	GUICtrlSetState($b_renameJson, $GUI_SHOW)
+
 EndFunc   ;==>ResizeGUIDatainterfaceSetupped
 
 Func ResizeGUIRunningDatainterface($b = 1)
@@ -652,14 +704,11 @@ Func _ProcessGetLocation($sProc = @ScriptFullPath)
 EndFunc   ;==>_ProcessGetLocation
 
 
-
-
-
 Func _checkVariant($JSON)
 	$initialKeys = MapKeys($JSON)
-	If Not _arrayContains($initialKeys, "Name") Then Return "No Name"
-	If Not _arrayContains($initialKeys, "Author") Then Return "No Author"
-	If Not _arrayContains($initialKeys, "Timelines") Then Return "No Timelines"
+	If Not _some($initialKeys, "_stringinstringcallback", "Name") Then Return "No Name"
+	If Not _some($initialKeys, "_stringinstringcallback", "Author") Then Return "No Author"
+	If Not _some($initialKeys, "_stringinstringcallback", "Timelines") Then Return "No Timelines"
 	$timelines = MapKeys($JSON["Timelines"])
 	$counting = 0
 	For $line In $timelines
@@ -690,14 +739,6 @@ Func _checkVariant($JSON)
 	Return True
 EndFunc   ;==>_checkVariant
 
-Func _arrayContains($array, $contains)
-	$bool = False
-	For $ele In $array
-		If $ele = $contains Then $bool = True
-	Next
-	Return $bool
-EndFunc   ;==>_arrayContains
-
 Func requestDatainterface()
 	InetGet("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", "temp.json")
 	$file = FileRead("temp.json")
@@ -710,7 +751,7 @@ Func requestDatainterface()
 	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
 	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
 	If @error Then ConsoleWrite(@error)
-	_loadDataInterface($folderDataInterface)
+	$data = _loadDataInterface($folderDataInterface)
 	FileDelete(@ScriptDir & "\data.zip")
 EndFunc   ;==>requestDatainterface
 Func findStandalone($assets)
@@ -733,5 +774,5 @@ Func _unZip($sZipFile, $sDestFolder)
 	Local $dest = $oShell.NameSpace($sDestFolder)
 	If Not $iZipFileCount Then Return SetError(4)    ; zip file empty
 	$dest.copyhere($oZip.items, 16)
-	If Not ($oZip.items.Count = $dest.items.count) Then SetError(4)
+	If Not ($oZip.items.Count = $dest.items.count) Then Return SetError(4)
 EndFunc   ;==>_unZip
