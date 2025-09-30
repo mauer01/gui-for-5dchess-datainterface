@@ -23,6 +23,7 @@ Func _loadDataInterface($filepath)
 	$data["configured"] = True
 	$data["jsonFiles"] = $__emptyArray
 	$data["lastFileList"] = $__emptyArray
+	$data["JsonFileManager"] = False
 	If Not FileExists($data["filePath"]) Or Not FileExists($data["jsonFile"]) Then SetError(1)
 	Return $data
 EndFunc   ;==>_loadDataInterface
@@ -252,35 +253,42 @@ EndFunc   ;==>_ProcessClose
 
 
 Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
+	If $data["JsonFileManager"] = False Then Return
 	If $name = "" Then Return
 	For $item In $data["jsonFiles"]
-		$newName = StringReplace($item, "  ACTIVE", "")
-		If $newName = $name Then
+		If $item = $name Then
 			MsgBox(16, "Error", "A file with this name already exists")
 			Return
 		EndIf
-		$item = $newName
 	Next
-	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $name & "  ACTIVE.json", 1)
+	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $name & ".json", 1)
+	$data["activeJsonFile"] = $name
 EndFunc   ;==>_createNewJsonFile
 
 Func _changeActiveJsonFile(ByRef $data, $name)
+	If $data["JsonFileManager"] = False Then Return
 	$activeFile = _find($data["jsonFiles"], "_stringinstringcallback", "ACTIVE")
-	FileMove($data["workingDir"] & "\Resources\" & $activeFile & ".json", $data["workingDir"] & "\Resources\" & StringReplace($activeFile, "  ACTIVE", "") & ".json", 1)
-	FileMove($data["workingDir"] & "\Resources\" & $name & ".json", $data["workingDir"] & "\Resources\" & $name & "  ACTIVE.json", 1)
-	FileCopy($data["workingDir"] & "\Resources\" & $name & "  ACTIVE.json", $data["jsonFile"], 1)
+	FileMove($data["workingDir"] & "\Resources\" & $activeFile & ".json", $data["workingDir"] & "\Resources\" & StringReplace($activeFile, "", "") & ".json", 1)
+	FileMove($data["workingDir"] & "\Resources\" & $name & ".json", $data["workingDir"] & "\Resources\" & $name & ".json", 1)
+	FileCopy($data["workingDir"] & "\Resources\" & $name & ".json", $data["jsonFile"], 1)
+	$data["activeJsonFile"] = StringReplace($name, ".json", "")
 EndFunc   ;==>_changeActiveJsonFile
 
 Func _changeNameOfJsonFile(ByRef $data, $oldName, $newName)
-	If StringInStr($oldName, "  ACTIVE") And Not StringInStr($newName, "  ACTIVE") Then
-		$newName &= "  ACTIVE"
+	If $data["JsonFileManager"] = False Then Return
+	If $oldName = $newName Then Return SetError(1)
+	If _some($data["jsonFiles"], "_stringinstringcallback", $newName) Then
+		Return SetError(2)
 	EndIf
 	FileMove($data["workingDir"] & "\Resources\" & $oldName & ".json", $data["workingDir"] & "\Resources\" & $newName & ".json", 1)
+	$data["activeJsonFile"] = $newName
+
 EndFunc   ;==>_changeNameOfJsonFile
 
 
 Func _syncActiveJsonFile(ByRef $data)
-	Local $activeFile = _find($data["jsonFiles"], "_stringinstringcallback", "  ACTIVE")
+	If $data["JsonFileManager"] = False Then Return
+	Local $activeFile = $data["activeJsonFile"]
 	If Not $activeFile Then Return
 	If Not (FileGetSize($data["workingDir"] & "\Resources\" & $activeFile & ".json") <> FileGetSize($data["jsonFile"])) Then
 		Return
