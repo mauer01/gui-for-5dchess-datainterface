@@ -94,6 +94,7 @@ GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $c_json_files = GUICtrlCreateCombo("", 88, 140, 220, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 $b_copyJson = GUICtrlCreateButton("Copy JsonFile", 7, 170, 75, 25)
 $b_renameJson = GUICtrlCreateButton("Rename JsonFile", 85, 170, 100, 25)
+$cb_disableJsonSwitch = GUICtrlCreateCheckbox("enable", 325, 140, 100, 25)
 GUICtrlSetState($c_json_files, $GUI_HIDE)
 GUICtrlSetState($Label3, $GUI_HIDE)
 GUICtrlSetState($c_variants, $GUI_HIDE)
@@ -102,7 +103,9 @@ GUICtrlSetState($b_renameJson, $GUI_HIDE)
 GUICtrlSetState($b_delvar, $GUI_HIDE)
 GUICtrlSetState($Label2, $GUI_HIDE)
 GUICtrlSetState($b_json_edit, $GUI_HIDE)
+GUICtrlSetState($cb_disableJsonSwitch, $GUI_HIDE)
 GUICtrlSetResizing($c_variants, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($cb_disableJsonSwitch, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_delvar, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_copyJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_renameJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -197,6 +200,7 @@ If FileExists($ini) Then
 		MsgBox(16, "Inifile failed to Load", "pls setup your datainterface again.")
 	EndIf
 	$user = IniRead($ini, $ini_Region, $value2, "")
+	$data["activeJsonFile"] = IniRead($ini, $ini_Region, "activeJsonFile", "")
 Else
 	WinMove($Main, "", Default, Default, Default, 136)
 EndIf
@@ -436,25 +440,42 @@ While 1
 		Case $c_json_files
 			$selected = GUICtrlRead($c_json_files)
 			_changeActiveJsonFile($data, $selected)
-			;Region End AND ENDSWITCH
+			IniWrite($ini, $ini_Region, "activeJsonFile", $selected)
 		Case $b_copyJson
 			$selected = GUICtrlRead($c_json_files)
 			GUISetState(@SW_DISABLE)
-			_createNewJsonFile($data, InputBox("Copy JsonFile", "Please provide a name for the copied jsonfile", StringReplace($selected, "  ACTIVE", "") & "_copy"))
+			_createNewJsonFile($data, InputBox("Copy JsonFile", "Please provide a name for the copied jsonfile", StringReplace($selected, "", "") & "_copy"))
 			GUISetState(@SW_ENABLE)
 			WinActivate($Main)
+			IniWrite($ini, $ini_Region, "activeJsonFile", $selected)
 
 		Case $b_renameJson
 			$selected = GUICtrlRead($c_json_files)
 			GUISetState(@SW_DISABLE)
-			$newName = InputBox("Rename JsonFile", "Please provide a new name for the jsonfile", StringReplace($selected, "  ACTIVE", ""))
+			$newName = InputBox("Rename JsonFile", "Please provide a new name for the jsonfile", StringReplace($selected, "", ""))
 			If @error Or $newName = "" Or $newName = $selected Then
 				GUISetState(@SW_ENABLE)
+				WinActivate($Main)
 				ContinueLoop
 			EndIf
 			_changeNameOfJsonFile($data, $selected, $newName)
+			If @error = 2 Then MsgBox(16, "Error renaming", "A jsonfile with that name already exists")
 			GUISetState(@SW_ENABLE)
 			WinActivate($Main)
+			IniWrite($ini, $ini_Region, "activeJsonFile", $newName)
+		Case $cb_disableJsonSwitch
+			If GUICtrlRead($cb_disableJsonSwitch) = $GUI_CHECKED Then
+				$data["JsonFileManager"] = True
+				If $data["activeJsonFile"] = "" Then
+					_createNewJsonFile($data)
+					IniWrite($ini, $ini_Region, "activeJsonFile", $data["activeJsonFile"])
+				EndIf
+				_JsonGuiElements(True)
+			Else
+				$data["JsonFileManager"] = False
+				_JsonGuiElements(False)
+			EndIf
+			;Region End AND ENDSWITCH
 	EndSwitch
 	;Region looped that needs to be at the end
 	_checkIsRunning($data)
@@ -465,8 +486,8 @@ While 1
 		If $changed Then
 			If $data["jsonFiles"] <> False Then
 				GUICtrlSetData($c_json_files, "|")
-				$active = _find($data["jsonFiles"], "_stringinstringcallback", "  ACTIVE")
-				If @error Then _createNewJsonFile($data)
+				$active = $data["activeJsonFile"]
+				If Not $active Then _createNewJsonFile($data)
 				$tempstring = _ArrayToString($data["jsonFiles"], "|", Default, Default, "|")
 				GUICtrlSetData($c_json_files, $tempstring, $active)
 			EndIf
@@ -533,7 +554,17 @@ Func _JSONLoad()
 	Return $temp
 EndFunc   ;==>_JSONLoad
 
-
+Func _JsonGuiElements($bShow)
+	If $bShow Then
+		GUICtrlSetState($c_json_files, $GUI_ENABLE)
+		GUICtrlSetState($b_copyJson, $GUI_ENABLE)
+		GUICtrlSetState($b_renameJson, $GUI_ENABLE)
+	Else
+		GUICtrlSetState($c_json_files, $GUI_DISABLE)
+		GUICtrlSetState($b_copyJson, $GUI_DISABLE)
+		GUICtrlSetState($b_renameJson, $GUI_DISABLE)
+	EndIf
+EndFunc   ;==>_JsonGuiElements
 Func _readinput()
 	$file = GUICtrlRead($i_file)
 	Local $lines
@@ -561,6 +592,8 @@ Func ResizeGUIDatainterfaceSetupped()
 	Local $newHeight = 280
 	Local $pos = WinGetPos($Main)
 	WinMove($Main, "", Default, Default, $pos[2], $newHeight)
+	_JsonGuiElements(GUICtrlRead($cb_disableJsonSwitch) = $GUI_CHECKED)
+	GUICtrlSetState($cb_disableJsonSwitch, $GUI_SHOW)
 	GUICtrlSetState($c_variants, $GUI_SHOW)
 	GUICtrlSetState($b_json_edit, $GUI_SHOW)
 	GUICtrlSetState($Label2, $GUI_SHOW)
