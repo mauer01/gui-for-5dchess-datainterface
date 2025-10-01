@@ -1,0 +1,5 @@
+{
+  "standard": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/standard.au3",
+  "firstCustomTournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/firstCustomTournament.json",
+  "secondCustomTournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/secondCustomTournament.json"
+}
