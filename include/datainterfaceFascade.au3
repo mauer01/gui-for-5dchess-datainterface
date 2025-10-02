@@ -24,7 +24,7 @@ Func _loadDataInterface($filepath)
 	$data["jsonFiles"] = $__emptyArray
 	$data["lastFileList"] = $__emptyArray
 	$data["JsonFileManager"] = False
-	If Not FileExists($data["filePath"]) Or Not FileExists($data["jsonFile"]) Then SetError(1)
+	If Not FileExists($data["filePath"]) Or Not FileExists($data["jsonFile"]) Then Return SetError(1)
 	Return $data
 EndFunc   ;==>_loadDataInterface
 
@@ -295,3 +295,37 @@ Func _syncActiveJsonFile(ByRef $data)
 	EndIf
 	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $activeFile & ".json", 1)
 EndFunc   ;==>_syncActiveJsonFile
+
+Func _backUpJsonFile(ByRef $data, $target, $entireFolder = False)
+	If $entireFolder Then
+		DirCopy($data["workingDir"] & "\Resources", $target)
+	Else
+		FileCopy($data["jsonFile"], $target, 1)
+	EndIf
+EndFunc   ;==>_backUpJsonFile
+
+Func _downloadAndInstallJsonFiles(ByRef $data, $key)
+	If Not MapExists($data, "remoteJsonUrls") Then
+		_cacheJsonUrls($data)
+		If @error Then Return SetError(1)
+	EndIf
+	If IsArray($key) Then
+		For $k In $key
+			_downloadAndInstallJsonFiles($data, $k)
+		Next
+		Return
+	EndIf
+	If Not MapExists($data["remoteJsonUrls"], $key) Then Return SetError(2)
+	Local $url = $data["remoteJsonUrls"][$key]
+	InetGet($url, $data["workingDir"] & "\Resources\" & $key & ".json", 1, 0)
+EndFunc   ;==>_downloadAndInstallJsonFiles
+
+Func _cacheJsonUrls(ByRef $data)
+	$data2 = InetRead("https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/variantFilesWithPath.json")
+	If @error Then
+		; Handle error if needed
+		Return SetError(1)
+	EndIf
+	$data2 = BinaryToString($data2)
+	$data["remoteJsonUrls"] = _JSON_Parse($data2)
+EndFunc   ;==>_cacheJsonUrls
