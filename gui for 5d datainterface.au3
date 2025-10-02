@@ -480,7 +480,7 @@ While 1
 				_JsonGuiElements(False)
 			EndIf
 		Case $b_backUp
-			$msgboxoutput = MsgBox(3, "BackupMode", "do you want to backup all? (or just the selected)")
+			$msgboxoutput = MsgBox(3, "BackupMode", "do you want to backup all?")
 			If $msgboxoutput = 6 Then
 				$Targetfolder = FileSelectFolder("select the folder to backup to", @WorkingDir, 7)
 				If @error Then ContinueLoop
