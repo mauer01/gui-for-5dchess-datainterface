@@ -44,6 +44,7 @@ EndFunc   ;==>_every
 Func _forEach($list, $callback, $arg = "")
 	For $item In $list
 		Call($callback, $item, $arg)
+		If @error Then Return SetError(@error)
 	Next
 EndFunc   ;==>_forEach
 

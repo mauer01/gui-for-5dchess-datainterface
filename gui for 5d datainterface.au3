@@ -470,8 +470,17 @@ While 1
 		Case $cb_disableJsonSwitch
 			If GUICtrlRead($cb_disableJsonSwitch) = $GUI_CHECKED Then
 				$data["JsonFileManager"] = True
-				If $data["activeJsonFile"] = "" Then
-					_createNewJsonFile($data)
+				If GUICtrlRead($c_json_files) = "" Then
+					_createNewJsonFile($data, "automatically created Standard")
+					If @error Then
+						If Not IsMap($data["jsonFiles"]) Then _createNewJsonFile($data, InputBox("Create First JsonFile", "Please provide a name for the first jsonfile", "Standard"))
+						If @error Then
+							MsgBox(16, "Error creating jsonfile", "Couldnt create a jsonfile, disabling jsonfilemanager")
+							GUICtrlSetState($cb_disableJsonSwitch, $GUI_UNCHECKED)
+							ContinueLoop
+						EndIf
+
+					EndIf
 					IniWrite($ini, $ini_Region, "activeJsonFile", $data["activeJsonFile"])
 				EndIf
 				_JsonGuiElements(True)
@@ -517,6 +526,7 @@ While 1
 							EndIf
 						Next
 						_downloadAndInstallJsonFiles($data, $selected)
+						If @error Then MsgBox(16, @error, "One or more jsonfiles couldnt be downloaded")
 						GUIDelete($SelectGui)
 						GUISetState(@SW_ENABLE)
 						WinActivate($Main)

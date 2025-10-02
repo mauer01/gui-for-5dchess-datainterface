@@ -253,12 +253,11 @@ EndFunc   ;==>_ProcessClose
 
 
 Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
-	If $data["JsonFileManager"] = False Then Return
-	If $name = "" Then Return
+	If $data["JsonFileManager"] = False Then Return SetError(1)
+	If $name = "" Then Return SetError(2)
 	For $item In $data["jsonFiles"]
 		If $item = $name Then
-			MsgBox(16, "Error", "A file with this name already exists")
-			Return
+			Return SetError(3)
 		EndIf
 	Next
 	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $name & ".json", 1)
@@ -310,16 +309,19 @@ Func _downloadAndInstallJsonFiles(ByRef $data, $key)
 		If @error Then Return SetError(1)
 	EndIf
 	If IsArray($key) Then
-		For $k In $key
-			_downloadAndInstallJsonFiles($data, $k)
-		Next
+		_forEach($key, "_downloadAndInstallJsonFilescb", $data)
+		If @error Then Return SetError(@error)
 		Return
 	EndIf
 	If Not MapExists($data["remoteJsonUrls"], $key) Then Return SetError(2)
+	If _some($data["jsonFiles"], "_stringinstringcallback", $key) Then Return SetError(3)
 	Local $url = $data["remoteJsonUrls"][$key]
 	InetGet($url, $data["workingDir"] & "\Resources\" & $key & ".json", 1, 0)
 EndFunc   ;==>_downloadAndInstallJsonFiles
-
+Func _downloadAndInstallJsonFilescb($item, $data)
+	_downloadAndInstallJsonFiles($data, $item)
+	If @error Then Return SetError(@error)
+EndFunc   ;==>_downloadAndInstallJsonFilescb
 Func _cacheJsonUrls(ByRef $data)
 	$data2 = InetRead("https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/variantFilesWithPath.json")
 	If @error Then
