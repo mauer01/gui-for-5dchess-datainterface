@@ -562,23 +562,23 @@ EndFunc   ;==>__JSON_ParseString
 ; helper function for converting a AutoIt-string into a json formatted string
 Func __JSON_FormatString(ByRef $sString)
 	Return StringLen($sString) < 50 ? _
-	StringTrimRight(StringRegExpReplace($sString & '\\\b\f\n\r\t\"', '(?s)(?|\\(?=.*(\\\\))|[\b](?=.*(\\b))|\f(?=.*(\\f))|\r\n(?=.*(\\n))|\n(?=.*(\\n))|\r(?=.*(\\r))|\t(?=.*(\\t))|"(?=.*(\\")))', '\1'), 15) : _
-	StringReplace( _
-		StringReplace( _
+			StringTrimRight(StringRegExpReplace($sString & '\\\b\f\n\r\t\"', '(?s)(?|\\(?=.*(\\\\))|[\b](?=.*(\\b))|\f(?=.*(\\f))|\r\n(?=.*(\\n))|\n(?=.*(\\n))|\r(?=.*(\\r))|\t(?=.*(\\t))|"(?=.*(\\")))', '\1'), 15) : _
 			StringReplace( _
-				StringReplace( _
-					StringReplace( _
-						StringReplace( _
-							StringReplace( _
-								StringReplace($sString, '\', '\\', 0, 1) _
-							, Chr(8), "\b", 0, 1) _
-						, Chr(12), "\f", 0, 1) _
-					, @CRLF, "\n", 0, 1) _
-				, @LF, "\n", 0, 1) _
+			StringReplace( _
+			StringReplace( _
+			StringReplace( _
+			StringReplace( _
+			StringReplace( _
+			StringReplace( _
+			StringReplace($sString, '\', '\\', 0, 1) _
+			, Chr(8), "\b", 0, 1) _
+			, Chr(12), "\f", 0, 1) _
+			, @CRLF, "\n", 0, 1) _
+			, @LF, "\n", 0, 1) _
 			, @CR, "\r", 0, 1) _
-		, @TAB, "\t", 0, 1) _
-	, '"', '\"', 0, 1)
-EndFunc
+			, @TAB, "\t", 0, 1) _
+			, '"', '\"', 0, 1)
+EndFunc   ;==>__JSON_FormatString
 
 
 ; #FUNCTION# ======================================================================================

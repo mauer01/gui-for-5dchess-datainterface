@@ -193,7 +193,7 @@ Func _multiversefromvariant(ByRef $i_multiverse, $variant)
 		$i_multiverse[0].gamebuilder = _IsEven(UBound($timelines)) - 1 + 2
 	EndIf
 
-	For $i = 0 to UBound($variant["Timelines"])-1
+	For $i = 0 To UBound($variant["Timelines"]) - 1
 		$timelinename = $timelines[$i]
 		$timelinetocopy = $variant["Timelines"][$timelinename]
 		$j = 0
@@ -202,13 +202,13 @@ Func _multiversefromvariant(ByRef $i_multiverse, $variant)
 				$j += 1
 				ContinueLoop
 			EndIf
-			if _IsEven($j) Then
+			If _IsEven($j) Then
 				$movecolor = 1
 			Else
 				$movecolor = 2
 			EndIf
-			$board = _createboard("custom",$timelinetocopy[$j])
-			_multiverse_setboard($i_multiverse,$board,$timelinename,_plyToTurn($j+1),$movecolor)
+			$board = _createboard("custom", $timelinetocopy[$j])
+			_multiverse_setboard($i_multiverse, $board, $timelinename, _plyToTurn($j + 1), $movecolor)
 			$j += 1
 		WEnd
 	Next
@@ -230,15 +230,15 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 
 	$lastline = $f_lines[0]
 	If $stopmove = -1 Then
-		While not StringRegExp($f_lines[$lastline], "[0-9]+.")
+		While Not StringRegExp($f_lines[$lastline], "[0-9]+.")
 			$lastline -= 1
 		WEnd
 		$stopmove = StringRegExp($f_lines[$lastline], "[0-9]+", 3)[0]
 	EndIf
-	While not StringRegExp($f_lines[$i],"\[[a-zA-Z]+")
+	While Not StringRegExp($f_lines[$i], "\[[a-zA-Z]+")
 		$i += 1
 	WEnd
-	While not StringRegExp($f_lines[$i],":[+-]?\d+:\d+:[wb]\]$")
+	While Not StringRegExp($f_lines[$i], ":[+-]?\d+:\d+:[wb]\]$")
 		Switch StringRegExp($f_lines[$i], "[a-zA-Z]+", 3)[0]
 			Case "Result"
 				$result = StringRegExp($f_lines[$i], '[01]-[01]', 3)[0]
@@ -291,9 +291,9 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 		If @error = 1 Then $includeblackmove = 0
 		$whitemoves = $ply[0]
 		While (StringLeft($whitemoves, 1) = "(") = False
-			if $whitemoves = "" then 
+			If $whitemoves = "" Then
 				$brokenWhiteMoves = True
-				ExitLoop 
+				ExitLoop
 			EndIf
 			$whitemoves = StringTrimLeft($whitemoves, 1)
 		WEnd
@@ -328,7 +328,7 @@ Func _multiversefrompgn($i_pgn, $stopmove = -1, $includeblackmove = 1)
 		EndIf
 		$i += 1
 	WEnd
-	if $brokenWhiteMoves then $multiverse["brokenWhite"] = True
+	If $brokenWhiteMoves Then $multiverse["brokenWhite"] = True
 	Return $multiverse
 EndFunc   ;==>_multiversefrompgn
 
@@ -784,7 +784,7 @@ Func _multiverse_removeemptytimelines($i_multiverse)
 EndFunc   ;==>_multiverse_removeemptytimelines
 
 Func _multiversetovariant($i_multiverse, $variant = "automatically generated", $author = "mauer01s crazy progammingskillz")
-	if $i_multiverse["brokenWhite"] Then $variant &= ":noWhiteMove"
+	If $i_multiverse["brokenWhite"] Then $variant &= ":noWhiteMove"
 	$i_multiverse[1] = _multiverse_removeemptytimelines($i_multiverse)
 	Local $string = "  {" & @LF & "    " & '"Name": "' & $variant & '",' & @LF & "    " & '"Author": "' & $author & '",' & @LF & "    " & '"Timelines": {' & @LF
 	Local $timelines = UBound($i_multiverse[1], 2) - 1
