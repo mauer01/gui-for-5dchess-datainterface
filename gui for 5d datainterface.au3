@@ -92,10 +92,15 @@ GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $Label3 = GUICtrlCreateLabel("jsonVariants: ", 7, 145, 100, 25)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $c_json_files = GUICtrlCreateCombo("", 88, 140, 220, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
-$b_copyJson = GUICtrlCreateButton("Copy JsonFile", 7, 170, 75, 25)
-$b_renameJson = GUICtrlCreateButton("Rename JsonFile", 85, 170, 100, 25)
+$b_copyJson = GUICtrlCreateButton("Copy JsonFile", 7, 165, 75, 25)
+$b_renameJson = GUICtrlCreateButton("Rename JsonFile", 85, 165, 100, 25)
 $cb_disableJsonSwitch = GUICtrlCreateCheckbox("enable", 325, 140, 100, 25)
+$b_backUp = GUICtrlCreateButton("Backup Jsons", 190, 165, 75, 25)
+$b_downloadJsons = GUICtrlCreateButton("Download Package", 270, 165, 100, 25)
+
 GUICtrlSetState($c_json_files, $GUI_HIDE)
+GUICtrlSetState($b_backUp, $GUI_HIDE)
+GUICtrlSetState($b_downloadJsons, $GUI_HIDE)
 GUICtrlSetState($Label3, $GUI_HIDE)
 GUICtrlSetState($c_variants, $GUI_HIDE)
 GUICtrlSetState($b_copyJson, $GUI_HIDE)
@@ -105,7 +110,9 @@ GUICtrlSetState($Label2, $GUI_HIDE)
 GUICtrlSetState($b_json_edit, $GUI_HIDE)
 GUICtrlSetState($cb_disableJsonSwitch, $GUI_HIDE)
 GUICtrlSetResizing($c_variants, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_downloadJsons, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($cb_disableJsonSwitch, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($b_backUp, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_delvar, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_copyJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_renameJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -127,31 +134,28 @@ $b_run_loaded_game = GUICtrlCreateButton("run loaded pgn", 111, 222)
 $b_insertCode = GUICtrlCreateButton("insert code", 190, 222, 70)
 $b_resumeGame = GUICtrlCreateButton("resume game", 270, 222, 75)
 $b_undoMove = GUICtrlCreateCheckbox("undo move", 351, 222)
+
+Global $DatainterfaceButtons[]
+
+$DatainterfaceButtons["b_run_loaded_game"] = $b_run_loaded_game
+$DatainterfaceButtons["b_run_pgn"] = $b_run_pgn
+$DatainterfaceButtons["b_run_variant"] = $b_run_variant
+$DatainterfaceButtons["b_datainterfaceChangeTimerL"] = $b_datainterfaceChangeTimerL
+$DatainterfaceButtons["b_datainterfaceChangeTimerM"] = $b_datainterfaceChangeTimerM
+$DatainterfaceButtons["b_datainterfaceChangeTimerS"] = $b_datainterfaceChangeTimerS
+$DatainterfaceButtons["b_animation"] = $b_animation
+$DatainterfaceButtons["b_close"] = $b_close
+$DatainterfaceButtons["cb_keepgameon"] = $cb_keepgameon
+$DatainterfaceButtons["b_insertCode"] = $b_insertCode
+$DatainterfaceButtons["b_resumeGame"] = $b_resumeGame
+$DatainterfaceButtons["b_undoMove"] = $b_undoMove
+
 GUICtrlSetState($cb_keepgameon, $GUI_UNCHECKED)
-GUICtrlSetState($b_run_pgn, BitOR($GUI_HIDE, $GUI_DISABLE))
-GUICtrlSetState($b_run_loaded_game, BitOR($GUI_HIDE, $GUI_DISABLE))
-GUICtrlSetState($b_insertCode, $GUI_HIDE)
-GUICtrlSetState($b_resumeGame, $GUI_HIDE)
-GUICtrlSetState($b_undoMove, $GUI_HIDE)
-GUICtrlSetState($b_close, $GUI_HIDE)
-GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
-GUICtrlSetState($b_run_variant, $GUI_HIDE)
-GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_HIDE)
-GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_HIDE)
-GUICtrlSetState($b_datainterfaceChangeTimerS, $GUI_HIDE)
-GUICtrlSetState($b_animation, $GUI_HIDE)
-GUICtrlSetResizing($b_animation, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_insertCode, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_resumeGame, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_undoMove, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_run_pgn, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_run_loaded_game, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($cb_keepgameon, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_datainterfaceChangeTimerS, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_close, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_datainterfaceChangeTimerL, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_datainterfaceChangeTimerM, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($b_run_variant, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetState($b_run_pgn, $GUI_DISABLE)
+GUICtrlSetState($b_run_loaded_game, $GUI_DISABLE)
+_forEach($DatainterfaceButtons, "GuiCtrlSetState", $GUI_HIDE)
+_forEach($DatainterfaceButtons, "GuiCtrlSetResizing", BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+
 #EndRegion DataInterfaceButtons
 #Region Editbox
 $e_json = GUICtrlCreateEdit("", 420, 0, 400, 160)
@@ -475,6 +479,58 @@ While 1
 				$data["JsonFileManager"] = False
 				_JsonGuiElements(False)
 			EndIf
+		Case $b_backUp
+			$msgboxoutput = MsgBox(3, "BackupMode", "do you want to backup all? (or just the selected)")
+			If $msgboxoutput = 6 Then
+				$Targetfolder = FileSelectFolder("select the folder to backup to", @WorkingDir, 7)
+				If @error Then ContinueLoop
+				_backUpJsonFile($data, $Targetfolder, True)
+
+			ElseIf $msgboxoutput = 7 Then
+				$targetfile = FileSaveDialog("Backup File to", @WorkingDir, "json files (*.json)")
+				If @error Then ContinueLoop
+				_backUpJsonFile($data, $targetfile, False)
+			EndIf
+		Case $b_downloadJsons
+			_cacheJsonUrls($data)
+			GUISetState(@SW_DISABLE)
+			$SelectGui = GUICreate("Select Jsons to download", 200, 400)
+			Global $cbs[]
+			_forEach(MapKeys($data["remoteJsonUrls"]), "_cbFactoryCallback")
+			$b_downloadSelected = GUICtrlCreateButton("Download Selected", 10, 370, 180, 25)
+			$b_downloadAll = GUICtrlCreateButton("Download All", 10, 340, 180, 25)
+			$b_cancelDownload = GUICtrlCreateButton("Cancel", 10, 310, 180, 25)
+			GUISetState(@SW_SHOW)
+			While 1
+				$nMsg2 = GUIGetMsg()
+				Switch $nMsg2
+					Case $GUI_EVENT_CLOSE, $b_cancelDownload
+						GUIDelete($SelectGui)
+						GUISetState(@SW_ENABLE)
+						WinActivate($Main)
+						ExitLoop
+					Case $b_downloadSelected
+						Global $selected[0]
+						For $id In MapKeys($cbs)
+							If GUICtrlRead($id) = $GUI_CHECKED Then
+								_ArrayAdd($selected, $cbs[$id])
+							EndIf
+						Next
+						_downloadAndInstallJsonFiles($data, $selected)
+						GUIDelete($SelectGui)
+						GUISetState(@SW_ENABLE)
+						WinActivate($Main)
+						ExitLoop
+					Case $b_downloadAll
+						For $i = 0 To UBound($data["remoteJsonUrls"]) - 1
+							_downloadAndInstallJsonFiles($data, MapKeys($data["remoteJsonUrls"]))
+						Next
+						GUIDelete($SelectGui)
+						GUISetState(@SW_ENABLE)
+						WinActivate($Main)
+						ExitLoop
+				EndSwitch
+			WEnd
 			;Region End AND ENDSWITCH
 	EndSwitch
 	;Region looped that needs to be at the end
@@ -511,6 +567,14 @@ While 1
 
 WEnd
 ;Region StartOfFunctions
+
+Func _cbFactoryCallback($item, ByRef $args)
+	If Not IsArray($args) Then $args = $__emptyArray
+	Global $cbs[]
+	_ArrayAdd($args, "")
+	Local $id = GUICtrlCreateCheckbox($item, 5, 5 + (20 * UBound($args)))
+	$cbs[$id] = $item
+EndFunc   ;==>_cbFactoryCallback
 
 
 Func _stringinstringcallback($e, $string)
@@ -594,6 +658,8 @@ Func ResizeGUIDatainterfaceSetupped()
 	WinMove($Main, "", Default, Default, $pos[2], $newHeight)
 	_JsonGuiElements(GUICtrlRead($cb_disableJsonSwitch) = $GUI_CHECKED)
 	GUICtrlSetState($cb_disableJsonSwitch, $GUI_SHOW)
+	GUICtrlSetState($b_backUp, $GUI_SHOW)
+	GUICtrlSetState($b_downloadJsons, $GUI_SHOW)
 	GUICtrlSetState($c_variants, $GUI_SHOW)
 	GUICtrlSetState($b_json_edit, $GUI_SHOW)
 	GUICtrlSetState($Label2, $GUI_SHOW)
@@ -610,37 +676,13 @@ Func ResizeGUIRunningDatainterface($b = 1)
 	Local Const $newHeight = 280, $pos = WinGetPos($Main)
 	If $b Then
 		WinMove($Main, "", Default, Default, $pos[2], $newHeight)
-		GUICtrlSetState($b_run_loaded_game, $GUI_SHOW)
-		GUICtrlSetState($b_run_pgn, $GUI_SHOW)
 		GUICtrlSetState($b_run_datainterface, $GUI_DISABLE)
-		GUICtrlSetState($b_run_variant, $GUI_SHOW)
-		GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_SHOW)
-		GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_SHOW)
-		GUICtrlSetState($b_datainterfaceChangeTimerS, $GUI_SHOW)
-		GUICtrlSetState($b_animation, $GUI_SHOW)
-		GUICtrlSetState($b_close, $GUI_SHOW)
-		GUICtrlSetState($cb_keepgameon, $GUI_SHOW)
-		GUICtrlSetState($b_insertCode, $GUI_SHOW)
-		GUICtrlSetState($b_resumeGame, $GUI_SHOW)
-		GUICtrlSetState($b_undoMove, $GUI_SHOW)
+		_foreach($DatainterfaceButtons, "GuiCtrlSetState", $GUI_SHOW)
 	Else
 		WinMove($Main, "", Default, Default, $pos[2], $newHeight)
+		_forEach($DatainterfaceButtons, "GuiCtrlSetState", $GUI_HIDE)
 		GUICtrlSetState($b_run_datainterface, $GUI_ENABLE)
-		GUICtrlSetState($b_insertCode, $GUI_ENABLE)
-		GUICtrlSetState($b_resumeGame, $GUI_ENABLE)
-		GUICtrlSetState($b_undoMove, $GUI_ENABLE)
-		GUICtrlSetState($b_run_loaded_game, $GUI_HIDE)
-		GUICtrlSetState($b_run_pgn, $GUI_HIDE)
-		GUICtrlSetState($b_run_variant, $GUI_HIDE)
-		GUICtrlSetState($b_datainterfaceChangeTimerL, $GUI_HIDE)
-		GUICtrlSetState($b_datainterfaceChangeTimerM, $GUI_HIDE)
-		GUICtrlSetState($b_datainterfaceChangeTimerS, $GUI_HIDE)
-		GUICtrlSetState($b_animation, $GUI_HIDE)
-		GUICtrlSetState($b_close, $GUI_HIDE)
-		GUICtrlSetState($cb_keepgameon, $GUI_HIDE)
-		GUICtrlSetState($b_insertCode, $GUI_HIDE)
-		GUICtrlSetState($b_resumeGame, $GUI_HIDE)
-		GUICtrlSetState($b_undoMove, $GUI_HIDE)
+
 	EndIf
 EndFunc   ;==>ResizeGUIRunningDatainterface
 
@@ -773,27 +815,31 @@ Func _checkVariant($JSON)
 EndFunc   ;==>_checkVariant
 
 Func requestDatainterface()
-	InetGet("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", "temp.json")
-	$file = FileRead("temp.json")
-	FileDelete("temp.json")
+	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
+	If @error Then
+		MsgBox(16, "Error", "Couldnt fetch latest release info from github")
+		Return SetError(1)
+	EndIf
+	$file = BinaryToString($file)
 	$JSON = _JSON_parse($file)
-	$assets = $JSON["assets"]
-	$asset = findStandalone($assets)
+	$asset = _find($JSON["assets"], "_someStringinStringcallback", "standalone")
+	If Not IsMap($asset) Then
+		MsgBox(16, "Error", "Couldnt find a standalone release asset")
+		Return SetError(1)
+	EndIf
 	Local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
 	DirCreate($folderDataInterface)
 	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
 	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
-	If @error Then ConsoleWrite(@error)
+	If @error Then
+		MsgBox(16, "Error:" & @error, "Couldnt unzip the downloaded file")
+		Return SetError(1)
+	EndIf
+
 	$data = _loadDataInterface($folderDataInterface)
+
 	FileDelete(@ScriptDir & "\data.zip")
 EndFunc   ;==>requestDatainterface
-Func findStandalone($assets)
-	For $asset In $assets
-		For $key In MapKeys($asset)
-			If StringInStr($asset[$key], "standalone") Then Return $asset
-		Next
-	Next
-EndFunc   ;==>findStandalone
 Func _unZip($sZipFile, $sDestFolder)
 	If Not FileExists($sZipFile) Then Return SetError(1)    ; source file does not exists
 	If Not FileExists($sDestFolder) Then
@@ -807,5 +853,4 @@ Func _unZip($sZipFile, $sDestFolder)
 	Local $dest = $oShell.NameSpace($sDestFolder)
 	If Not $iZipFileCount Then Return SetError(4)    ; zip file empty
 	$dest.copyhere($oZip.items, 16)
-	If Not ($oZip.items.Count = $dest.items.count) Then Return SetError(4)
 EndFunc   ;==>_unZip
