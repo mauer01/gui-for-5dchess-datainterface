@@ -41,6 +41,12 @@ Func _every($list, $callback, $arg)
 	Return True
 EndFunc   ;==>_every
 
+Func _forEach($list, $callback, $arg = "")
+	For $item In $list
+		Call($callback, $item, $arg)
+	Next
+EndFunc   ;==>_forEach
+
 Func _arrayCountEquals($array1, $array2)
 	If UBound($array1) <> UBound($array2) Then Return False
 	For $item In $array1
@@ -50,3 +56,7 @@ Func _arrayCountEquals($array1, $array2)
 	Next
 	Return True
 EndFunc   ;==>_arrayCountEquals
+
+Func _someStringinStringcallback($e, $string)
+	Return _some($e, "_stringinstringcallback", $string)
+EndFunc   ;==>_someStringinStringcallback
