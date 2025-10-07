@@ -189,7 +189,7 @@ EndFunc   ;==>_JSON_Parse
 Func _JSON_Generate($o_Object, $s_ObjIndent = @TAB, $s_ObjDelEl = @CRLF, $s_ObjDelKey = "", $s_ObjDelVal = " ", $s_ArrIndent = @TAB, $s_ArrDelEl = @CRLF, $i_Level = 0)
 	Local Static $s_JSON_String
 	If $i_Level = 0 Then $s_JSON_String = ""
-
+	Local $s_KeyTemp, $o_Value
 	Switch VarGetType($o_Object)
 		Case "String"
 			$s_JSON_String &= '"' & __JSON_FormatString($o_Object) & '"'
@@ -217,7 +217,8 @@ Func _JSON_Generate($o_Object, $s_ObjIndent = @TAB, $s_ObjDelEl = @CRLF, $s_ObjD
 			EndIf
 		Case "Object"
 			If ObjName($o_Object) = "Dictionary" Then
-				Local $s_KeyTemp, $o_Value
+				$s_KeyTemp = ""
+				$o_Value = ""
 				If $o_Object.Count() = 0 Then
 					$s_JSON_String &= "{}"
 				Else
@@ -236,7 +237,8 @@ Func _JSON_Generate($o_Object, $s_ObjIndent = @TAB, $s_ObjDelEl = @CRLF, $s_ObjD
 				EndIf
 			EndIf
 		Case "Map"
-			Local $s_KeyTemp, $o_Value
+			$s_KeyTemp = ""
+			$o_Value = ""
 			If UBound($o_Object) = 0 Then
 				$s_JSON_String &= "{}"
 			Else

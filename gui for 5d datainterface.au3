@@ -87,7 +87,7 @@ GUICtrlSetResizing($b_addvariant, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSI
 #Region bonus stuff
 $c_variants = GUICtrlCreateCombo("", 56, 112, 249, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 $b_delvar = GUICtrlCreateButton("Delete Variant", 328, 112, 75, 25)
-$Label2 = GUICtrlCreateLabel("Variant:", 7, 112)
+$label2 = GUICtrlCreateLabel("Variant:", 7, 112)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 $Label3 = GUICtrlCreateLabel("jsonVariants: ", 7, 145, 100, 25)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
@@ -106,7 +106,7 @@ GUICtrlSetState($c_variants, $GUI_HIDE)
 GUICtrlSetState($b_copyJson, $GUI_HIDE)
 GUICtrlSetState($b_renameJson, $GUI_HIDE)
 GUICtrlSetState($b_delvar, $GUI_HIDE)
-GUICtrlSetState($Label2, $GUI_HIDE)
+GUICtrlSetState($label2, $GUI_HIDE)
 GUICtrlSetState($b_json_edit, $GUI_HIDE)
 GUICtrlSetState($cb_disableJsonSwitch, $GUI_HIDE)
 GUICtrlSetResizing($c_variants, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
@@ -116,7 +116,7 @@ GUICtrlSetResizing($b_backUp, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_delvar, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_copyJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($b_renameJson, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
-GUICtrlSetResizing($Label2, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
+GUICtrlSetResizing($label2, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($c_json_files, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 GUICtrlSetResizing($Label3, BitOR($GUI_DOCKTOP, $GUI_DOCKLEFT, $GUI_DOCKSIZE))
 
@@ -470,8 +470,17 @@ While 1
 		Case $cb_disableJsonSwitch
 			If GUICtrlRead($cb_disableJsonSwitch) = $GUI_CHECKED Then
 				$data["JsonFileManager"] = True
-				If $data["activeJsonFile"] = "" Then
-					_createNewJsonFile($data)
+				If GUICtrlRead($c_json_files) = "" Then
+					_createNewJsonFile($data, "automatically created Standard")
+					If @error Then
+						If Not IsMap($data["jsonFiles"]) Then _createNewJsonFile($data, InputBox("Create First JsonFile", "Please provide a name for the first jsonfile", "Standard"))
+						If @error Then
+							MsgBox(16, "Error creating jsonfile", "Couldnt create a jsonfile, disabling jsonfilemanager")
+							GUICtrlSetState($cb_disableJsonSwitch, $GUI_UNCHECKED)
+							ContinueLoop
+						EndIf
+
+					EndIf
 					IniWrite($ini, $ini_Region, "activeJsonFile", $data["activeJsonFile"])
 				EndIf
 				_JsonGuiElements(True)
@@ -494,50 +503,16 @@ While 1
 		Case $b_downloadJsons
 			_cacheJsonUrls($data)
 			GUISetState(@SW_DISABLE)
-			$SelectGui = GUICreate("Select Jsons to download", 200, 400)
-			Global $cbs[]
-			_forEach(MapKeys($data["remoteJsonUrls"]), "_cbFactoryCallback")
-			$b_downloadSelected = GUICtrlCreateButton("Download Selected", 10, 370, 180, 25)
-			$b_downloadAll = GUICtrlCreateButton("Download All", 10, 340, 180, 25)
-			$b_cancelDownload = GUICtrlCreateButton("Cancel", 10, 310, 180, 25)
-			GUISetState(@SW_SHOW)
-			While 1
-				$nMsg2 = GUIGetMsg()
-				Switch $nMsg2
-					Case $GUI_EVENT_CLOSE, $b_cancelDownload
-						GUIDelete($SelectGui)
-						GUISetState(@SW_ENABLE)
-						WinActivate($Main)
-						ExitLoop
-					Case $b_downloadSelected
-						Global $selected[0]
-						For $id In MapKeys($cbs)
-							If GUICtrlRead($id) = $GUI_CHECKED Then
-								_ArrayAdd($selected, $cbs[$id])
-							EndIf
-						Next
-						_downloadAndInstallJsonFiles($data, $selected)
-						GUIDelete($SelectGui)
-						GUISetState(@SW_ENABLE)
-						WinActivate($Main)
-						ExitLoop
-					Case $b_downloadAll
-						For $i = 0 To UBound($data["remoteJsonUrls"]) - 1
-							_downloadAndInstallJsonFiles($data, MapKeys($data["remoteJsonUrls"]))
-						Next
-						GUIDelete($SelectGui)
-						GUISetState(@SW_ENABLE)
-						WinActivate($Main)
-						ExitLoop
-				EndSwitch
-			WEnd
+			secondGuiLoop()
+			GUISetState(@SW_ENABLE)
+			WinActivate($Main)
 			;Region End AND ENDSWITCH
 	EndSwitch
 	;Region looped that needs to be at the end
 	_checkIsRunning($data)
 	If $data["configured"] Then
 		If (GUICtrlGetState($b_run_datainterface) = 144 And $data["isRunning"] = False) Then ResizeGUIRunningDatainterface(0)
-		$variantsobj = _loadVariants($data)
+		$variantsobj = _loadVariants($data, $nMsg = $c_json_files)
 		$changed = _updateJsonFiles($data)
 		If $changed Then
 			If $data["jsonFiles"] <> False Then
@@ -568,13 +543,7 @@ While 1
 WEnd
 ;Region StartOfFunctions
 
-Func _cbFactoryCallback($item, ByRef $args)
-	If Not IsArray($args) Then $args = $__emptyArray
-	Global $cbs[]
-	_ArrayAdd($args, "")
-	Local $id = GUICtrlCreateCheckbox($item, 5, 5 + (20 * UBound($args)))
-	$cbs[$id] = $item
-EndFunc   ;==>_cbFactoryCallback
+
 
 
 Func _stringinstringcallback($e, $string)
@@ -662,7 +631,7 @@ Func ResizeGUIDatainterfaceSetupped()
 	GUICtrlSetState($b_downloadJsons, $GUI_SHOW)
 	GUICtrlSetState($c_variants, $GUI_SHOW)
 	GUICtrlSetState($b_json_edit, $GUI_SHOW)
-	GUICtrlSetState($Label2, $GUI_SHOW)
+	GUICtrlSetState($label2, $GUI_SHOW)
 	GUICtrlSetState($c_json_files, $GUI_SHOW)
 	GUICtrlSetState($Label3, $GUI_SHOW)
 	GUICtrlSetState($b_renameJson, $GUI_SHOW)
@@ -854,3 +823,56 @@ Func _unZip($sZipFile, $sDestFolder)
 	If Not $iZipFileCount Then Return SetError(4)    ; zip file empty
 	$dest.copyhere($oZip.items, 16)
 EndFunc   ;==>_unZip
+
+Func _cbFactory($item, $args)
+	Return GUICtrlCreateCheckbox($item, 5, 5 + (20 * $args))
+EndFunc   ;==>_cbFactory
+
+Func secondGuiLoop()
+	Local $SelectGui = GUICreate("Select Jsons to download", 200, 400)
+	Local $cbs[]
+	$keys = MapKeys($data["remoteJsonUrls"])
+	For $i = 0 To UBound($data["remoteJsonUrls"]) - 1
+		$cbs[$keys[$i]] = _cbFactory($keys[$i], $i + 1)
+	Next
+
+	Local $b_downloadSelected = GUICtrlCreateButton("Download Selected", 10, 370, 180, 25)
+	Local $b_downloadAll = GUICtrlCreateButton("Download All", 10, 340, 180, 25)
+	Local $b_cancelDownload = GUICtrlCreateButton("Cancel", 10, 310, 180, 25)
+	Local $label = GUICtrlCreateLabel("Selected", 10, 210, 180, 25)
+
+	GUISetState(@SW_SHOW)
+	Local $nMsg
+	Local $selected[]
+
+	While 1
+		$nMsg = GUIGetMsg()
+		$selected = _filter($cbs, "guictrlreadEquality", $GUI_CHECKED)
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $b_cancelDownload
+				GUIDelete($SelectGui)
+				ExitLoop
+			Case $b_downloadSelected
+				_downloadAndInstallJsonFiles($data, MapKeys($selected))
+				GUIDelete($SelectGui)
+				ExitLoop
+			Case $b_downloadAll
+				For $i = 0 To UBound($data["remoteJsonUrls"]) - 1
+					_downloadAndInstallJsonFiles($data, MapKeys($data["remoteJsonUrls"]))
+				Next
+				GUIDelete($SelectGui)
+				ExitLoop
+		EndSwitch
+	WEnd
+
+	Return True
+EndFunc   ;==>secondGuiLoop
+
+
+Func guictrlreadEquality($item, $args)
+	Local $returner
+	$read = GUICtrlRead($item)
+	$returner = ($read = $args)
+	Return $returner
+EndFunc   ;==>guictrlreadEquality
+
