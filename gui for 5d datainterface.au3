@@ -839,7 +839,6 @@ Func secondGuiLoop()
 	Local $b_downloadSelected = GUICtrlCreateButton("Download Selected", 10, 370, 180, 25)
 	Local $b_downloadAll = GUICtrlCreateButton("Download All", 10, 340, 180, 25)
 	Local $b_cancelDownload = GUICtrlCreateButton("Cancel", 10, 310, 180, 25)
-	Local $label = GUICtrlCreateLabel("Selected", 10, 210, 180, 25)
 
 	GUISetState(@SW_SHOW)
 	Local $nMsg
