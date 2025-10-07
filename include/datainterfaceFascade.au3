@@ -136,11 +136,11 @@ Func _runVariant(ByRef $data, $variant)
 EndFunc   ;==>_runVariant
 
 
-Func _loadVariants(ByRef $data)
+Func _loadVariants(ByRef $data, $forceReload = False)
 	Local $variantsstring, $variantsarray
 	$f_variantloader = $data["jsonFile"]
 	$time = _ArrayToString(FileGetTime($f_variantloader))
-	If $time <> $data["jsonFileLastChanged"] Then
+	If ($time <> $data["jsonFileLastChanged"]) Or $forceReload Then
 		$data["jsonFileLastChanged"] = $time
 		$variantsstring = _readvariants($data)
 		$variantsarray = StringSplit($variantsstring, "|")
