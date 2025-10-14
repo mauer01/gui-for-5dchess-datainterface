@@ -5,7 +5,7 @@
 #include <Process.au3>
 #include <JSON.au3>
 #include <moreArray.au3>
-#include <unZip.au3>
+#include <util.au3>
 
 Const $__tempFile = @ScriptDir & "\temp-pgn to variant.txt"
 Global $__PIDArray[0] = []
@@ -334,6 +334,7 @@ Func _cacheJsonUrls(ByRef $data)
 EndFunc   ;==>_cacheJsonUrls
 
 Func _requestDatainterface()
+	Local $JSON, $file, $data
 	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
 	If @error Then
 		MsgBox(16, "Error", "Couldnt fetch latest release info from github")
@@ -359,3 +360,10 @@ Func _requestDatainterface()
 
 	FileDelete(@ScriptDir & "\data.zip")
 EndFunc   ;==>_requestDatainterface
+
+
+Func _JSONLoad(ByRef $data)
+	$fileContent = FileRead($data["jsonFile"])
+	$temp = _JSON_Parse($fileContent)
+	Return $temp
+EndFunc   ;==>_JSONLoad
