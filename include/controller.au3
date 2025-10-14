@@ -106,3 +106,15 @@ Func _controller_downloadVariants(ByRef $data, $cacheOnly = False, $variantfiles
 	EndIf
 	_downloadAndInstallJsonFiles($data, $variantfiles)
 EndFunc   ;==>_controller_downloadVariants
+
+
+Func _controller_replaceVariant(ByRef $data, $input, $variantnumber, ByRef $fullJSON)
+	$newJSON = _JSON_Parse($input)
+	$check = _checkVariant($newJSON)
+	If IsString($check) Then
+		Return SetError(1, 0, $check) ; variant not valid
+	EndIf
+	$fullJSON[$variantnumber - 1] = $newJSON
+	updateJSONVariants($data, $fullJSON)
+	Return True
+EndFunc   ;==>_controller_replaceVariant
