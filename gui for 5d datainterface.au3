@@ -316,29 +316,22 @@ While 1
 			ClipPut(_JSON_MYGenerate(_multiversetovariant($multiverse, "5D Chess Game", "pgn to variant")))
 		Case $b_delvar
 			If MsgBox(4, "REALLY???", "REALLY REALLY????") = 6 Then
-				_removeVariantFromJson($data, StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0])
+				_controller_removeVariant($data, StringRegExp(GUICtrlRead($c_variants), "[0-9]+", 3)[0])
 
 			EndIf
 			;Region ButtonsDatainterface
 		Case $b_close
 			_cleanExit($data)
 		Case $b_run_pgn
-			If ProcessExists($processname) Then
-				_runPGN($data, FileRead(GUICtrlRead($i_file)))
-			Else
-				ContinueLoop
-			EndIf
+			_controller_runPGN($data, FileRead(GUICtrlRead($i_file)))
+			If @error Then MsgBox(16, "Error", "Game not running")
 		Case $b_run_loaded_game
-			If ProcessExists($processname) Then
-				_runPGN($data, _ArrayToString(_multiversetopgn($multiverse), @LF))
-			Else
-				ContinueLoop
-			EndIf
+			_controller_runPGN($data, _ArrayToString(_multiversetopgn($multiverse), @LF))
+			If @error Then MsgBox(16, "Error", "Game not running")
 		Case $b_datainterfaceSetup
 			If MsgBox(4, "No DatainterfaceSetup", "Saying yes here will automatically setup the datainterface to download into" & _
 					@CRLF & @LocalAppDataDir & "\GuiDataInterface\DataInterface") = 6 Then
-				requestDatainterface()
-				$folder = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
+				$folder = False
 			Else
 				$folder = FileSelectFolder("Select The DataInterface Folder you want to use", @WorkingDir)
 				If @error Then
@@ -346,20 +339,19 @@ While 1
 					ContinueLoop
 				EndIf
 			EndIf
-			$data = _loadDataInterface($folder)
-			If @error Then
-				If Not StringInStr($folder, "\Resources") Then
-					MsgBox(16, "Wrong Folder", "The chosen Folder doesnt contain the datainterface please Try Again")
+			_controller_datainterfaceSetup($ini, $folder)
+			Switch @error
+				Case 1
+					MsgBox(16, "Error", "The folder selected is not a valid datainterface folder")
 					ContinueLoop
-				EndIf
-				$data = _loadDataInterface(StringTrimRight($folder, 10))
-				If @error Then
-					MsgBox(16, "Broken Datainterfacesetup", "Your given datainterface setup might be broken." & @CRLF & "Couldnt find Datainterfaceconsole.exe or jsonVariants.json")
+				Case 2
+					MsgBox(16, "Error", "loading the datainterface failed")
 					ContinueLoop
-				EndIf
-			EndIf
+				Case 3
+					MsgBox(16, "Error", "The ini parameter is not valid")
+					ContinueLoop
+			EndSwitch
 			ResizeGUIDatainterfaceSetupped()
-			IniWrite($ini, $ini_Region, $value1, $data["workingDir"])
 		Case $b_run_datainterface
 			_runDataInterface($data)
 			If @error Then MsgBox(0, "", "")
@@ -384,11 +376,7 @@ While 1
 			$delay = $stuff["delay"]
 			_controller_changeTimer($data, $time, $delay, "S")
 		Case $b_undoMove
-			If GUICtrlRead($b_undoMove) = $GUI_CHECKED Then
-				_optionsOrTriggers($data, 1, 1)
-			Else
-				_optionsOrTriggers($data, 1, 2)
-			EndIf
+			_controller_undoMoveToggle($data)
 		Case $b_resumeGame
 			_optionsOrTriggers($data, 3)
 		Case $b_insertCode
@@ -414,7 +402,7 @@ While 1
 				EndSwitch
 			EndIf
 			If ($animation < 4 And $animation) Then
-				_settingOptions($data, 1, $animation)
+				_controller_animationSetting($data, $animation)
 			ElseIf $animation <> 0 Then
 				MsgBox(16, "no valid number", "No valid number got parsed, setting left unchanged")
 			EndIf
@@ -760,46 +748,8 @@ Func _checkVariant($JSON)
 	Return True
 EndFunc   ;==>_checkVariant
 
-Func requestDatainterface()
-	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
-	If @error Then
-		MsgBox(16, "Error", "Couldnt fetch latest release info from github")
-		Return SetError(1)
-	EndIf
-	$file = BinaryToString($file)
-	$JSON = _JSON_parse($file)
-	$asset = _find($JSON["assets"], "_someStringinStringcallback", "standalone")
-	If Not IsMap($asset) Then
-		MsgBox(16, "Error", "Couldnt find a standalone release asset")
-		Return SetError(1)
-	EndIf
-	Local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
-	DirCreate($folderDataInterface)
-	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
-	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
-	If @error Then
-		MsgBox(16, "Error:" & @error, "Couldnt unzip the downloaded file")
-		Return SetError(1)
-	EndIf
 
-	$data = _loadDataInterface($folderDataInterface)
 
-	FileDelete(@ScriptDir & "\data.zip")
-EndFunc   ;==>requestDatainterface
-Func _unZip($sZipFile, $sDestFolder)
-	If Not FileExists($sZipFile) Then Return SetError(1)    ; source file does not exists
-	If Not FileExists($sDestFolder) Then
-		If Not DirCreate($sDestFolder) Then Return SetError(2)      ; unable to create destination
-	Else
-		If Not StringInStr(FileGetAttrib($sDestFolder), "D") Then Return SetError(3)      ; destination not folder
-	EndIf
-	Local $oShell = ObjCreate("shell.application")
-	Local $oZip = $oShell.NameSpace($sZipFile)
-	Local $iZipFileCount = $oZip.items.Count
-	Local $dest = $oShell.NameSpace($sDestFolder)
-	If Not $iZipFileCount Then Return SetError(4)    ; zip file empty
-	$dest.copyhere($oZip.items, 16)
-EndFunc   ;==>_unZip
 
 Func _cbFactory($item, $args)
 	Return GUICtrlCreateCheckbox($item, 5, 5 + (20 * $args))

@@ -18,3 +18,60 @@ Func _controller_changeTimer(ByRef $data, $time, $delay, $type)
 		_settingOptions($data, $map[$type] + 1, $delay)
 	EndIf
 EndFunc   ;==>_controller_changeTimer
+
+
+Func _controller_undoMoveToggle(ByRef $data)
+	Static $toggled = False
+	If $toggled Then
+		_optionsOrTriggers($data, 1, 2)
+		$toggled = False
+	Else
+		_optionsOrTriggers($data, 1, 1)
+		$toggled = True
+	EndIf
+EndFunc   ;==>_controller_undoMoveToggle
+
+Func _controller_animationSetting(ByRef $data, $setting)
+	If $setting < 1 Or $setting > 3 Then
+		Return SetError(1, 0, 0)
+	EndIf
+	_settingOptions($data, 1, $setting)
+EndFunc   ;==>_controller_animationSetting
+
+Func _controller_removeVariant(ByRef $data, $variantId)
+	_removeVariantFromJson($data, $variantId)
+EndFunc   ;==>_controller_removeVariant
+
+Func _controller_runPGN(ByRef $data, $pgn)
+	If ProcessExists("5dchesswithmultiversetimetravel.exe") Then
+		_runPGN($data, FileRead(GUICtrlRead($i_file)))
+	Else
+		Return SetError(1, 0, 0) ; game not running
+	EndIf
+EndFunc   ;==>_controller_runPGN
+
+Func _controller_datainterfaceSetup($ini, $localPath = False)
+	If Not IsMap($ini) Or Not MapExists($ini, "path") Or Not MapExists($ini, "section") Then
+		Return SetError(3, 0, 0) ; ini parameter not valid
+	EndIf
+	If Not $localPath Then
+		_requestDatainterface()
+		$localPath = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
+	EndIf
+	$data = _loadDataInterface($localPath)
+	If @error Then
+		If Not StringInStr($localPath, "\Resources") Then
+			Return SetError(1, 0, 0) ; not a valid folder
+		EndIf
+		$data = _loadDataInterface(StringTrimRight($localPath, 10))
+		If @error Then
+			Return SetError(1, 0, 0) ; not a valid folder
+		EndIf
+	EndIf
+	If $data["workingDir"] = "" Then
+		Return SetError(2, 0, 0) ; loading went wrong
+	EndIf
+	IniWrite($ini["path"], $ini["section"], "Interface", $data["workingDir"])
+	Return $data
+EndFunc   ;==>_controller_datainterfaceSetup
+
