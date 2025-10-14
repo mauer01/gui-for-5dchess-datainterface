@@ -20,6 +20,7 @@ githublink for complete source = https://github.com/mauer01/gui-for-5dchess-data
 
 #include <include\multiversechess.au3>
 #include <include\datainterfaceService.au3>
+#include <include\controller.au3>
 #include <ButtonConstants.au3>
 #include <ComboConstants.au3>
 #include <EditConstants.au3>
@@ -371,41 +372,17 @@ While 1
 			$stuff = _inputbox()
 			$time = $stuff["time"]
 			$delay = $stuff["delay"]
-			If ($time And $delay) Then
-				_settingOptions($data, 6, $time)
-				_waitForResponse($data, "Action executed. Returning to menu")
-				_settingOptions($data, 7, $delay)
-			ElseIf $time Then
-				_settingOptions($data, 6, $time)
-			ElseIf $delay Then
-				_settingOptions($data, 7, $time)
-			EndIf
+			_controller_changeTimer($data, $time, $delay, "L")
 		Case $b_datainterfaceChangeTimerM
 			$stuff = _inputbox()
 			$time = $stuff["time"]
 			$delay = $stuff["delay"]
-			If ($time And $delay) Then
-				_settingOptions($data, 4, $time)
-				_waitForResponse($data, "Action executed. Returning to menu")
-				_settingOptions($data, 5, $delay)
-			ElseIf $time Then
-				_settingOptions($data, 4, $time)
-			ElseIf $delay Then
-				_settingOptions($data, 5, $delay)
-			EndIf
+			_controller_changeTimer($data, $time, $delay, "M")
 		Case $b_datainterfaceChangeTimerS
 			$stuff = _inputbox()
 			$time = $stuff["time"]
 			$delay = $stuff["delay"]
-			If ($time And $delay) Then
-				_settingOptions($data, 2, $time)
-				_waitForResponse($data, "Action executed. Returning to menu")
-				_settingOptions($data, 3, $delay)
-			ElseIf $time Then
-				_settingOptions($data, 2, $time)
-			ElseIf $delay Then
-				_settingOptions($data, 3, $delay)
-			EndIf
+			_controller_changeTimer($data, $time, $delay, "S")
 		Case $b_undoMove
 			If GUICtrlRead($b_undoMove) = $GUI_CHECKED Then
 				_optionsOrTriggers($data, 1, 1)
