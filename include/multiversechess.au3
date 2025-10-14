@@ -1,5 +1,6 @@
 #include-once
 #include <Array.au3>
+#include <moreArray.au3>
 #include <File.au3>
 #include <JSON.au3>
 
@@ -904,3 +905,39 @@ Func _IsEven($number)
 	Return Mod($number, 2) = 0
 EndFunc   ;==>_IsEven
 #EndRegion stupid stuff
+
+
+Func _checkVariant($JSON)
+	$initialKeys = MapKeys($JSON)
+	If Not _some($initialKeys, "_stringinstringcallback", "Name") Then Return "No Name"
+	If Not _some($initialKeys, "_stringinstringcallback", "Author") Then Return "No Author"
+	If Not _some($initialKeys, "_stringinstringcallback", "Timelines") Then Return "No Timelines"
+	$timelines = MapKeys($JSON["Timelines"])
+	$counting = 0
+	For $line In $timelines
+		If StringRegExp($line, "^([+-]?(0|[1-9]\d*))L$") Then
+			$counting += 1
+		EndIf
+	Next
+	If Not ($counting = UBound($timelines)) Then Return "Ungültige Zeitliniennamen"
+	Local $multiverse = _multiverse_create("variant", $JSON)
+	$multiversum = $multiverse[1]
+	For $i = 0 To UBound($multiversum) - 1
+		For $j = 0 To UBound($multiversum, 2) - 1
+			If Not IsArray($multiversum[$i][$j]) Then ContinueLoop
+			$board = $multiversum[$i][$j]
+			$boardheight = UBound($board)
+			If $boardheight > 8 Then MsgBox(0, "", "")
+			$boardwidth = UBound($board, 2)
+			If Not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
+			If $boardheight <> $boardwidth Then
+				Return "Board at timeline " & $j & " and at position " & $i + 1 & " isnt a square"
+			EndIf
+			If $boardheight <> $oldboardheight Then
+				Return "Board at timeline " & $j & " and at position " & $i + 1 & " has a different height"
+			EndIf
+			$oldboardheight = $boardheight
+		Next
+	Next
+	Return True
+EndFunc   ;==>_checkVariant
