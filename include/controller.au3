@@ -1,5 +1,6 @@
 #include-once
 #include <datainterfaceService.au3>
+#include <multiversechess.au3>
 Func _controller_changeTimer(ByRef $data, $time, $delay, $type)
 	If $type <> "L" And $type <> "M" And $type <> "S" Then
 		Return SetError(1, 0, 0)
@@ -44,7 +45,7 @@ EndFunc   ;==>_controller_removeVariant
 
 Func _controller_runPGN(ByRef $data, $pgn)
 	If ProcessExists("5dchesswithmultiversetimetravel.exe") Then
-		_runPGN($data, FileRead(GUICtrlRead($i_file)))
+		_runPGN($data, $pgn)
 	Else
 		Return SetError(1, 0, 0) ; game not running
 	EndIf
@@ -75,3 +76,33 @@ Func _controller_datainterfaceSetup($ini, $localPath = False)
 	Return $data
 EndFunc   ;==>_controller_datainterfaceSetup
 
+Func _controller_addVariant(ByRef $data, $multiverse)
+	If Not MapExists($multiverse, "Name") Then
+		Return SetError(1, 0, 0) ; name missing
+	EndIf
+	$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $multiverse["Name"], "pgn to variant"))
+	_addVariantToJson($data, $variant, $multiverse["Name"])
+EndFunc   ;==>_controller_addVariant
+
+
+
+Func _controller_downloadVariants(ByRef $data, $cacheOnly = False, $variantfiles = "all")
+	_cacheJsonUrls($data)
+	If $cacheOnly Then
+		Return
+	EndIf
+	If $variantfiles <> "all" Then
+		If Not IsArray($variantfiles) Then
+			If _some($data["remoteJsonUrls"], "StringInStr", $variantfiles) = -1 Then
+				Return SetError(1, 0, 0) ; variant file not found in cached urls
+			EndIf
+		EndIf
+		If Not _some($data["remoteJsonUrls"], "_someStringinStringcallback", $variantfiles) Then
+			Return SetError(2, 0, 0) ; some variant file not found in cached urls
+		EndIf
+	EndIf
+	If $variantfiles = "all" Then
+		$variantfiles = MapKeys($data["remoteJsonUrls"])
+	EndIf
+	_downloadAndInstallJsonFiles($data, $variantfiles)
+EndFunc   ;==>_controller_downloadVariants
