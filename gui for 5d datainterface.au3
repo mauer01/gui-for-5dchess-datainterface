@@ -270,15 +270,12 @@ While 1
 			ResizeGUIEditBox(0)
 		Case $b_e_save
 			$input = GUICtrlRead($e_json)
-			$newJSON = _JSON_Parse($input)
-			$check = _checkVariant($newJSON)
-			If IsString($check) Then
-				MsgBox(16, "Error in Variant", $check)
+			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replaces it with the new one") <> 6 Then ContinueLoop
+			_controller_replaceVariant($data, $input, $variantnumber, $fullJSON)
+			If @error Then
+				MsgBox(16, "Error", "Variant not replaced")
 				ContinueLoop
 			EndIf
-			If MsgBox(4, "This changes the Original", "pressing yes here will remove the original variant and replaces it with the new one") <> 6 Then ContinueLoop
-			$fullJSON[$variantnumber - 1] = $newJSON
-			updateJSONVariants($data, $fullJSON)
 			GUISetState(@SW_ENABLE)
 			ResizeGUIEditBox(0)
 		Case $b_json_edit
