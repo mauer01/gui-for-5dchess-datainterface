@@ -909,9 +909,9 @@ EndFunc   ;==>_IsEven
 
 Func _checkVariant($JSON)
 	$initialKeys = MapKeys($JSON)
-	If Not _some($initialKeys, "_stringinstringcallback", "Name") Then Return "No Name"
-	If Not _some($initialKeys, "_stringinstringcallback", "Author") Then Return "No Author"
-	If Not _some($initialKeys, "_stringinstringcallback", "Timelines") Then Return "No Timelines"
+	If Not _some($initialKeys, "StringInStr", "Name") Then Return "No Name"
+	If Not _some($initialKeys, "StringInStr", "Author") Then Return "No Author"
+	If Not _some($initialKeys, "StringInStr", "Timelines") Then Return "No Timelines"
 	$timelines = MapKeys($JSON["Timelines"])
 	$counting = 0
 	For $line In $timelines
