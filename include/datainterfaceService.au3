@@ -5,6 +5,7 @@
 #include <Process.au3>
 #include <JSON.au3>
 #include <moreArray.au3>
+#include <util.au3>
 
 Const $__tempFile = @ScriptDir & "\temp-pgn to variant.txt"
 Global $__PIDArray[0] = []
@@ -331,3 +332,38 @@ Func _cacheJsonUrls(ByRef $data)
 	$data2 = BinaryToString($data2)
 	$data["remoteJsonUrls"] = _JSON_Parse($data2)
 EndFunc   ;==>_cacheJsonUrls
+
+Func _requestDatainterface()
+	Local $JSON, $file, $data
+	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
+	If @error Then
+		MsgBox(16, "Error", "Couldnt fetch latest release info from github")
+		Return SetError(1)
+	EndIf
+	$file = BinaryToString($file)
+	$JSON = _JSON_parse($file)
+	$asset = _find($JSON["assets"], "_someStringinStringcallback", "standalone")
+	If Not IsMap($asset) Then
+		MsgBox(16, "Error", "Couldnt find a standalone release asset")
+		Return SetError(1)
+	EndIf
+	Local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
+	DirCreate($folderDataInterface)
+	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
+	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
+	If @error Then
+		MsgBox(16, "Error:" & @error, "Couldnt unzip the downloaded file")
+		Return SetError(1)
+	EndIf
+
+	$data = _loadDataInterface($folderDataInterface)
+
+	FileDelete(@ScriptDir & "\data.zip")
+EndFunc   ;==>_requestDatainterface
+
+
+Func _JSONLoad(ByRef $data)
+	$fileContent = FileRead($data["jsonFile"])
+	$temp = _JSON_Parse($fileContent)
+	Return $temp
+EndFunc   ;==>_JSONLoad
