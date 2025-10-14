@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<object type="TAForm" name="main">
+	<properties>
+		<property name="Left" vt="Int16">1038</property>
+		<property name="Top" vt="Int16">320</property>
+		<property name="Width" vt="Int16">617</property>
+		<property name="Height" vt="Int16">248</property>
+		<property name="Caption" vt="String">Gui for Datainterface</property>
+		<property name="Color" vt="Ident">clBtnFace</property>
+		<property name="Font.Charset" vt="Ident">DEFAULT_CHARSET</property>
+		<property name="Font.Color" vt="Ident">clWindowText</property>
+		<property name="Font.Height" vt="Int8">-11</property>
+		<property name="Font.Name" vt="String">MS Sans Serif</property>
+		<property name="Font.Style" vt="Set"/>
+		<property name="OldCreateOrder" vt="False">False</property>
+		<property name="Visible" vt="True">True</property>
+		<property name="OnClose" vt="String">mainClose</property>
+		<property name="Style" vt="Int32">-1798701056</property>
+		<property name="ExStyle" vt="Int16">256</property>
+		<property name="Version" vt="String">1.04</property>
+		<property name="FormOptOnEvent" vt="False">False</property>
+		<property name="FormOptExpVars" vt="False">False</property>
+		<property name="FormOptPopulate" vt="False">False</property>
+		<property name="FormOptVarsForSet" vt="False">False</property>
+		<property name="FormOptIndentChar" vt="Int8">0</property>
+		<property name="FormOptIndentCount" vt="Int8">1</property>
+		<property name="FormOptIndentInit" vt="Int8">0</property>
+		<property name="FormOptVarScope" vt="Int8">0</property>
+		<property name="Resizing" vt="Set"/>
+		<property name="PixelsPerInch" vt="Int8">96</property>
+		<property name="TextHeight" vt="Int8">13</property>
+	</properties>
+	<components>
+		<object type="TATab" name="tab">
+			<properties>
+				<property name="Left" vt="Int8">0</property>
+				<property name="Top" vt="Int8">0</property>
+				<property name="Width" vt="Int16">601</property>
+				<property name="Height" vt="Int16">209</property>
+				<property name="ActivePage" vt="Ident">tJsonLoader</property>
+				<property name="Font.Charset" vt="Ident">DEFAULT_CHARSET</property>
+				<property name="Font.Color" vt="Ident">clWindowText</property>
+				<property name="Font.Height" vt="Int8">-11</property>
+				<property name="Font.Name" vt="String">Arial</property>
+				<property name="Font.Style" vt="Set"/>
+				<property name="ParentFont" vt="False">False</property>
+				<property name="TabOrder" vt="Int8">0</property>
+				<property name="CtrlStyle" vt="Int32">1409482752</property>
+				<property name="CtrlExStyle" vt="Int8">0</property>
+				<property name="Resizing" vt="Set"/>
+			</properties>
+			<components>
+				<object type="TTabSheet" name="tJsonLoader">
+					<properties>
+						<property name="Caption" vt="String">JSON Loader</property>
+						<property name="Font.Charset" vt="Ident">DEFAULT_CHARSET</property>
+						<property name="Font.Color" vt="Ident">clWindowText</property>
+						<property name="Font.Height" vt="Int8">-11</property>
+						<property name="Font.Name" vt="String">MS Sans Serif</property>
+						<property name="Font.Style" vt="Set"/>
+						<property name="ImageIndex" vt="Int8">-1</property>
+						<property name="ParentFont" vt="False">False</property>
+					</properties>
+					<components>
+						<object type="TAControlGroup" name="cgNewJson">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">7</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components>
+								<object type="TAInput" name="iJsonFileNewPath">
+									<properties>
+										<property name="Left" vt="Int8">0</property>
+										<property name="Top" vt="Int8">2</property>
+										<property name="Width" vt="Int16">225</property>
+										<property name="Height" vt="Int8">21</property>
+										<property name="TabOrder" vt="Int8">0</property>
+										<property name="CtrlStyle" vt="Int32">1342374016</property>
+										<property name="CtrlExStyle" vt="Int16">512</property>
+										<property name="Resizing" vt="Set">DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bAddJsonFile">
+									<properties>
+										<property name="Left" vt="Int16">232</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">35</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Add</property>
+										<property name="TabOrder" vt="Int8">1</property>
+										<property name="OnClick" vt="String">bAddJsonFileClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342377984</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+							</components>
+						</object>
+						<object type="TAControlGroup" name="cgRemoteJson">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">39</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components>
+								<object type="TACombo" name="cRemoteJsons">
+									<properties>
+										<property name="Left" vt="Int8">0</property>
+										<property name="Top" vt="Int8">2</property>
+										<property name="Width" vt="Int16">225</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="ItemHeight" vt="Int8">13</property>
+										<property name="TabOrder" vt="Int8">0</property>
+										<property name="OnChange" vt="String">cRemoteJsonsChange</property>
+										<property name="CtrlStyle" vt="Int32">1342374466</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set"/>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bRemoteJsonDownload">
+									<properties>
+										<property name="Left" vt="Int16">232</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">35</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Add</property>
+										<property name="TabOrder" vt="Int8">1</property>
+										<property name="OnClick" vt="String">Button1Click</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set"/>
+									</properties>
+									<components/>
+								</object>
+							</components>
+						</object>
+						<object type="TAControlGroup" name="cgLocalJson">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">71</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components>
+								<object type="TACombo" name="cLocalJsonFiles">
+									<properties>
+										<property name="Left" vt="Int8">0</property>
+										<property name="Top" vt="Int8">2</property>
+										<property name="Width" vt="Int16">225</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="ItemHeight" vt="Int8">13</property>
+										<property name="TabOrder" vt="Int8">0</property>
+										<property name="OnChange" vt="String">cLocalJsonFilesChange</property>
+										<property name="CtrlStyle" vt="Int32">1342374466</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bLocalJsonFileRemove">
+									<properties>
+										<property name="Left" vt="Int16">232</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">50</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Remove</property>
+										<property name="TabOrder" vt="Int8">1</property>
+										<property name="OnClick" vt="String">Button1Click</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bLocalJsonFileCopy">
+									<properties>
+										<property name="Left" vt="Int16">286</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">50</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Copy</property>
+										<property name="TabOrder" vt="Int8">2</property>
+										<property name="OnClick" vt="String">Button1Click</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bLocalJsonFileRename">
+									<properties>
+										<property name="Left" vt="Int16">340</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">50</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Rename</property>
+										<property name="TabOrder" vt="Int8">3</property>
+										<property name="OnClick" vt="String">bLocalJsonFileRenameClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bLocalJsonFileBackup">
+									<properties>
+										<property name="Left" vt="Int16">394</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">50</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Backup</property>
+										<property name="TabOrder" vt="Int8">4</property>
+										<property name="OnClick" vt="String">bLocalJsonFileBackupClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bOpenJsonFolder">
+									<properties>
+										<property name="Left" vt="Int16">448</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">75</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Open Folder</property>
+										<property name="TabOrder" vt="Int8">5</property>
+										<property name="OnClick" vt="String">bOpenJsonFolderClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+							</components>
+						</object>
+						<object type="TAControlGroup" name="cgVariants">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">103</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components>
+								<object type="TACombo" name="cListOfVariants">
+									<properties>
+										<property name="Left" vt="Int8">0</property>
+										<property name="Top" vt="Int8">2</property>
+										<property name="Width" vt="Int16">225</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="ItemHeight" vt="Int8">13</property>
+										<property name="TabOrder" vt="Int8">0</property>
+										<property name="CtrlStyle" vt="Int32">1342374466</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bRunVariant">
+									<properties>
+										<property name="Left" vt="Int16">232</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">43</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Run</property>
+										<property name="TabOrder" vt="Int8">1</property>
+										<property name="OnClick" vt="String">bRunVariantClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bVariantRemove">
+									<properties>
+										<property name="Left" vt="Int16">280</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">59</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Remove</property>
+										<property name="TabOrder" vt="Int8">2</property>
+										<property name="OnClick" vt="String">bVariantRemoveClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bVariantEdit">
+									<properties>
+										<property name="Left" vt="Int16">344</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">43</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Edit</property>
+										<property name="TabOrder" vt="Int8">3</property>
+										<property name="OnClick" vt="String">bVariantEditClick</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+							</components>
+						</object>
+						<object type="TAControlGroup" name="ControlGroup1">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int16">135</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components>
+								<object type="TAButton" name="bAddVariantfromClip">
+									<properties>
+										<property name="Left" vt="Int16">160</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">75</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Clipboard</property>
+										<property name="TabOrder" vt="Int8">0</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TALabel" name="laddSpecifier">
+									<properties>
+										<property name="Left" vt="Int8">8</property>
+										<property name="Top" vt="Int8">5</property>
+										<property name="Width" vt="Int16">146</property>
+										<property name="Height" vt="Int8">17</property>
+										<property name="Caption" vt="String">Add new Variant via Methods:</property>
+										<property name="TabOrder" vt="Int8">1</property>
+										<property name="HaveVariable" vt="False">False</property>
+										<property name="CtrlStyle" vt="Int32">1342308608</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set"/>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="bAddVariantFromFile">
+									<properties>
+										<property name="Left" vt="Int16">240</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">59</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Textfile</property>
+										<property name="TabOrder" vt="Int8">2</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+								<object type="TAButton" name="baddVariantsFromJsonFile">
+									<properties>
+										<property name="Left" vt="Int16">304</property>
+										<property name="Top" vt="Int8">0</property>
+										<property name="Width" vt="Int8">115</property>
+										<property name="Height" vt="Int8">25</property>
+										<property name="Caption" vt="String">Combine JsonFiles</property>
+										<property name="TabOrder" vt="Int8">3</property>
+										<property name="OnClick" vt="String">Button1Click</property>
+										<property name="Color" vt="Ident">clBtnFace</property>
+										<property name="CtrlStyle" vt="Int32">1342373888</property>
+										<property name="CtrlExStyle" vt="Int8">0</property>
+										<property name="Resizing" vt="Set">DockWidth, DockHeight</property>
+									</properties>
+									<components/>
+								</object>
+							</components>
+						</object>
+					</components>
+				</object>
+				<object type="TTabSheet" name="tSettings">
+					<properties>
+						<property name="Caption" vt="String">Settings</property>
+						<property name="Font.Charset" vt="Ident">DEFAULT_CHARSET</property>
+						<property name="Font.Color" vt="Ident">clWindowText</property>
+						<property name="Font.Height" vt="Int8">-11</property>
+						<property name="Font.Name" vt="String">MS Sans Serif</property>
+						<property name="Font.Style" vt="Set"/>
+						<property name="ImageIndex" vt="Int8">-1</property>
+						<property name="ParentFont" vt="False">False</property>
+					</properties>
+					<components>
+						<object type="TAControlGroup" name="cgClocks">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">7</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">57</property>
+							</properties>
+							<components/>
+						</object>
+						<object type="TAControlGroup" name="cgEphemeral">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">71</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components/>
+						</object>
+						<object type="TAControlGroup" name="cgSettings">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">103</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components/>
+						</object>
+						<object type="TAControlGroup" name="cgTriggers">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int16">135</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components/>
+						</object>
+					</components>
+				</object>
+				<object type="TTabSheet" name="tPgnLoader">
+					<properties>
+						<property name="Caption" vt="String">PGN Loader</property>
+						<property name="Font.Charset" vt="Ident">DEFAULT_CHARSET</property>
+						<property name="Font.Color" vt="Ident">clWindowText</property>
+						<property name="Font.Height" vt="Int8">-11</property>
+						<property name="Font.Name" vt="String">MS Sans Serif</property>
+						<property name="Font.Style" vt="Set"/>
+						<property name="ImageIndex" vt="Int8">-1</property>
+						<property name="ParentFont" vt="False">False</property>
+					</properties>
+					<components>
+						<object type="TAControlGroup" name="cgNewPgn">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">7</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components/>
+						</object>
+						<object type="TAControlGroup" name="cgPgnText">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">39</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components/>
+						</object>
+						<object type="TAControlGroup" name="cgListPgns">
+							<properties>
+								<property name="Left" vt="Int8">4</property>
+								<property name="Top" vt="Int8">71</property>
+								<property name="Width" vt="Int16">569</property>
+								<property name="Height" vt="Int8">25</property>
+							</properties>
+							<components/>
+						</object>
+					</components>
+				</object>
+			</components>
+		</object>
+	</components>
+</object>
