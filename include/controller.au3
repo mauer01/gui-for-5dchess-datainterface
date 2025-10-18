@@ -51,30 +51,7 @@ Func _controller_runPGN(ByRef $data, $pgn)
 	EndIf
 EndFunc   ;==>_controller_runPGN
 
-Func _controller_datainterfaceSetup($ini, $localPath = False)
-	If Not IsMap($ini) Or Not MapExists($ini, "path") Or Not MapExists($ini, "section") Then
-		Return SetError(3, 0, 0) ; ini parameter not valid
-	EndIf
-	If Not $localPath Then
-		_requestDatainterface()
-		$localPath = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
-	EndIf
-	$data = _loadDataInterface($localPath)
-	If @error Then
-		If Not StringInStr($localPath, "\Resources") Then
-			Return SetError(1, 0, 0) ; not a valid folder
-		EndIf
-		$data = _loadDataInterface(StringTrimRight($localPath, 10))
-		If @error Then
-			Return SetError(1, 0, 0) ; not a valid folder
-		EndIf
-	EndIf
-	If $data["workingDir"] = "" Then
-		Return SetError(2, 0, 0) ; loading went wrong
-	EndIf
-	IniWrite($ini["path"], $ini["section"], "Interface", $data["workingDir"])
-	Return $data
-EndFunc   ;==>_controller_datainterfaceSetup
+
 
 Func _controller_addVariant(ByRef $data, $multiverse)
 	If Not MapExists($multiverse, "Name") Then

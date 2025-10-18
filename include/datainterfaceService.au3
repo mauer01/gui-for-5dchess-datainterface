@@ -10,6 +10,24 @@
 Const $__tempFile = @ScriptDir & "\temp-pgn to variant.txt"
 Global $__PIDArray[0] = []
 Global $__emptyArray[0] = []
+
+Func _datainterfaceSetup($localPath = False)
+	If Not $localPath Then
+		_requestDatainterface()
+		$localPath = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
+	EndIf
+	$data = _loadDataInterface($localPath)
+	If @error Then
+		If Not StringInStr($localPath, "\Resources") Then
+			Return SetError(1, 0, 0) ; not a valid folder
+		EndIf
+		$data = _loadDataInterface(StringTrimRight($localPath, 10))
+		If @error Then
+			Return SetError(1, 0, 0) ; not a valid folder
+		EndIf
+	EndIf
+	Return $data
+EndFunc   ;==>_datainterfaceSetup
 Func _loadDataInterface($filepath)
 	Local $data[]
 	$data["isRunning"] = False
@@ -24,8 +42,12 @@ Func _loadDataInterface($filepath)
 	$data["configured"] = True
 	$data["jsonFiles"] = $__emptyArray
 	$data["lastFileList"] = $__emptyArray
-	$data["JsonFileManager"] = False
-	If Not FileExists($data["filePath"]) Or Not FileExists($data["jsonFile"]) Then Return SetError(1)
+	$data["JsonFileManager"] = True
+	$data["settings"] = _newMap()
+	If FileExists($data["workingDir"] & "\settings.json") Then
+		$data["settings"] = _JSON_Parse(FileRead($data["workingDir"] & "\settings.json"))
+	EndIf
+
 	Return $data
 EndFunc   ;==>_loadDataInterface
 
