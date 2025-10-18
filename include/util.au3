@@ -39,7 +39,6 @@ Func _standardLang()
 			'    "bPgnAdd": "Add",' & @CRLF & _
 			'    "bPgnOpenPath": "Choose Path",' & @CRLF & _
 			'    "bPgnAddClipboard": "Add from Clipboard",' & @CRLF & _
-			'    "cPgnList": "cPgnList",' & @CRLF & _
 			'    "bPgnRun": "Run",' & @CRLF & _
 			'    "bPgnRemove": "Remove",' & @CRLF & _
 			'    "bPgnEdit": "Edit"' & @CRLF & _
