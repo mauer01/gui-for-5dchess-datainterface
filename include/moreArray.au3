@@ -25,6 +25,7 @@ Func _equalityCallback($a, $b)
 EndFunc   ;==>_equalityCallback
 
 Func _find($list, $callback, $arg)
+
 	For $item In $list
 		If Call($callback, $item, $arg) Then
 			Return $item
@@ -93,3 +94,32 @@ Func _arraytoMap($array)
 	Next
 	Return $map
 EndFunc   ;==>_arraytoMap
+
+
+Func _multidimfind($array, $callback, $arg = "")
+
+	For $i = 0 To UBound($array) - 1
+		For $j = 0 To UBound($array, 2) - 1
+			If Call($callback, $array[$i][$j], $arg) Then
+
+				Return $array[$i][$j + 1]
+			EndIf
+		Next
+	Next
+	Return SetError(1, 0, 0)
+EndFunc   ;==>_multidimfind
+
+
+Func _twodimarraytoMap($array)
+	Local $map[]
+	For $i = 0 To UBound($array) - 1
+		$map[$array[$i][0]] = $array[$i][1]
+	Next
+	Return $map
+EndFunc   ;==>_twodimarraytoMap
+
+
+Func _newMap()
+	Local $map[]
+	Return $map
+EndFunc   ;==>_newMap
