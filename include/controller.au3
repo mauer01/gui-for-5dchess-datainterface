@@ -95,3 +95,17 @@ Func _controller_replaceVariant(ByRef $data, $input, $variantnumber, ByRef $full
 	updateJSONVariants($data, $fullJSON)
 	Return True
 EndFunc   ;==>_controller_replaceVariant
+
+
+
+Func _controller_trigger(ByRef $data, $code = False)
+	If Not $code Then
+		_optionsOrTriggers($data, 3)
+		Return
+	EndIf
+	If Not StringInStr($code, "\:\]") Then
+		Return SetError(1)
+	EndIf
+
+	_optionsOrTriggers($data, 2, $code)
+EndFunc   ;==>_controller_trigger
