@@ -39,13 +39,21 @@ Func main()
 	Local $context = loadContext()
 	Switch @error
 		Case 1
-			MsgBox(16, "Error", "Failed to load Datainterface.")
+			Return SetError(1, 0, $context)
 	EndSwitch
 
 	$run = _runDataInterface($context["data"])
-	If @error Then Return SetError(@error, @extended, $run)
+	If @error Then
+		_cleanexit($context.data)
+		Return SetError(@error, @extended, $run)
+	EndIf
+
 	$main = _MainGui($context)
-	If @error Then Return SetError(@error, @extended, $main)
+	If @error Then
+		_cleanexit($context.data)
+		Return SetError(@error, @extended, $main)
+	EndIf
+
 
 EndFunc   ;==>main
 
@@ -59,6 +67,7 @@ Func loadContext()
 	EndIf
 	IniReadSection("gui for datainterface.ini", "Data")
 	$context["ini"]["data"] = _twodimarraytoMap(IniReadSection("gui for datainterface.ini", "Data"))
+	If Not MapExists($context.ini.data, "Interface") Then Return SetError(1, 0, "force setting up datainterface")
 	$context["data"] = _datainterfaceSetup($context["ini"]["data"]["Interface"])
 	If @error = 1 Then
 		Return SetError(1, 0, "force setting up datainterface")

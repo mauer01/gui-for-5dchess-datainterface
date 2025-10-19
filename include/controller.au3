@@ -34,7 +34,7 @@ EndFunc   ;==>_controller_undoMoveToggle
 
 Func _controller_animationSetting(ByRef $data, $setting)
 	If $setting < 1 Or $setting > 3 Then
-		Return SetError(1, 0, 0)
+		Return SetError(1, 0, "Setting out of range")
 	EndIf
 	_settingOptions($data, 1, $setting)
 EndFunc   ;==>_controller_animationSetting
