@@ -38,5 +38,6 @@
   "cPgnList": "PGN-Liste",
   "bPgnRun": "Ausführen",
   "bPgnRemove": "Entfernen",
-  "bPgnEdit": "Bearbeiten"
+  "bPgnEdit": "Bearbeiten",
+  "cbBlackIncluded": "Schwarz einbeziehen"
 }

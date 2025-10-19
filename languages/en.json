@@ -38,5 +38,6 @@
   "cPgnList": "cPgnList",
   "bPgnRun": "Run",
   "bPgnRemove": "Remove",
-  "bPgnEdit": "Edit"
+  "bPgnEdit": "Edit",
+  "cbBlackIncluded": "Black Included"
 }

@@ -6,78 +6,114 @@
 #include <StaticConstants.au3>
 #include <TabConstants.au3>
 #include <WindowsConstants.au3>
+#include <include\controller.au3>
 Func _MainGui($context)
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
-	Local $main = GUICreate($context["labels"]["main"], 604, 210, 1140, 268)
+	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
+	;### Debug MSGBOX ↓↓↓
+	MsgBox(262144, 'Debug line ~' & @ScriptLineNumber, 'Selection:' & @CRLF & '$context' & @CRLF & @CRLF & 'Return:' & @CRLF & $context)
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
-	GUICtrlCreateTabItem($context["labels"]["tJsonLoader"])
+	GUICtrlCreateTabItem($context.labels.tJsonLoader)
 	GUIStartGroup()
+	Local $cgNewJson = GUICtrlCreateLabel("", 8, 34, 0, 0)
 	Local $iJsonFileNewPath = GUICtrlCreateInput("", 8, 34, 225, 21)
-	Local $bAddJsonFile = GUICtrlCreateButton($context["labels"]["bAddJsonFile"], 240, 32, 35, 25, $BS_PUSHLIKE)
+	Local $bAddJsonFile = GUICtrlCreateButton($context.labels.bAddJsonFile, 240, 32)
 	GUIStartGroup()
 	GUIStartGroup()
+	Local $cgRemoteJson = GUICtrlCreateLabel("", 8, 66, 0, 0)
 	Local $cRemoteJsons = GUICtrlCreateCombo("", 8, 66, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	Local $bRemoteJsonDownload = GUICtrlCreateButton($context["labels"]["bRemoteJsonDownload"], 240, 64, 67, 25)
+	Local $bRemoteJsonDownload = GUICtrlCreateButton($context.labels.bRemoteJsonDownload, 240, 64)
 	GUIStartGroup()
 	GUIStartGroup()
+	Local $cgLocalJson = GUICtrlCreateLabel("", 8, 98, 0, 0)
 	Local $cLocalJsonFiles = GUICtrlCreateCombo("", 8, 98, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	Local $bLocalJsonFileRemove = GUICtrlCreateButton($context["labels"]["bLocalJsonFileRemove"], 240, 96, 50, 25)
-	Local $bLocalJsonFileCopy = GUICtrlCreateButton($context["labels"]["bLocalJsonFileCopy"], 294, 96, 50, 25)
-	Local $bLocalJsonFileRename = GUICtrlCreateButton($context["labels"]["bLocalJsonFileRename"], 348, 96, 50, 25)
-	Local $bLocalJsonFileBackup = GUICtrlCreateButton($context["labels"]["bLocalJsonFileBackup"], 402, 96, 50, 25)
-	Local $bOpenJsonFolder = GUICtrlCreateButton($context["labels"]["bOpenJsonFolder"], 456, 96, 75, 25)
+	Local $bLocalJsonFileRemove = GUICtrlCreateButton($context.labels.bLocalJsonFileRemove, 240, 96)
+	$newPos = myControlGetPos($main, $bLocalJsonFileRemove)
+	Local $bLocalJsonFileCopy = GUICtrlCreateButton($context.labels.bLocalJsonFileCopy, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bLocalJsonFileCopy)
+	Local $bLocalJsonFileRename = GUICtrlCreateButton($context.labels.bLocalJsonFileRename, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bLocalJsonFileRename)
+	Local $bLocalJsonFileBackup = GUICtrlCreateButton($context.labels.bLocalJsonFileBackup, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bLocalJsonFileBackup)
+	Local $bOpenJsonFolder = GUICtrlCreateButton($context.labels.bOpenJsonFolder, $newPos["x"] + 5, $newPos["y"])
 	GUIStartGroup()
 	GUIStartGroup()
+	Local $cgVariants = GUICtrlCreateLabel("", 8, 130, 0, 0)
 	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	Local $bRunVariant = GUICtrlCreateButton($context["labels"]["bRunVariant"], 240, 128, 43, 25)
-	Local $bVariantRemove = GUICtrlCreateButton($context["labels"]["bVariantRemove"], 288, 128, 59, 25)
-	Local $bVariantEdit = GUICtrlCreateButton($context["labels"]["bVariantEdit"], 352, 128, 43, 25)
+	$newPos = myControlGetPos($main, $cListOfVariants)
+	Local $bRunVariant = GUICtrlCreateButton($context.labels.bRunVariant, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bRunVariant)
+	Local $bVariantRemove = GUICtrlCreateButton($context.labels.bVariantRemove, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bVariantRemove)
+	Local $bVariantEdit = GUICtrlCreateButton($context.labels.bVariantEdit, $newPos["x"] + 5, $newPos["y"])
 	GUIStartGroup()
 	GUIStartGroup()
-	Local $bAddVariantfromClip = GUICtrlCreateButton($context["labels"]["bAddVariantfromClip"], 168, 160, 75, 25)
-	GUICtrlCreateLabel($context["labels"]["laddSpecifier"], 16, 165, 146, 17)
-	Local $bAddVariantFromFile = GUICtrlCreateButton($context["labels"]["bAddVariantFromFile"], 248, 160, 59, 25)
-	Local $baddVariantsFromJsonFile = GUICtrlCreateButton($context["labels"]["baddVariantsFromJsonFile"], 312, 160, 115, 25)
+	$lAddSpecifier = GUICtrlCreateLabel($context.labels.laddSpecifier, 16, 170)
+	$newPos = myControlGetPos($main, $lAddSpecifier)
+	Local $cgAddvariants = GUICtrlCreateLabel("", $newPos["x"], $newPos["y"] - 5, 0, 0)
+	Local $bAddVariantfromClip = GUICtrlCreateButton($context.labels.bAddVariantfromClip, $newPos["x"], $newPos["y"] - 5)
+	$newPos = myControlGetPos($main, $bAddVariantfromClip)
+	Local $bAddVariantFromFile = GUICtrlCreateButton($context.labels.bAddVariantFromFile, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bAddVariantFromFile)
+	Local $baddVariantsFromJsonFile = GUICtrlCreateButton($context.labels.baddVariantsFromJsonFile, $newPos["x"] + 5, $newPos["y"])
 	GUIStartGroup()
-	GUICtrlCreateTabItem($context["labels"]["tSettings"])
+	GUICtrlCreateTabItem($context.labels.tSettings)
 	GUIStartGroup()
-	Local $cClocks = GUICtrlCreateCombo($context["labels"]["cClocks"], 8, 32, 145, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	GUICtrlSetData(-1, $context["labels"]["cClocksChoices"])
-	Local $iClockTime = GUICtrlCreateInput($context["labels"]["iClockTime"], 8, 56, 65, 21)
-	Local $iClockDelay = GUICtrlCreateInput($context["labels"]["iClockDelay"], 88, 56, 65, 21)
-	Local $bClockSet = GUICtrlCreateButton($context["labels"]["bClockSet"], 160, 56, 51, 25)
-	Local $bClockReset = GUICtrlCreateButton($context["labels"]["bClockReset"], 160, 32, 91, 25)
-	GUICtrlCreateLabel($context["labels"]["Label1"], 76, 58, 10, 17)
-	GUIStartGroup()
-	GUIStartGroup()
-	Local $cbUndoMove = GUICtrlCreateCheckbox($context["labels"]["cbUndoMove"], 8, 96, 89, 17)
-	Local $cbRestartGameOnCrash = GUICtrlCreateCheckbox($context["labels"]["cbRestartGameOnCrash"], 8, 112, 129, 17)
-	GUIStartGroup()
-	GUIStartGroup()
-	GUICtrlCreateLabel($context["labels"]["lTravelAnimations"], 264, 96, 91, 17)
-	Local $rAnimationsAlwaysOn = GUICtrlCreateRadio($context["labels"]["rAnimationsAlwaysOn"], 280, 112, 113, 17)
-	Local $rAnimationsAlwaysOff = GUICtrlCreateRadio($context["labels"]["rAnimationsAlwaysOff"], 280, 128, 113, 17)
-	Local $rAnimationsIgnore = GUICtrlCreateRadio($context["labels"]["rAnimationsIgnore"], 280, 144, 113, 17)
+	Local $cgClocks = GUICtrlCreateLabel("", 8, 32, 0, 0)
+	Local $cClocks = GUICtrlCreateCombo($context.labels.cClocks, 8, 32, 145, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	GUICtrlSetData(-1, $context.labels.cClocksChoices)
+	Local $iClockTime = GUICtrlCreateInput($context.labels.iClockTime, 8, 56, 65, 21)
+	Local $iClockDelay = GUICtrlCreateInput($context.labels.iClockDelay, 88, 56, 65, 21)
+	Local $bClockSet = GUICtrlCreateButton($context.labels.bClockSet, 160, 56)
+	Local $bClockReset = GUICtrlCreateButton($context.labels.bClockReset, 160, 32)
+	GUICtrlCreateLabel($context.labels.Label1, 76, 58, 10, 17)
 	GUIStartGroup()
 	GUIStartGroup()
-	Local $bInsertCode = GUICtrlCreateButton($context["labels"]["bInsertCode"], 144, 96, 107, 25)
-	Local $bResumeGame = GUICtrlCreateButton($context["labels"]["bResumeGame"], 144, 120, 107, 25)
+	Local $cgEphemeral = GUICtrlCreateLabel("", 8, 96, 0, 0)
+	Local $cbUndoMove = GUICtrlCreateCheckbox($context.labels.cbUndoMove, 8, 96, 89, 17)
+	$newPos = myControlGetPos($main, $cbUndoMove, "y")
+	Local $cbRestartGameOnCrash = GUICtrlCreateCheckbox($context.labels.cbRestartGameOnCrash, $newPos["x"], $newPos["y"] + 5, 129, 17)
 	GUIStartGroup()
-	GUICtrlCreateTabItem($context["labels"]["tPgnLoader"])
+	GUIStartGroup()
+	Local $cgSettings = GUICtrlCreateLabel("", 264, 96, 0, 0)
+	GUICtrlCreateLabel($context.labels.lTravelAnimations, 264, 96, 91, 17)
+	$newPos = myControlGetPos($main, $cgSettings, "y")
+	Local $rAnimationsAlwaysOn = GUICtrlCreateRadio($context.labels.rAnimationsAlwaysOn, 280, $newPos["y"] + 20)
+	$newPos = myControlGetPos($main, $rAnimationsAlwaysOn, "y")
+	Local $rAnimationsAlwaysOff = GUICtrlCreateRadio($context.labels.rAnimationsAlwaysOff, 280, $newPos["y"] + 5)
+	$newPos = myControlGetPos($main, $rAnimationsAlwaysOff, "y")
+	Local $rAnimationsIgnore = GUICtrlCreateRadio($context.labels.rAnimationsIgnore, 280, $newPos["y"] + 5)
+	GUIStartGroup()
+	GUIStartGroup()
+	Local $cgTriggers = GUICtrlCreateLabel("", 144, 96, 0, 0)
+	Local $bInsertCode = GUICtrlCreateButton($context.labels.bInsertCode, 144, 96, 107, 25)
+	Local $bResumeGame = GUICtrlCreateButton($context.labels.bResumeGame, 144, 120, 107, 25)
+	GUIStartGroup()
+	GUICtrlCreateTabItem($context.labels.tPgnLoader)
 	GUICtrlSetState(-1, $GUI_SHOW)
 	GUIStartGroup()
+	Local $cgNewPgn = GUICtrlCreateLabel("", 8, 32, 0, 0)
 	Local $iPgnLoaderPath = GUICtrlCreateInput("", 8, 32, 217, 21)
-	Local $bPgnAdd = GUICtrlCreateButton($context["labels"]["bPgnAdd"], 232, 32, 51, 25)
-	Local $bPgnOpenPath = GUICtrlCreateButton($context["labels"]["bPgnOpenPath"], 288, 32, 75, 25)
+	Local $bPgnAdd = GUICtrlCreateButton($context.labels.bPgnAdd, 232, 32)
+	$newPos = myControlGetPos($main, $bPgnAdd)
+	Local $bPgnOpenPath = GUICtrlCreateButton($context.labels.bPgnOpenPath, $newPos["x"] + 5, $newPos["y"])
 	GUIStartGroup()
 	GUIStartGroup()
-	Local $bPgnAddClipboard = GUICtrlCreateButton($context["labels"]["bPgnAddClipboard"], 8, 64, 107, 25)
+	Local $cgPgnText = GUICtrlCreateLabel("", 8, 64, 0, 0)
+	Local $bPgnAddClipboard = GUICtrlCreateButton($context.labels.bPgnAddClipboard, 8, 64)
 	GUIStartGroup()
 	GUIStartGroup()
-	Local $cPgnList = GUICtrlCreateCombo($context["labels"]["cPgnList"], 8, 96, 217, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	Local $bPgnRun = GUICtrlCreateButton($context["labels"]["bPgnRun"], 232, 96, 51, 25)
-	Local $bPgnRemove = GUICtrlCreateButton($context["labels"]["bPgnRemove"], 288, 96, 51, 25)
-	Local $bPgnEdit = GUICtrlCreateButton($context["labels"]["bPgnEdit"], 344, 96, 43, 25)
+	Local $cgListPgns = GUICtrlCreateLabel("", 8, 96, 0, 0)
+	Local $cPgnList = GUICtrlCreateCombo("", 8, 96, 217, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $bPgnRun = GUICtrlCreateButton($context.labels.bPgnRun, 232, 96)
+	$newPos = myControlGetPos($main, $bPgnRun)
+	Local $bPgnRemove = GUICtrlCreateButton($context.labels.bPgnRemove, $newPos["x"] + 5, $newPos["y"])
+	$newPos = myControlGetPos($main, $bPgnRemove)
+	Local $bPgnEdit = GUICtrlCreateButton($context.labels.bPgnEdit, $newPos["x"] + 5, $newPos["y"])
+	GUIStartGroup()
+	GUIStartGroup()
+	$cMoveList = GUICtrlCreateCombo("", 8, 128, 217, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	$cbBlackIncluded = GUICtrlCreateCheckbox($context.labels.cbBlackIncluded, 232, 128, 97, 17)
 	GUIStartGroup()
 	GUISetState(@SW_SHOW)
 	#EndRegion ### END Koda GUI section ###
@@ -86,10 +122,8 @@ Func _MainGui($context)
 		$nMsg = GUIGetMsg()
 		Switch $nMsg
 			Case $GUI_EVENT_CLOSE
-				Exit
+				Return
 
-			Case $main
-			Case $tab
 			Case $bAddJsonFile
 			Case $bAddVariantfromClip
 			Case $bAddVariantFromFile
@@ -108,12 +142,15 @@ Func _MainGui($context)
 			Case $bClockSet
 			Case $bClockReset
 			Case $cbUndoMove
+				_controller_undoMoveToggle($context.data)
 			Case $cbRestartGameOnCrash
 			Case $rAnimationsAlwaysOn
 			Case $rAnimationsAlwaysOff
 			Case $rAnimationsIgnore
 			Case $bInsertCode
+				_controller_trigger($context.data, ClipGet())
 			Case $bResumeGame
+				_controller_trigger($context.data)
 			Case $bPgnAdd
 			Case $bPgnOpenPath
 			Case $cPgnList
@@ -122,5 +159,20 @@ Func _MainGui($context)
 			Case $bPgnEdit
 			Case $bPgnAddClipboard
 		EndSwitch
+		_checkIsRunning($context.data)
 	WEnd
 EndFunc   ;==>_MainGui
+
+
+
+
+Func myControlGetPos($form_id, $control_id, $axis = "x")
+	WinGetTitle($form_id)
+	Local $pos[]
+	Local $coords = ControlGetPos($form_id, "", $control_id)
+	$pos["x"] = $coords[0] + $coords[2] * ($axis = "x")
+	$pos["y"] = $coords[1] + $coords[3] * ($axis = "y")
+
+	Return $pos
+EndFunc   ;==>myControlGetPos
+
