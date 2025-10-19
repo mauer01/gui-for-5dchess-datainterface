@@ -90,7 +90,7 @@ Func _checkIsRunning(ByRef $data)
 		$err = StderrRead($data["pid"])
 		$data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
 		ConsoleWrite($new)
-		$data["log"] = StringRight($data["log"], 10000)
+		$data["log"] = StringRight($data["log"], 1000)
 	Else
 		$data["isRunning"] = False
 		If $data["wasRunning"] = True Then
@@ -359,23 +359,20 @@ Func _requestDatainterface()
 	Local $JSON, $file, $data
 	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
 	If @error Then
-		MsgBox(16, "Error", "Couldnt fetch latest release info from github")
-		Return SetError(1)
+		Return SetError(1,0,"Couldnt fetch latest release info from github")
 	EndIf
 	$file = BinaryToString($file)
 	$JSON = _JSON_parse($file)
 	$asset = _find($JSON["assets"], "_someStringinStringcallback", "standalone")
 	If Not IsMap($asset) Then
-		MsgBox(16, "Error", "Couldnt find a standalone release asset")
-		Return SetError(1)
+		Return SetError(1, 0 ,"Couldnt find a standalone release asset")
 	EndIf
 	Local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
 	DirCreate($folderDataInterface)
 	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
 	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
 	If @error Then
-		MsgBox(16, "Error:" & @error, "Couldnt unzip the downloaded file")
-		Return SetError(1)
+		Return SetError(1, 0,  "Couldnt unzip the downloaded file")
 	EndIf
 
 	$data = _loadDataInterface($folderDataInterface)

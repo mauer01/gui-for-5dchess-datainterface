@@ -927,7 +927,7 @@ Func _checkVariant($JSON)
 			If Not IsArray($multiversum[$i][$j]) Then ContinueLoop
 			$board = $multiversum[$i][$j]
 			$boardheight = UBound($board)
-			If $boardheight > 8 Then MsgBox(0, "", "")
+			If $boardheight > 8 Then return setError(1,0,"Board bigger than allowed")
 			$boardwidth = UBound($board, 2)
 			If Not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
 			If $boardheight <> $boardwidth Then
