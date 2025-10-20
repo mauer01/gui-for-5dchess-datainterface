@@ -133,6 +133,8 @@ EndFunc   ;==>_optionsOrTriggers
 Func _waitForResponse(ByRef $data, $response)
 	$new = StdoutRead($data["pid"])
 	While Not StringInStr($new, $response)
+		_checkIsRunning($data)
+		If @error Then Return SetError(1, 0, "Datainterface not running anymore")
 		$new = StdoutRead($data["pid"])
 		ConsoleWrite($new)
 		Sleep(10)
