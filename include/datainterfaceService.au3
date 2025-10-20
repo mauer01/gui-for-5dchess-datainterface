@@ -16,16 +16,14 @@ Func _datainterfaceSetup($localPath = False)
 		_requestDatainterface()
 		$localPath = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
 	EndIf
-	$data = _loadDataInterface($localPath)
-	If @error Then
-		If Not StringInStr($localPath, "\Resources") Then
-			Return SetError(1, 0, 0) ; not a valid folder
+	If Not StringInStr($localPath, "\Resources") Then
+		If Not StringInStr($localPath & "\..\", "\Resources") Then
+			Return SetError(1, 0, "not a valid folder")
 		EndIf
-		$data = _loadDataInterface(StringTrimRight($localPath, 10))
-		If @error Then
-			Return SetError(1, 0, 0) ; not a valid folder
-		EndIf
+		$localPath = StringSplit($localPath, "\", 1)
+		$localPath = _ArrayToString($localPath, "\", 1, $localPath[0] - 1)
 	EndIf
+	$data = _loadDataInterface(StringTrimRight($localPath, 10))
 	Return $data
 EndFunc   ;==>_datainterfaceSetup
 Func _loadDataInterface($filepath)
@@ -96,7 +94,7 @@ Func _checkIsRunning(ByRef $data)
 		If $data["wasRunning"] = True Then
 			$data["wasRunning"] = False
 			$data["crashed"] = True
-			MsgBox(16, "DataInterface", "Datainterface closed unexpectidly" & @CRLF & "Logfile might provide data")
+			Return SetError(1, 0, "Datainterface closed unexpectidly Logfile might provide data")
 			FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
 		EndIf
 	EndIf
@@ -359,25 +357,23 @@ Func _requestDatainterface()
 	Local $JSON, $file, $data
 	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
 	If @error Then
-		Return SetError(1,0,"Couldnt fetch latest release info from github")
+		Return SetError(1, 0, "Couldnt fetch latest release info from github")
 	EndIf
 	$file = BinaryToString($file)
 	$JSON = _JSON_parse($file)
 	$asset = _find($JSON["assets"], "_someStringinStringcallback", "standalone")
 	If Not IsMap($asset) Then
-		Return SetError(1, 0 ,"Couldnt find a standalone release asset")
+		Return SetError(1, 0, "Couldnt find a standalone release asset")
 	EndIf
 	Local $folderDataInterface = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
 	DirCreate($folderDataInterface)
 	InetGet($asset["browser_download_url"], @ScriptDir & "\data.zip")
 	_unZip(@ScriptDir & "\data.zip", $folderDataInterface)
 	If @error Then
-		Return SetError(1, 0,  "Couldnt unzip the downloaded file")
+		Return SetError(1, 0, "Couldnt unzip the downloaded file")
 	EndIf
-
-	$data = _loadDataInterface($folderDataInterface)
-
 	FileDelete(@ScriptDir & "\data.zip")
+	Return $folderDataInterface
 EndFunc   ;==>_requestDatainterface
 
 
