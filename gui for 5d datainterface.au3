@@ -143,8 +143,11 @@ Func _MainGui($context)
 				_controller_undoMoveToggle($context.data)
 			Case $cbRestartGameOnCrash
 			Case $rAnimationsAlwaysOn
+				_controller_animationSetting($context.data, "on")
 			Case $rAnimationsAlwaysOff
+				_controller_animationSetting($context.data, "off")
 			Case $rAnimationsIgnore
+				_controller_animationSetting($context.data, "ignore")
 			Case $bInsertCode
 				_controller_trigger($context.data, ClipGet())
 			Case $bResumeGame

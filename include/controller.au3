@@ -33,6 +33,13 @@ Func _controller_undoMoveToggle(ByRef $data)
 EndFunc   ;==>_controller_undoMoveToggle
 
 Func _controller_animationSetting(ByRef $data, $setting)
+	Local $map[]
+	$map["on"] = 1
+	$map["off"] = 2
+	$map["ignore"] = 3
+	If IsString($setting) Then
+		$setting = $map[$setting]
+	EndIf
 	If $setting < 1 Or $setting > 3 Then
 		Return SetError(1, 0, "Setting out of range")
 	EndIf
@@ -47,7 +54,7 @@ Func _controller_runPGN(ByRef $data, $pgn)
 	If ProcessExists("5dchesswithmultiversetimetravel.exe") Then
 		_runPGN($data, $pgn)
 	Else
-		Return SetError(1, 0, 0) ; game not running
+		Return SetError(1, 0, "game not running")
 	EndIf
 EndFunc   ;==>_controller_runPGN
 
@@ -55,7 +62,7 @@ EndFunc   ;==>_controller_runPGN
 
 Func _controller_addVariant(ByRef $data, $multiverse)
 	If Not MapExists($multiverse, "Name") Then
-		Return SetError(1, 0, 0) ; name missing
+		Return SetError(1, 0, "name missing")
 	EndIf
 	$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $multiverse["Name"], "pgn to variant"))
 	_addVariantToJson($data, $variant, $multiverse["Name"])
@@ -71,11 +78,11 @@ Func _controller_downloadVariants(ByRef $data, $cacheOnly = False, $variantfiles
 	If $variantfiles <> "all" Then
 		If Not IsArray($variantfiles) Then
 			If _some($data["remoteJsonUrls"], "StringInStr", $variantfiles) = -1 Then
-				Return SetError(1, 0, 0) ; variant file not found in cached urls
+				Return SetError(1, 0, "variant file not found in cached urls")
 			EndIf
 		EndIf
 		If Not _some($data["remoteJsonUrls"], "_someStringinStringcallback", $variantfiles) Then
-			Return SetError(2, 0, 0) ; some variant file not found in cached urls
+			Return SetError(2, 0, "some variant file not found in cached urls")
 		EndIf
 	EndIf
 	If $variantfiles = "all" Then
