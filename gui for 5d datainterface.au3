@@ -7,7 +7,7 @@
 #include <TabConstants.au3>
 #include <WindowsConstants.au3>
 #include <include\controller.au3>
-Func _LoadMainGui($context)
+Func _LoadMainGui(ByRef $context)
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
 	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
@@ -149,6 +149,12 @@ Func _LoadMainGui($context)
 	$settingsMap["cClocks"] = $cClocks
 	$settingsMap["iClockTime"] = $iClockTime
 	$settingsMap["iClockDelay"] = $iClockDelay
+	$settingsMap["Timers"] = _newMap()
+	$keys = StringSplit($context.labels.cClocksChoices, "|", 3)
+	_ArrayDisplay($keys)
+	$settingsMap["Timers"][$keys[0]] = "L"
+	$settingsMap["Timers"][$keys[1]] = "M"
+	$settingsMap["Timers"][$keys[2]] = "S"
 	$settingsMap["bClockSet"] = $bClockSet
 	$settingsMap["bClockReset"] = $bClockReset
 	$settingsMap["cgEphemeral"] = $cgEphemeral
