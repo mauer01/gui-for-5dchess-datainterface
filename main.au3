@@ -21,26 +21,47 @@
 #cs
 githublink for complete source = https://github.com/mauer01/gui-for-5dchess-datainterface
 #ce
-$exit = main()
-$errorcode = @error
-$extended = @extended
-If $errorcode Then
-	MsgBox(16, "Error", "An error occurred: " & @CRLF & "Code: " & $errorcode & @CRLF & "ErrorMessage: " & $exit)
-	Exit $errorcode
-EndIf
-If $exit Then
-	Exit
-EndIf
-
+While 1
+	$exit = main()
+	$errorcode = @error
+	$extended = @extended
+	If $errorcode Then
+		MsgBox(16, "Error", "An error occurred: " & @CRLF & "Code: " & $errorcode & @CRLF & "ErrorMessage: " & $exit)
+		Exit $errorcode
+	EndIf
+	If $exit Then
+		Exit
+	EndIf
+WEnd
 
 
 
 Func main()
 	Local $context = loadContext()
-	Switch @error
-		Case 1
-			Return SetError(1, 0, $context)
-	EndSwitch
+	$error = @error
+	If $error = 1 Then
+		Local $msg = "No valid configuration found." & _
+				@CRLF & "5D data interface needs to be set up" & _
+				@CRLF & "Do you want it to happen automatically by downloading" & _
+				@CRLF & "the required files from the internet into" & _
+				@CRLF & @LocalAppDataDir & "\GuiDataInterface"
+		$res = MsgBox(3, "Setup Required", $msg)
+		If $res = 6 Then
+			$msg = _requestDatainterface()
+			If @error Then Return SetError(@error, @extended, $msg)
+		ElseIf $res = 7 Then
+			$msg = FileSelectFolder("Select folder containing 5D Chess Data Interface", @WorkingDir)
+			If @error Then Return SetError(1, 0, "folder selection Failed")
+			$testLoad = _datainterfaceSetup($msg)
+			If @error Then Return SetError(@error, 0, $testLoad)
+		ElseIf $res = 2 Then
+			Return True ; exit the program
+		EndIf
+		IniWrite("gui for datainterface.ini", "Data", "Interface", $msg)
+		Return False ; restart main to load new config
+	ElseIf $error Then
+		Return SetError($error, @extended, $context)
+	EndIf
 
 	$run = _runDataInterface($context["data"])
 	If @error Then
@@ -48,13 +69,28 @@ Func main()
 		Return SetError(@error, @extended, $run)
 	EndIf
 
-	$main = _MainGui($context)
+	$main = _LoadMainGui($context)
 	If @error Then
 		_cleanexit($context.data)
 		Return SetError(@error, @extended, $main)
 	EndIf
-
-
+	Do
+		$msg = _mainGuiLoop($main, $context)
+		$error = @error
+		If $error Then
+			_cleanexit($context.data)
+			Return SetError($error, @extended, $msg)
+		EndIf
+		If $msg = "exit" Then
+			_cleanexit($context.data)
+			Return False
+		ElseIf $msg = "restart" Then
+			_cleanexit($context.data)
+			Return True
+		EndIf
+	Until $error
+	_cleanexit($context.data)
+	Return SetError(2, 0, "Uncaught Exit")
 EndFunc   ;==>main
 
 
@@ -72,7 +108,6 @@ Func loadContext()
 	If @error = 1 Then
 		Return SetError(1, 0, "force setting up datainterface")
 	EndIf
-	IniWrite($context["ini"]["path"], "Data", "Interface", $context["data"]["workingDir"])
 	If MapExists($context["ini"]["data"], "language") Then
 		$context["labels"] = _loadLanguage($context["ini"]["data"]["language"])
 		If @error Then
