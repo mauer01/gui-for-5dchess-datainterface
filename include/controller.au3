@@ -1,10 +1,78 @@
 #include-once
 #include <datainterfaceService.au3>
+#include <moreArray.au3>
 #include <multiversechess.au3>
+#include <GUIConstantsEx.au3>
+
+Func _frontController(ByRef $context, ByRef $mainGui)
+	$nMsg = GUIGetMsg()
+	Switch $nMsg
+		Case $GUI_EVENT_CLOSE
+			Return "exit"
+
+		Case $mainGui["json"]["bAddJsonFile"]
+		Case $mainGui["json"]["bAddVariantfromClip"]
+		Case $mainGui["json"]["bAddVariantFromFile"]
+		Case $mainGui["json"]["cRemoteJsons"]
+		Case $mainGui["json"]["bRemoteJsonDownload"]
+		Case $mainGui["json"]["cLocalJsonFiles"]
+		Case $mainGui["json"]["bLocalJsonFileRemove"]
+		Case $mainGui["json"]["bLocalJsonFileCopy"]
+		Case $mainGui["json"]["bLocalJsonFileRename"]
+		Case $mainGui["json"]["bLocalJsonFileBackup"]
+		Case $mainGui["json"]["bOpenJsonFolder"]
+		Case $mainGui["json"]["bRunVariant"]
+		Case $mainGui["json"]["bVariantRemove"]
+		Case $mainGui["json"]["bVariantEdit"]
+		Case $mainGui["json"]["baddVariantsFromJsonFile"]
+		Case $mainGui["settings"]["bClockSet"]
+			Local $time = GUICtrlRead($mainGui["settings"]["iClockTime"])
+			Local $delay = GUICtrlRead($mainGui["settings"]["iClockDelay"])
+			Local $type[]
+			$type["Medium"] = "M"
+			$type["Long"] = "L"
+			$type["Short"] = "S"
+			Local $msg = _controller_changeTimer($context.data, $time, $delay, $type[GUICtrlRead($mainGui["settings"]["cClockType"])])
+			If @error Then Return SetError(@error, 0, $msg)
+		Case $mainGui["settings"]["bClockReset"]
+		Case $mainGui["settings"]["cbUndoMove"]
+			_controller_undoMoveToggle($context.data)
+		Case $mainGui["settings"]["cbRestartGameOnCrash"]
+		Case $mainGui["settings"]["rAnimationsAlwaysOn"]
+			_controller_animationSetting($context.data, "on")
+		Case $mainGui["settings"]["rAnimationsAlwaysOff"]
+			_controller_animationSetting($context.data, "off")
+		Case $mainGui["settings"]["rAnimationsIgnore"]
+			_controller_animationSetting($context.data, "ignore")
+		Case $mainGui["settings"]["bInsertCode"]
+			_controller_trigger($context.data, ClipGet())
+		Case $mainGui["settings"]["bResumeGame"]
+			_controller_trigger($context.data)
+		Case $mainGui["pgn"]["bPgnAdd"]
+		Case $mainGui["pgn"]["bPgnOpenPath"]
+		Case $mainGui["pgn"]["cPgnList"]
+		Case $mainGui["pgn"]["bPgnRun"]
+		Case $mainGui["pgn"]["bPgnRemove"]
+		Case $mainGui["pgn"]["bPgnEdit"]
+		Case $mainGui["pgn"]["bPgnAddClipboard"]
+	EndSwitch
+	_checkIsRunning($context.data)
+EndFunc   ;==>_frontController
+
+
+
+
+
 Func _controller_changeTimer(ByRef $data, $time, $delay, $type)
+	Local $except[2] = ["reset", ":"]
 	If $type <> "L" And $type <> "M" And $type <> "S" Then
-		Return SetError(1, 0, 0)
+		Return SetError(1, 0, "Type must be L, M, or S")
 	EndIf
+
+	_checkString($time, $except)
+	If @error Then Return SetError(1, 0, "Time is not in either a : split format or in milliseconds or reset")
+	_checkString($delay, $except)
+	If @error Then Return SetError(1, 0, "Delay is not in either a : split format or in milliseconds or reset")
 	Local $map[]
 	$map["L"] = 6
 	$map["M"] = 4
@@ -20,7 +88,11 @@ Func _controller_changeTimer(ByRef $data, $time, $delay, $type)
 	EndIf
 EndFunc   ;==>_controller_changeTimer
 
-
+Func _checkString($string, $exceptions = "")
+	If Not StringIsDigit($string) And Not _some($exceptions, "stringinstr", $string) Then
+		Return SetError(1, 0, "string must be in a numeric or follow a format")
+	EndIf
+EndFunc   ;==>_checkString
 Func _controller_undoMoveToggle(ByRef $data)
 	Static $toggled = False
 	If $toggled Then
