@@ -1,8 +1,7 @@
 #include-once
 #include <JSON.au3>
 #include <moreArray.au3>
-Func _standardLang()
-	Return _JSON_Parse('{' & @CRLF & _
+global const $standardLang = _JSON_Parse('{' & @CRLF & _
 			'    "main": "Gui for Datainterface",' & @CRLF & _
 			'    "tJsonLoader": "JSON Loader",' & @CRLF & _
 			'    "bAddJsonFile": "Add",' & @CRLF & _
@@ -75,17 +74,16 @@ Func _ProcessGetLocation($sProc = @ScriptFullPath)
 EndFunc   ;==>_ProcessGetLocation
 
 Func _LoadLanguage($language = Null)
-	Local $standard = _standardLang()
 	If Not FileExists("language.json") Or Not $language Then
-		Return $standard
+		Return $standardLang
 	EndIf
 	Local $filedata = FileRead("language.json")
 	Local $filejson = _JSON_Parse($filedata)
 	If Not MapExists($filejson, $language) Then
-		Return SetError(1, 0, $standard)
+		Return SetError(1, 0, $standardLang)
 	EndIf
-	If Not _arrayinarray(MapKeys($filejson[$language]), MapKeys($standard)) Then
-		Return SetError(1, 0, $standard)
+	If Not _arrayinarray(MapKeys($filejson[$language]), MapKeys($standardLang)) Then
+		Return SetError(1, 0, $standardLang)
 	EndIf
 	Return $filejson[$language]
 EndFunc   ;==>_LoadLanguage
