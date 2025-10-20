@@ -2,7 +2,6 @@
 #include <datainterfaceService.au3>
 #include <moreArray.au3>
 #include <multiversechess.au3>
-#include <GUIConstantsEx.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
 	$nMsg = GUIGetMsg()
@@ -28,13 +27,19 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 		Case $mainGui["settings"]["bClockSet"]
 			Local $time = GUICtrlRead($mainGui["settings"]["iClockTime"])
 			Local $delay = GUICtrlRead($mainGui["settings"]["iClockDelay"])
-			Local $type[]
-			$type["Medium"] = "M"
-			$type["Long"] = "L"
-			$type["Short"] = "S"
-			Local $msg = _controller_changeTimer($context.data, $time, $delay, $type[GUICtrlRead($mainGui["settings"]["cClockType"])])
-			If @error Then Return SetError(@error, 0, $msg)
+			Local $type = GUICtrlRead($mainGui["settings"]["cClocks"])
+			If Not _some(MapKeys($mainGui["settings"]["Timers"]), "stringinstr", $type) = -1 Then
+				MsgBox(16, "Error", "Choose a valid clock type.")
+				Return
+			EndIf
+			Local $msg = _controller_changeTimer($context, $time, $delay, $mainGui["settings"]["Timers"][$type])
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
+
 		Case $mainGui["settings"]["bClockReset"]
+			_controller_changeTimer($context, "reset", "reset",)
 		Case $mainGui["settings"]["cbUndoMove"]
 			_controller_undoMoveToggle($context.data)
 		Case $mainGui["settings"]["cbRestartGameOnCrash"]
@@ -56,23 +61,23 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 		Case $mainGui["pgn"]["bPgnEdit"]
 		Case $mainGui["pgn"]["bPgnAddClipboard"]
 	EndSwitch
-	_checkIsRunning($context.data)
+	Return
 EndFunc   ;==>_frontController
 
 
 
 
 
-Func _controller_changeTimer(ByRef $data, $time, $delay, $type)
+Func _controller_changeTimer(ByRef $context, $time, $delay, $type)
+	Local $data = $context.data
 	Local $except[2] = ["reset", ":"]
 	If $type <> "L" And $type <> "M" And $type <> "S" Then
 		Return SetError(1, 0, "Type must be L, M, or S")
 	EndIf
-
 	_checkString($time, $except)
-	If @error Then Return SetError(1, 0, "Time is not in either a : split format or in milliseconds or reset")
+	If @error Then Return SetError(2, 0, "Time is not in either a : split format or in milliseconds or reset")
 	_checkString($delay, $except)
-	If @error Then Return SetError(1, 0, "Delay is not in either a : split format or in milliseconds or reset")
+	If @error Then Return SetError(3, 0, "Delay is not in either a : split format or in milliseconds or reset")
 	Local $map[]
 	$map["L"] = 6
 	$map["M"] = 4
