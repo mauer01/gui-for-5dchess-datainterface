@@ -62,33 +62,32 @@ Func main()
 	ElseIf $error Then
 		Return SetError($error, @extended, $context)
 	EndIf
-
 	$run = _runDataInterface($context["data"])
 	If @error Then
 		_cleanexit($context.data)
 		Return SetError(@error, @extended, $run)
 	EndIf
-
 	$main = _LoadMainGui($context)
 	If @error Then
 		_cleanexit($context.data)
 		Return SetError(@error, @extended, $main)
 	EndIf
 	Do
-		$msg = _mainGuiLoop($main, $context)
+		$msg = _frontController($context, $main)
 		$error = @error
 		If $error Then
 			_cleanexit($context.data)
 			Return SetError($error, @extended, $msg)
 		EndIf
-		If $msg = "exit" Then
-			_cleanexit($context.data)
-			Return False
-		ElseIf $msg = "restart" Then
+		If $msg == "exit" Then
 			_cleanexit($context.data)
 			Return True
+		ElseIf $msg == "restart" Then
+			_cleanexit($context.data)
+			Return False
 		EndIf
-	Until $error
+		_checkIsRunning($context.data)
+	Until $error And Not $msg
 	_cleanexit($context.data)
 	Return SetError(2, 0, "Uncaught Exit")
 EndFunc   ;==>main
@@ -118,5 +117,3 @@ Func loadContext()
 	EndIf
 	Return $context
 EndFunc   ;==>loadContext
-
-
