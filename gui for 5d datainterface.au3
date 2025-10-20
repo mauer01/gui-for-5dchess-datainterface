@@ -7,7 +7,7 @@
 #include <TabConstants.au3>
 #include <WindowsConstants.au3>
 #include <include\controller.au3>
-Func _MainGui($context)
+Func _LoadMainGui($context)
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
 	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
@@ -115,54 +115,78 @@ Func _MainGui($context)
 	GUIStartGroup()
 	GUISetState(@SW_SHOW)
 	#EndRegion ### END Koda GUI section ###
+	Local $formMap[]
+	$formMap["main"] = $main
+	$formMap["tab"] = $tab
 
-	While 1
-		$nMsg = GUIGetMsg()
-		Switch $nMsg
-			Case $GUI_EVENT_CLOSE
-				Return
+	Local $jsonMap[]
+	$jsonMap["cgNewJson"] = $cgNewJson
+	$jsonMap["iJsonFileNewPath"] = $iJsonFileNewPath
+	$jsonMap["bAddJsonFile"] = $bAddJsonFile
+	$jsonMap["cgRemoteJson"] = $cgRemoteJson
+	$jsonMap["cRemoteJsons"] = $cRemoteJsons
+	$jsonMap["bRemoteJsonDownload"] = $bRemoteJsonDownload
+	$jsonMap["cgLocalJson"] = $cgLocalJson
+	$jsonMap["cLocalJsonFiles"] = $cLocalJsonFiles
+	$jsonMap["bLocalJsonFileRemove"] = $bLocalJsonFileRemove
+	$jsonMap["bLocalJsonFileCopy"] = $bLocalJsonFileCopy
+	$jsonMap["bLocalJsonFileRename"] = $bLocalJsonFileRename
+	$jsonMap["bLocalJsonFileBackup"] = $bLocalJsonFileBackup
+	$jsonMap["bOpenJsonFolder"] = $bOpenJsonFolder
+	$jsonMap["cgVariants"] = $cgVariants
+	$jsonMap["cListOfVariants"] = $cListOfVariants
+	$jsonMap["bRunVariant"] = $bRunVariant
+	$jsonMap["bVariantRemove"] = $bVariantRemove
+	$jsonMap["bVariantEdit"] = $bVariantEdit
+	$jsonMap["lAddSpecifier"] = $lAddSpecifier
+	$jsonMap["cgAddvariants"] = $cgAddvariants
+	$jsonMap["bAddVariantfromClip"] = $bAddVariantfromClip
+	$jsonMap["bAddVariantFromFile"] = $bAddVariantFromFile
+	$jsonMap["baddVariantsFromJsonFile"] = $baddVariantsFromJsonFile
 
-			Case $bAddJsonFile
-			Case $bAddVariantfromClip
-			Case $bAddVariantFromFile
-			Case $cRemoteJsons
-			Case $bRemoteJsonDownload
-			Case $cLocalJsonFiles
-			Case $bLocalJsonFileRemove
-			Case $bLocalJsonFileCopy
-			Case $bLocalJsonFileRename
-			Case $bLocalJsonFileBackup
-			Case $bOpenJsonFolder
-			Case $bRunVariant
-			Case $bVariantRemove
-			Case $bVariantEdit
-			Case $baddVariantsFromJsonFile
-			Case $bClockSet
-			Case $bClockReset
-			Case $cbUndoMove
-				_controller_undoMoveToggle($context.data)
-			Case $cbRestartGameOnCrash
-			Case $rAnimationsAlwaysOn
-				_controller_animationSetting($context.data, "on")
-			Case $rAnimationsAlwaysOff
-				_controller_animationSetting($context.data, "off")
-			Case $rAnimationsIgnore
-				_controller_animationSetting($context.data, "ignore")
-			Case $bInsertCode
-				_controller_trigger($context.data, ClipGet())
-			Case $bResumeGame
-				_controller_trigger($context.data)
-			Case $bPgnAdd
-			Case $bPgnOpenPath
-			Case $cPgnList
-			Case $bPgnRun
-			Case $bPgnRemove
-			Case $bPgnEdit
-			Case $bPgnAddClipboard
-		EndSwitch
-		_checkIsRunning($context.data)
-	WEnd
-EndFunc   ;==>_MainGui
+	Local $settingsMap[]
+	$settingsMap["cgClocks"] = $cgClocks
+	$settingsMap["cClocks"] = $cClocks
+	$settingsMap["iClockTime"] = $iClockTime
+	$settingsMap["iClockDelay"] = $iClockDelay
+	$settingsMap["bClockSet"] = $bClockSet
+	$settingsMap["bClockReset"] = $bClockReset
+	$settingsMap["cgEphemeral"] = $cgEphemeral
+	$settingsMap["cbUndoMove"] = $cbUndoMove
+	$settingsMap["cbRestartGameOnCrash"] = $cbRestartGameOnCrash
+	$settingsMap["cgSettings"] = $cgSettings
+	$settingsMap["rAnimationsAlwaysOn"] = $rAnimationsAlwaysOn
+	$settingsMap["rAnimationsAlwaysOff"] = $rAnimationsAlwaysOff
+	$settingsMap["rAnimationsIgnore"] = $rAnimationsIgnore
+	$settingsMap["cgTriggers"] = $cgTriggers
+	$settingsMap["bInsertCode"] = $bInsertCode
+	$settingsMap["bResumeGame"] = $bResumeGame
+
+	Local $pgnMap[]
+	$pgnMap["cgNewPgn"] = $cgNewPgn
+	$pgnMap["iPgnLoaderPath"] = $iPgnLoaderPath
+	$pgnMap["bPgnAdd"] = $bPgnAdd
+	$pgnMap["bPgnOpenPath"] = $bPgnOpenPath
+	$pgnMap["cgPgnText"] = $cgPgnText
+	$pgnMap["bPgnAddClipboard"] = $bPgnAddClipboard
+	$pgnMap["cgListPgns"] = $cgListPgns
+	$pgnMap["cPgnList"] = $cPgnList
+	$pgnMap["bPgnRun"] = $bPgnRun
+	$pgnMap["bPgnRemove"] = $bPgnRemove
+	$pgnMap["bPgnEdit"] = $bPgnEdit
+	$pgnMap["cMoveList"] = $cMoveList
+	$pgnMap["cbBlackIncluded"] = $cbBlackIncluded
+
+	Local $ctrlMap[]
+	$ctrlMap["form"] = $formMap
+	$ctrlMap["json"] = $jsonMap
+	$ctrlMap["settings"] = $settingsMap
+	$ctrlMap["pgn"] = $pgnMap
+
+	; return the assembled control map
+	Return $ctrlMap
+EndFunc   ;==>_LoadMainGui
+
 
 
 
@@ -171,8 +195,8 @@ Func myControlGetPos($form_id, $control_id, $axis = "x")
 	WinGetTitle($form_id)
 	Local $pos[]
 	Local $coords = ControlGetPos($form_id, "", $control_id)
-	$pos["x"] = $coords[0] + $coords[2] * ($axis = "x")
-	$pos["y"] = $coords[1] + $coords[3] * ($axis = "y")
+	$pos["x"] = $coords[0] + $coords[2] * ($axis == "x")
+	$pos["y"] = $coords[1] + $coords[3] * ($axis == "y")
 
 	Return $pos
 EndFunc   ;==>myControlGetPos
