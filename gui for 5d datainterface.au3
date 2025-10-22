@@ -8,6 +8,13 @@
 #include <WindowsConstants.au3>
 #include <include\controller.au3>
 Func _LoadMainGui(ByRef $context)
+	Local $map = _newMap()
+	$map["longNullClock"] = "20:00"
+	$map["shortNullClock"] = "5:00"
+	$map["mediumNullClock"] = "10:00"
+	$map["longNullDelay"] = "10"
+	$map["shortNullDelay"] = "3"
+	$map["mediumNullDelay"] = "5"
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
 	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
@@ -19,7 +26,12 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgRemoteJson = GUICtrlCreateLabel("", 8, 66, 0, 0)
-	Local $cRemoteJsons = GUICtrlCreateCombo("", 8, 66, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $cRemoteJsons = GUICtrlCreateCombo("No Connection", 8, 66, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	If MapExists($context.data, "remoteJsonUrls") Then
+		Local $keys = MapKeys($context.data.remoteJsonUrls)
+		GUICtrlSetData($cRemoteJsons, "")
+		GUICtrlSetData($cRemoteJsons, _ArrayToString($keys), $keys[0])
+	EndIf
 	Local $bRemoteJsonDownload = GUICtrlCreateButton($context.labels.bRemoteJsonDownload, 240, 64)
 	GUIStartGroup()
 	GUIStartGroup()
@@ -64,7 +76,7 @@ Func _LoadMainGui(ByRef $context)
 	Local $iClockDelay = GUICtrlCreateInput($context.labels.iClockDelay, 88, 56, 65, 21)
 	Local $bClockSet = GUICtrlCreateButton($context.labels.bClockSet, 160, 56)
 	Local $bClockReset = GUICtrlCreateButton($context.labels.bClockReset, 160, 32)
-	GUICtrlCreateLabel($context.labels.Label1, 76, 58, 10, 17)
+	GUICtrlCreateLabel($context.labels.Label1, 76, 58)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgEphemeral = GUICtrlCreateLabel("", 8, 96, 0, 0)
@@ -74,7 +86,7 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgSettings = GUICtrlCreateLabel("", 264, 96, 0, 0)
-	GUICtrlCreateLabel($context.labels.lTravelAnimations, 264, 96, 91, 17)
+	GUICtrlCreateLabel($context.labels.lTravelAnimations, 264, 96)
 	$newPos = myControlGetPos($main, $cgSettings, "y")
 	Local $rAnimationsAlwaysOn = GUICtrlCreateRadio($context.labels.rAnimationsAlwaysOn, 280, $newPos["y"] + 20)
 	$newPos = myControlGetPos($main, $rAnimationsAlwaysOn, "y")
@@ -111,14 +123,36 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	$cMoveList = GUICtrlCreateCombo("", 8, 128, 217, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	$cbBlackIncluded = GUICtrlCreateCheckbox($context.labels.cbBlackIncluded, 232, 128, 97, 17)
+	$cbBlackIncluded = GUICtrlCreateCheckbox($context.labels.cbBlackIncluded, 232, 128)
 	GUIStartGroup()
+	GUICtrlCreateTabItem("")
+
 	GUISetState(@SW_SHOW)
 	#EndRegion ### END Koda GUI section ###
 	Local $formMap[]
 	$formMap["main"] = $main
 	$formMap["tab"] = $tab
-
+	#cs
+		  "ForceTimetravelAnimationValue": "always_off",
+	 "Clock1BaseTime": null,
+	 "Clock1Increment": null,
+	 "Clock2BaseTime": null,
+	 "Clock2Increment": null,
+	 "Clock3BaseTime": null,
+	 "Clock3Increment": null
+	#ce
+	If MapExists($context.data, "settings") Then
+		If (MapExists($context.data.settings, "ForceTimetravelAnimationValue")) Then
+			Switch $context.data.settings.ForceTimetravelAnimationValue
+				Case "always_on"
+					GUICtrlSetState($rAnimationsAlwaysOn, $GUI_CHECKED)
+				Case "always_off"
+					GUICtrlSetState($rAnimationsAlwaysOff, $GUI_CHECKED)
+				Case "ignore"
+					GUICtrlSetState($rAnimationsIgnore, $GUI_CHECKED)
+			EndSwitch
+		EndIf
+	EndIf
 	Local $jsonMap[]
 	$jsonMap["cgNewJson"] = $cgNewJson
 	$jsonMap["iJsonFileNewPath"] = $iJsonFileNewPath
@@ -151,7 +185,6 @@ Func _LoadMainGui(ByRef $context)
 	$settingsMap["iClockDelay"] = $iClockDelay
 	$settingsMap["Timers"] = _newMap()
 	$keys = StringSplit($context.labels.cClocksChoices, "|", 3)
-	_ArrayDisplay($keys)
 	$settingsMap["Timers"][$keys[0]] = "L"
 	$settingsMap["Timers"][$keys[1]] = "M"
 	$settingsMap["Timers"][$keys[2]] = "S"
@@ -206,4 +239,7 @@ Func myControlGetPos($form_id, $control_id, $axis = "x")
 
 	Return $pos
 EndFunc   ;==>myControlGetPos
+
+
+
 
