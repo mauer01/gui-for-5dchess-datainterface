@@ -52,7 +52,7 @@ Func main()
 		ElseIf $res = 7 Then
 			$msg = FileSelectFolder("Select folder containing 5D Chess Data Interface", @WorkingDir)
 			If @error Then Return SetError(1, 0, "folder selection Failed")
-			$testLoad = _datainterfaceSetup($msg)
+			$testLoad = _datainterfaceSetup($context["ini"], $msg)
 			If @error Then Return SetError(@error, 0, $testLoad)
 		ElseIf $res = 2 Then
 			Return True ; exit the program
@@ -64,36 +64,39 @@ Func main()
 	EndIf
 	$run = _runDataInterface($context["data"])
 	If @error Then
-		_cleanexit($context.data)
+		_cleanexit($context["data"])
 		Return SetError(@error, @extended, $run)
 	EndIf
-	$msg = _cacheJsonUrls($context.data)
+	$msg = _cacheJsonUrls($context["data"])
 	If @error Then
 		MsgBox(16, "Error", $msg)
 	EndIf
+	_updateJsonFiles($context["data"])
 	$main = _LoadMainGui($context)
 	If @error Then
-		_cleanexit($context.data)
+		_cleanexit($context["data"])
 		Return SetError(@error, @extended, $main)
 	EndIf
 
 	Do
+		_updateJsonFiles($context["data"])
 		$msg = _frontController($context, $main)
 		$error = @error
 		If $error Then
-			_cleanexit($context.data)
+			_cleanexit($context["data"])
 			Return SetError($error, @extended, $msg)
 		EndIf
 		If $msg == "exit" Then
-			_cleanexit($context.data)
+			_cleanexit($context["data"])
 			Return True
 		ElseIf $msg == "restart" Then
-			_cleanexit($context.data)
+			_cleanexit($context["data"])
 			Return False
 		EndIf
-		_checkIsRunning($context.data)
+		_checkIsRunning($context["data"])
+		_updateComboBoxes($context["data"], $main)
 	Until $error And Not $msg
-	_cleanexit($context.data)
+	_cleanexit($context["data"])
 	Return SetError(2, 0, "Uncaught Exit")
 EndFunc   ;==>main
 
@@ -108,7 +111,7 @@ Func loadContext()
 	IniReadSection("gui for datainterface.ini", "Data")
 	$context["ini"]["data"] = _twodimarraytoMap(IniReadSection("gui for datainterface.ini", "Data"))
 	If Not MapExists($context["ini"]["data"], "Interface") Then Return SetError(1, 0, "force setting up datainterface")
-	$context["data"] = _datainterfaceSetup($context["ini"]["data"]["Interface"])
+	$context["data"] = _datainterfaceSetup($context["ini"], $context["ini"]["data"]["Interface"])
 	If @error = 1 Then
 		Return SetError(1, 0, "force setting up datainterface")
 	EndIf
