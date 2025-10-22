@@ -54,8 +54,8 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	Local $cgVariants = GUICtrlCreateLabel("", 8, 130, 0, 0)
 	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
-	$variantsAsStrings = _map($context.data.cachedVariantArray, "variantNameAuthorCallback", "")
-	GUICtrlSetData($cListOfVariants, _ArrayToString($variantsAsStrings), $variantsAsStrings[0])
+	$mapKeys = MapKeys($context.data.cachedVariants)
+	GUICtrlSetData($cListOfVariants, _ArrayToString($mapKeys), $mapKeys[0])
 
 	$newPos = myControlGetPos($main, $cListOfVariants)
 	Local $bRunVariant = GUICtrlCreateButton($context.labels.bRunVariant, $newPos["x"] + 5, $newPos["y"])
@@ -247,7 +247,6 @@ Func myControlGetPos($form_id, $control_id, $axis = "x")
 	Return $pos
 EndFunc   ;==>myControlGetPos
 Func _updateComboBoxes(ByRef $data, ByRef $main)
-	; Update Remote Jsons ComboBox
 	Local $keys = MapKeys($data["remoteJsonUrls"])
 	Static Local $oldkeys[0]
 	Static Local $oldjson[0]
@@ -257,18 +256,16 @@ Func _updateComboBoxes(ByRef $data, ByRef $main)
 		GUICtrlSetData($main["json"]["cRemoteJsons"], _ArrayToString($keys), $keys[0])
 		$oldkeys = $keys
 	EndIf
-	; Update Local Json Files ComboBox
 	If MapExists($data, "jsonFiles") And Not _arrayCountEquals($data.jsonFiles, $oldjson) Then
 		GUICtrlSetData($main["json"]["cLocalJsonFiles"], "")
 		GUICtrlSetData($main["json"]["cLocalJsonFiles"], _ArrayToString($data.jsonFiles), $data.activeJsonFile)
 		$oldjson = $data["jsonFiles"]
 	EndIf
-	; Update Variant List ComboBox
-	If Not _arrayCountEquals($data["cachedVariantArray"], $oldvariants) Then
-		$variantsAsStrings = _map($data["cachedVariantArray"], "variantNameAuthorCallback", "")
-		GUICtrlSetData($main["json"]["cVariantList"], "")
-		GUICtrlSetData($main["json"]["cVariantList"], _ArrayToString($variantsAsStrings), $variantsAsStrings[0])
-		$oldvariants = $data["cachedVariantArray"]
+	If Not _arrayCountEquals(MapKeys($data["cachedVariants"]), $oldvariants) Then
+		$mapKeys = MapKeys($data["cachedVariants"])
+		GUICtrlSetData($main["json"]["cListOfVariants"], "")
+		GUICtrlSetData($main["json"]["cListOfVariants"], _ArrayToString($mapKeys), $mapKeys[0])
+		$oldvariants = $mapKeys
 	EndIf
 
 EndFunc   ;==>_updateComboBoxes
