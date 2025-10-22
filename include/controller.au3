@@ -4,7 +4,7 @@
 #include <multiversechess.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
-	Local $nMsg, $msg
+	Local $nMsg, $msg, $filepath, $filename
 
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
@@ -12,16 +12,42 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			Return "exit"
 
 		Case $mainGui["json"]["bAddJsonFile"]
+			$filepath = GUICtrlRead($mainGui["json"]["iJsonFileNewPath"])
+			If $filepath = "" Then
+				MsgBox(16, "Error", "No file path provided")
+				Return
+			EndIf
+			$filename = StringSplit($filepath, "\", 3)
+			_ArrayReverse($filename)
+			$filename = $filename[0]
+			If FileExists($filepath) Then
+				FileCopy($filepath, $context["data"]["ressourceDir"] & "\" & $filename)
+			EndIf
+
 		Case $mainGui["json"]["bAddVariantfromClip"]
+			_controller_addVariant($context["data"], _multiverse_create("pgn", ClipGet()))
 		Case $mainGui["json"]["bAddVariantFromFile"]
-		Case $mainGui["json"]["cRemoteJsons"]
+			$filepath = FileOpenDialog("Select PGN File", "", "PGN Files (*.pgn;*.txt)|All Files (*.*)")
+			If @error Then
+				MsgBox(16, "Error", "No file selected")
+				Return
+			EndIf
+			$msg = _controller_addVariant($context["data"], _multiverse_create("pgn", $filepath))
+			If @error Then
+				ConsoleWrite("Error adding variant: " & @error & " - " & @extended & @CRLF & $msg & @CRLF)
+			EndIf
+
 		Case $mainGui["json"]["bRemoteJsonDownload"]
+			$msg = _controller_downloadVariants($context["data"], False, GUICtrlRead($mainGui["json"]["cRemoteJsons"]))
 		Case $mainGui["json"]["cLocalJsonFiles"]
+			_changeActiveJsonFile($context["data"], GUICtrlRead($mainGui["json"]["cLocalJsonFiles"]))
+			IniWrite($context.data.ini.path, "Data", "ActiveJsonFile", $context["data"]["activeJsonFile"])
 		Case $mainGui["json"]["bLocalJsonFileRemove"]
 		Case $mainGui["json"]["bLocalJsonFileCopy"]
 		Case $mainGui["json"]["bLocalJsonFileRename"]
 		Case $mainGui["json"]["bLocalJsonFileBackup"]
 		Case $mainGui["json"]["bOpenJsonFolder"]
+			ShellExecute("explorer.exe", $context["data"]["ressourceDir"])
 		Case $mainGui["json"]["bRunVariant"]
 		Case $mainGui["json"]["bVariantRemove"]
 		Case $mainGui["json"]["bVariantEdit"]
@@ -39,7 +65,6 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$settingmap["L"] = _newMap()
 			$settingmap["L"]["timer"] = $keys[5]
 			$settingmap["L"]["increment"] = $keys[6]
-
 			GUICtrlSetData($mainGui["settings"]["iClockTime"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["timer"]])
 			GUICtrlSetData($mainGui["settings"]["iClockDelay"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["increment"]])
 		Case $mainGui["settings"]["bClockSet"]
@@ -55,7 +80,6 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				MsgBox(16, "Error", $msg)
 				Return
 			EndIf
-
 		Case $mainGui["settings"]["bClockReset"]
 			Local $type = GUICtrlRead($mainGui["settings"]["cClocks"])
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], "reset", "reset")
@@ -189,7 +213,7 @@ Func _controller_addVariant(ByRef $data, $multiverse)
 		Return SetError(1, 0, "name missing")
 	EndIf
 	$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $multiverse["Name"], "pgn to variant"))
-	_addVariantToJson($data, $variant, $multiverse["Name"])
+	_addVariantToJson($data, $variant)
 EndFunc   ;==>_controller_addVariant
 
 
@@ -201,11 +225,10 @@ Func _controller_downloadVariants(ByRef $data, $cacheOnly = False, $variantfiles
 	EndIf
 	If $variantfiles <> "all" Then
 		If Not IsArray($variantfiles) Then
-			If _some($data["remoteJsonUrls"], "StringInStr", $variantfiles) = -1 Then
+			If Not _some($data["remoteJsonUrls"], "StringInStr", $variantfiles) Then
 				Return SetError(1, 0, "variant file not found in cached urls")
 			EndIf
-		EndIf
-		If Not _some($data["remoteJsonUrls"], "_someStringinStringcallback", $variantfiles) Then
+		ElseIf Not _some($data["remoteJsonUrls"], "_someStringinStringcallback", $variantfiles) Then
 			Return SetError(2, 0, "some variant file not found in cached urls")
 		EndIf
 	EndIf
