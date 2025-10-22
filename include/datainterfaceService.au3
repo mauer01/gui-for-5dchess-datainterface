@@ -89,7 +89,10 @@ Func _checkIsRunning(ByRef $data, $justexist = False)
 	If $justexist And Not ProcessExists($data["pid"]) Then
 		_datainterface_crashed($data)
 		Return SetError(1, 0, "Datainterface not running anymore")
+	ElseIf $justexist Then
+		Return
 	EndIf
+
 	If ProcessExists($data["pid"]) Then
 		$new = StdoutRead($data["pid"])
 		$err = StderrRead($data["pid"])
@@ -143,7 +146,7 @@ EndFunc   ;==>_optionsOrTriggers
 Func _waitForResponse(ByRef $data, $response)
 	$new = StdoutRead($data["pid"])
 	While Not StringInStr($new, $response)
-		$new = StdoutRead($data["pid"])
+		$new = StdoutRead($data["pid"], True)
 		ConsoleWrite($new)
 		Sleep(10)
 		_checkIsRunning($data, True)

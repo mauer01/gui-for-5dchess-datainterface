@@ -118,7 +118,6 @@ Func _controller_changeTimer(ByRef $context, $type, $time = Null, $delay = Null)
 		$delay = _timetoSeconds($delay)
 		If @error Then Return SetError(5, 0, "Delay format invalid")
 	EndIf
-	MsgBox(0, "", $context["data"]["settings"][$settingmap[$type]["increment"]])
 	$keyinc = $settingmap[$type]["increment"]
 	$keytimer = $settingmap[$type]["timer"]
 	If ($time And $delay) Then
