@@ -353,10 +353,14 @@ EndFunc   ;==>_requestDatainterface
 
 
 Func _JSONLoad(ByRef $data)
+	$data["cachedVariants"] = _newMap()
 	Local $path = $data["activeJsonFilePath"]
 	Local $fileContent = FileRead($path)
 	Local $temp = _JSON_Parse($fileContent)
-	$data["cachedVariantArray"] = $temp
+	Local $keys = _map($temp, "variantNameAuthorCallback", "")
+	For $i = 0 To UBound($keys) - 1
+		$data["cachedVariants"][$keys[$i]] = $temp[$i]
+	Next
 EndFunc   ;==>_JSONLoad
 
 
