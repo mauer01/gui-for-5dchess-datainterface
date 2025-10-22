@@ -8,10 +8,10 @@
 #include <util.au3>
 
 Const $__tempFile = @ScriptDir & "\temp-pgn to variant.txt"
-Global $__PIDArray[0] = []
-Global $__emptyArray[0] = []
+Global $__PIDArray = _newArray()
 
-Func _datainterfaceSetup($localPath = False)
+
+Func _datainterfaceSetup($ini, $localPath = False)
 	If Not $localPath Then
 		_requestDatainterface()
 		$localPath = @LocalAppDataDir & "\GuiDataInterface\DataInterface"
@@ -23,38 +23,54 @@ Func _datainterfaceSetup($localPath = False)
 		$localPath = StringSplit($localPath, "\", 1)
 		$localPath = _ArrayToString($localPath, "\", 1, $localPath[0] - 1)
 	EndIf
-	$data = _loadDataInterface(StringTrimRight($localPath, 10))
+	$data = _loadDataInterface(StringTrimRight($localPath, 10), $ini.data.activeJsonFile)
 	Return $data
 EndFunc   ;==>_datainterfaceSetup
-Func _loadDataInterface($filepath)
+Func _loadDataInterface($filepath, $activeFile)
 	Local $data[]
 	$data["isRunning"] = False
 	$data["wasRunning"] = False
 	$data["filePath"] = $filepath & "\DataInterfaceConsole.exe"
 	$data["workingDir"] = $filepath
 	$data["jsonFile"] = $filepath & "\Resources\jsonVariants.json"
+	$data["ressourceDir"] = $filepath & "\Resources"
+	$data["activeJsonFile"] = $activeFile
+	$data["activeJsonFilePath"] = $data["ressourceDir"] & "\" & $activeFile & ".json"
 	$data["jsonFileLastChanged"] = ""
 	$data["log"] = ""
 	$data["crashed"] = False
 	$data["pid"] = ""
 	$data["configured"] = True
-	$data["jsonFiles"] = $__emptyArray
-	$data["lastFileList"] = $__emptyArray
+	$data["jsonFiles"] = _newArray()
+	$data["lastFileList"] = _newArray()
 	$data["settings"] = _newMap()
 	$data["cachedVariantMap"] = _newMap()
 	If FileExists($data["workingDir"] & "\settings.json") Then
 		$fileContent = FileRead($data["workingDir"] & "\settings.json")
 		$data["settings"] = _JSON_Parse($fileContent)
 	EndIf
-
-
+	$msg = _updateJsonFiles($data)
+	If @error = 1 Then
+		FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\guiJsonVariants.json", 1)
+		_changeActiveJsonFile($data, "guiJsonVariants.json")
+		_updateJsonFiles($data)
+	ElseIf @error Then
+		Return SetError(@error, 0, $msg)
+	EndIf
+	If Not _some($data["jsonFiles"], "stringinstr", $activeFile) Then
+		$data["activeJsonFile"] = $data.jsonFiles[0]
+	EndIf
+	_JSONLoad($data)
 	Return $data
 EndFunc   ;==>_loadDataInterface
 
 Func _updateJsonFiles(ByRef $data)
 	Local $files = _FileListToArray($data["workingDir"] & "\Resources", "*.json", 1, 1)
+	If $files[0] = 1 And StringInStr($files[1], "jsonVariants.json") Then
+		Return SetError(1, 0, "Only normal jsonVariants.json file found, no variant files present")
+	EndIf
 	If $files[0] > 1 And Not _arrayCountEquals($files, $data["lastFileList"]) Then
-		$data["jsonFiles"] = $__emptyArray
+		$data["jsonFiles"] = _newArray()
 		For $file In $files
 			Local $fullpath = StringSplit($file, "\", 1)
 			$newFile = $fullpath[UBound($fullpath) - 1]
@@ -83,6 +99,7 @@ Func _cleanExit(ByRef $data)
 		$data["isRunning"] = False
 		_ProcessClose($data["pid"])
 		_ArrayDelete($__PIDArray, _ArraySearch($__PIDArray, $data["pid"]))
+		If UBound($__PIDArray) = 0 Then OnAutoItExitUnRegister("_CloseAllDatainterfaces")
 	EndIf
 EndFunc   ;==>_cleanExit
 Func _checkIsRunning(ByRef $data, $justexist = False)
@@ -172,48 +189,6 @@ Func _runVariant(ByRef $data, $variant)
 EndFunc   ;==>_runVariant
 
 
-Func _loadVariants(ByRef $data, $forceReload = False)
-	Local $variantsstring, $variantsarray
-	$f_variantloader = $data["jsonFile"]
-	$time = _ArrayToString(FileGetTime($f_variantloader))
-	If ($time <> $data["jsonFileLastChanged"]) Or $forceReload Then
-		$data["jsonFileLastChanged"] = $time
-		$variantsstring = _readvariants($data)
-		$variantsarray = StringSplit($variantsstring, "|")
-		Local $variants[]
-		$variants["string"] = $variantsstring
-		$variants["array"] = $variantsarray
-		$variants["true"] = True
-		_syncActiveJsonFile($data)
-		Return $variants
-	EndIf
-	Local $j[]
-	$j["true"] = False
-	Return $j
-EndFunc   ;==>_loadVariants
-
-Func _readvariants(ByRef $data)
-	$f_variantloader = $data["jsonFile"]
-	$regexp = '\"Name": "[^"]+'
-	$regexp2 = '\"Author": "[^"]+'
-	$hnd_variantload = FileOpen($f_variantloader)
-	$fileContent = FileRead($hnd_variantload)
-	FileClose($hnd_variantload)
-	$matches = StringRegExp($fileContent, $regexp, 3)
-	$matches2 = StringRegExp($fileContent, $regexp2, 3)
-	$string = ""
-
-	For $i = 0 To UBound($matches) - 1
-		$matches[$i] = StringTrimLeft($matches[$i], 9)
-	Next
-
-	For $i = 0 To UBound($matches2) - 1
-		$matches2[$i] = StringTrimLeft($matches2[$i], 11)
-		$string &= $i + 1 & ".  " & $matches[$i] & " by " & $matches2[$i] & "|"
-	Next
-	$string = StringTrimRight($string, 1)
-	Return $string
-EndFunc   ;==>_readvariants
 
 
 Func updateJSONVariants(ByRef $data, $JSON)
@@ -222,6 +197,7 @@ Func updateJSONVariants(ByRef $data, $JSON)
 	FileWrite($h_temp, _JSON_MYGenerate($JSON))
 	FileClose($h_temp)
 	FileMove($__tempFile, $data["jsonFile"], 1)
+
 EndFunc   ;==>updateJSONVariants
 
 Func _JSON_MYGenerate($string)
@@ -229,9 +205,9 @@ Func _JSON_MYGenerate($string)
 EndFunc   ;==>_JSON_MYGenerate
 
 
-Func _addVariantToJson(ByRef $data, $variant, $name)
+Func _addVariantToJson(ByRef $data, $variant)
 	Local $h_file
-	_FileReadToArray($data["jsonFile"], $h_file)
+	_FileReadToArray($data["activeJsonFile"], $h_file)
 	$h_temp = FileOpen($__tempFile, 2)
 	GUISetState(@SW_DISABLE)
 	For $i = 1 To $h_file[0] - 1
@@ -244,16 +220,13 @@ Func _addVariantToJson(ByRef $data, $variant, $name)
 	$variant = StringTrimRight($variant, 2)
 	FileWrite($h_temp, $variant & @LF & "}" & @LF)
 	FileWriteLine($h_temp, $h_file[$i])
-
 	FileClose($h_temp)
-	FileMove($__tempFile, $data["jsonFile"], 1)
-
+	FileMove($__tempFile, $data["activeJsonFile"], 1)
 EndFunc   ;==>_addVariantToJson
 
 Func _removeVariantFromJson(ByRef $data, $variant)
 	Local $h_file, $skip = 0, $string = ""
-	_FileReadToArray($data["activejsonFile"], $h_file)
-
+	_FileReadToArray($data["activeJsonFile"], $h_file)
 	$k = 0
 	GUISetState(@SW_DISABLE)
 	For $i = 1 To $h_file[0] - 1
@@ -266,7 +239,6 @@ Func _removeVariantFromJson(ByRef $data, $variant)
 		If $k = $variant + 1 Then
 			$skip = 0
 		EndIf
-
 		If $skip = 0 Then
 			$string &= $h_file[$i] & @LF
 		EndIf
@@ -288,7 +260,7 @@ EndFunc   ;==>_ProcessClose
 
 
 
-Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
+Func _createNewJsonFile(ByRef $data, $name)
 
 	If $name = "" Then Return SetError(2)
 	For $item In $data["jsonFiles"]
@@ -297,27 +269,26 @@ Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
 		EndIf
 	Next
 	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $name & ".json", 1)
-	$data["activeJsonFile"] = $name
+	_changeActiveJsonFile($data, $name)
 EndFunc   ;==>_createNewJsonFile
 
 Func _changeActiveJsonFile(ByRef $data, $name)
-
-	$activeFile = _find($data["jsonFiles"], "_stringinstringcallback", "ACTIVE")
-	FileMove($data["workingDir"] & "\Resources\" & $activeFile & ".json", $data["workingDir"] & "\Resources\" & StringReplace($activeFile, "", "") & ".json", 1)
-	FileMove($data["workingDir"] & "\Resources\" & $name & ".json", $data["workingDir"] & "\Resources\" & $name & ".json", 1)
-	FileCopy($data["workingDir"] & "\Resources\" & $name & ".json", $data["jsonFile"], 1)
+	If Not _some($data["jsonFiles"], "stringinstr", $name) Then
+		Return SetError(1, 0, "Json file not found")
+	EndIf
 	$data["activeJsonFile"] = StringReplace($name, ".json", "")
+	$data["activeJsonFilePath"] = $data["ressourceDir"] & "\" & $data["activeJsonFile"] & ".json"
+	IniWrite(@ScriptDir & "\gui for datainterface.ini", "Data", "activeJsonFile", $data["activeJsonFile"])
+	_JSONLoad($data)
 EndFunc   ;==>_changeActiveJsonFile
 
 Func _changeNameOfJsonFile(ByRef $data, $oldName, $newName)
-
 	If $oldName = $newName Then Return SetError(1)
 	If _some($data["jsonFiles"], "stringinstr", $newName) Then
 		Return SetError(2)
 	EndIf
 	FileMove($data["workingDir"] & "\Resources\" & $oldName & ".json", $data["workingDir"] & "\Resources\" & $newName & ".json", 1)
 	$data["activeJsonFile"] = $newName
-
 EndFunc   ;==>_changeNameOfJsonFile
 
 
@@ -382,7 +353,14 @@ EndFunc   ;==>_requestDatainterface
 
 
 Func _JSONLoad(ByRef $data)
-	$fileContent = FileRead($data["activeJsonFile"])
-	$temp = _JSON_Parse($fileContent)
+	Local $path = $data["activeJsonFilePath"]
+	Local $fileContent = FileRead($path)
+	Local $temp = _JSON_Parse($fileContent)
 	$data["cachedVariantArray"] = $temp
 EndFunc   ;==>_JSONLoad
+
+
+Func variantNameAuthorCallback($e, $string)
+	Local $fullstring = $e.Name & " by " & $e.Author & $string
+	Return $fullstring
+EndFunc   ;==>variantNameAuthorCallback
