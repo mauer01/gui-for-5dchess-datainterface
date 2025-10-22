@@ -67,11 +67,16 @@ Func main()
 		_cleanexit($context.data)
 		Return SetError(@error, @extended, $run)
 	EndIf
+	$msg = _cacheJsonUrls($context.data)
+	If @error Then
+		MsgBox(16, "Error", $msg)
+	EndIf
 	$main = _LoadMainGui($context)
 	If @error Then
 		_cleanexit($context.data)
 		Return SetError(@error, @extended, $main)
 	EndIf
+
 	Do
 		$msg = _frontController($context, $main)
 		$error = @error
@@ -102,7 +107,7 @@ Func loadContext()
 	EndIf
 	IniReadSection("gui for datainterface.ini", "Data")
 	$context["ini"]["data"] = _twodimarraytoMap(IniReadSection("gui for datainterface.ini", "Data"))
-	If Not MapExists($context.ini.data, "Interface") Then Return SetError(1, 0, "force setting up datainterface")
+	If Not MapExists($context["ini"]["data"], "Interface") Then Return SetError(1, 0, "force setting up datainterface")
 	$context["data"] = _datainterfaceSetup($context["ini"]["data"]["Interface"])
 	If @error = 1 Then
 		Return SetError(1, 0, "force setting up datainterface")
