@@ -117,17 +117,17 @@ Func _checkIsRunning(ByRef $data, $justexist = False)
 		ConsoleWrite($new)
 		$data["log"] = StringRight($data["log"], 1000)
 	Else
-		_datainterface_crashed($data)
-		Return SetError(1, 0, "Datainterface not running anymore")
+		Return _datainterface_crashed($data)
 	EndIf
 EndFunc   ;==>_checkIsRunning
 Func _datainterface_crashed(ByRef $data)
 	If $data["wasRunning"] = True Then
 		$data["wasRunning"] = False
 		$data["crashed"] = True
-		Return SetError(1, 0, "Datainterface closed unexpectidly Logfile might provide data")
 		FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
+		Return SetError(1, 0, "Datainterface closed unexpectidly Logfile might provide data")
 	EndIf
+	Return SetError(1, 0, "Datainterface is not running")
 EndFunc   ;==>_datainterface_crashed
 Func _CloseAllDatainterfaces()
 	For $pid In $__PIDArray
