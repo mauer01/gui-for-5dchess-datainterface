@@ -61,7 +61,7 @@ Func _arrayCountEquals($array1, $array2)
 EndFunc   ;==>_arrayCountEquals
 
 Func _someStringinStringcallback($e, $string)
-	Return _some($e, "_stringinstringcallback", $string)
+	Return _some($e, "stringinstr", $string)
 EndFunc   ;==>_someStringinStringcallback
 
 
@@ -123,3 +123,8 @@ Func _newMap()
 	Local $map[]
 	Return $map
 EndFunc   ;==>_newMap
+
+Func _newArray()
+	Local $__emptyArray[0] = []
+	Return $__emptyArray
+EndFunc   ;==>_newArray
