@@ -40,11 +40,13 @@ Func _loadDataInterface($filepath)
 	$data["configured"] = True
 	$data["jsonFiles"] = $__emptyArray
 	$data["lastFileList"] = $__emptyArray
-	$data["JsonFileManager"] = True
 	$data["settings"] = _newMap()
+	$data["cachedVariantMap"] = _newMap()
 	If FileExists($data["workingDir"] & "\settings.json") Then
-		$data["settings"] = _JSON_Parse(FileRead($data["workingDir"] & "\settings.json"))
+		$fileContent = FileRead($data["workingDir"] & "\settings.json")
+		$data["settings"] = _JSON_Parse($fileContent)
 	EndIf
+
 
 	Return $data
 EndFunc   ;==>_loadDataInterface
@@ -67,22 +69,27 @@ Func _updateJsonFiles(ByRef $data)
 EndFunc   ;==>_updateJsonFiles
 
 Func _runDataInterface(ByRef $data)
+	OnAutoItExitRegister("_CloseAllDatainterfaces")
 	$pid = Run($data["filePath"], $data["workingDir"], @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD, $STDERR_CHILD))
 	$data["pid"] = $pid
 	$data["isRunning"] = True
 	$data["wasRunning"] = True
 	_ArrayAdd($__PIDArray, $data["pid"])
 EndFunc   ;==>_runDataInterface
-
 Func _cleanExit(ByRef $data)
 	_checkIsRunning($data)
 	If $data["isRunning"] Then
 		$data["wasRunning"] = False
 		$data["isRunning"] = False
 		_ProcessClose($data["pid"])
+		_ArrayDelete($__PIDArray, _ArraySearch($__PIDArray, $data["pid"]))
 	EndIf
 EndFunc   ;==>_cleanExit
-Func _checkIsRunning(ByRef $data)
+Func _checkIsRunning(ByRef $data, $justexist = False)
+	If $justexist And Not ProcessExists($data["pid"]) Then
+		_datainterface_crashed($data)
+		Return SetError(1, 0, "Datainterface not running anymore")
+	EndIf
 	If ProcessExists($data["pid"]) Then
 		$new = StdoutRead($data["pid"])
 		$err = StderrRead($data["pid"])
@@ -90,15 +97,18 @@ Func _checkIsRunning(ByRef $data)
 		ConsoleWrite($new)
 		$data["log"] = StringRight($data["log"], 1000)
 	Else
-		$data["isRunning"] = False
-		If $data["wasRunning"] = True Then
-			$data["wasRunning"] = False
-			$data["crashed"] = True
-			Return SetError(1, 0, "Datainterface closed unexpectidly Logfile might provide data")
-			FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
-		EndIf
+		_datainterface_crashed($data)
+		Return SetError(1, 0, "Datainterface not running anymore")
 	EndIf
 EndFunc   ;==>_checkIsRunning
+Func _datainterface_crashed(ByRef $data)
+	If $data["wasRunning"] = True Then
+		$data["wasRunning"] = False
+		$data["crashed"] = True
+		Return SetError(1, 0, "Datainterface closed unexpectidly Logfile might provide data")
+		FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
+	EndIf
+EndFunc   ;==>_datainterface_crashed
 Func _CloseAllDatainterfaces()
 	For $pid In $__PIDArray
 		If ProcessExists($pid) Then
@@ -133,11 +143,11 @@ EndFunc   ;==>_optionsOrTriggers
 Func _waitForResponse(ByRef $data, $response)
 	$new = StdoutRead($data["pid"])
 	While Not StringInStr($new, $response)
-		_checkIsRunning($data)
-		If @error Then Return SetError(1, 0, "Datainterface not running anymore")
 		$new = StdoutRead($data["pid"])
 		ConsoleWrite($new)
 		Sleep(10)
+		_checkIsRunning($data, True)
+		If @error Then Return SetError(1, 0, "Datainterface not running anymore")
 	WEnd
 EndFunc   ;==>_waitForResponse
 Func _runPGN(ByRef $data, $pgn)
@@ -239,7 +249,7 @@ EndFunc   ;==>_addVariantToJson
 
 Func _removeVariantFromJson(ByRef $data, $variant)
 	Local $h_file, $skip = 0, $string = ""
-	_FileReadToArray($data["jsonFile"], $h_file)
+	_FileReadToArray($data["activejsonFile"], $h_file)
 
 	$k = 0
 	GUISetState(@SW_DISABLE)
@@ -276,7 +286,7 @@ EndFunc   ;==>_ProcessClose
 
 
 Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
-	If $data["JsonFileManager"] = False Then Return SetError(1)
+
 	If $name = "" Then Return SetError(2)
 	For $item In $data["jsonFiles"]
 		If $item = $name Then
@@ -288,7 +298,7 @@ Func _createNewJsonFile(ByRef $data, $name = "newVariantFile")
 EndFunc   ;==>_createNewJsonFile
 
 Func _changeActiveJsonFile(ByRef $data, $name)
-	If $data["JsonFileManager"] = False Then Return
+
 	$activeFile = _find($data["jsonFiles"], "_stringinstringcallback", "ACTIVE")
 	FileMove($data["workingDir"] & "\Resources\" & $activeFile & ".json", $data["workingDir"] & "\Resources\" & StringReplace($activeFile, "", "") & ".json", 1)
 	FileMove($data["workingDir"] & "\Resources\" & $name & ".json", $data["workingDir"] & "\Resources\" & $name & ".json", 1)
@@ -297,9 +307,9 @@ Func _changeActiveJsonFile(ByRef $data, $name)
 EndFunc   ;==>_changeActiveJsonFile
 
 Func _changeNameOfJsonFile(ByRef $data, $oldName, $newName)
-	If $data["JsonFileManager"] = False Then Return
+
 	If $oldName = $newName Then Return SetError(1)
-	If _some($data["jsonFiles"], "_stringinstringcallback", $newName) Then
+	If _some($data["jsonFiles"], "stringinstr", $newName) Then
 		Return SetError(2)
 	EndIf
 	FileMove($data["workingDir"] & "\Resources\" & $oldName & ".json", $data["workingDir"] & "\Resources\" & $newName & ".json", 1)
@@ -307,16 +317,6 @@ Func _changeNameOfJsonFile(ByRef $data, $oldName, $newName)
 
 EndFunc   ;==>_changeNameOfJsonFile
 
-
-Func _syncActiveJsonFile(ByRef $data)
-	If $data["JsonFileManager"] = False Then Return
-	Local $activeFile = $data["activeJsonFile"]
-	If Not $activeFile Then Return
-	If Not (FileGetSize($data["workingDir"] & "\Resources\" & $activeFile & ".json") <> FileGetSize($data["jsonFile"])) Then
-		Return
-	EndIf
-	FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\" & $activeFile & ".json", 1)
-EndFunc   ;==>_syncActiveJsonFile
 
 Func _backUpJsonFile(ByRef $data, $target, $entireFolder = False)
 	If $entireFolder Then
@@ -348,8 +348,7 @@ EndFunc   ;==>_downloadAndInstallJsonFilescb
 Func _cacheJsonUrls(ByRef $data)
 	$data2 = InetRead("https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/variantFilesWithPath.json")
 	If @error Then
-		; Handle error if needed
-		Return SetError(1)
+		Return SetError(@error, 0, "Couldnt fetch variant file list from github")
 	EndIf
 	$data2 = BinaryToString($data2)
 	$data["remoteJsonUrls"] = _JSON_Parse($data2)
@@ -380,7 +379,7 @@ EndFunc   ;==>_requestDatainterface
 
 
 Func _JSONLoad(ByRef $data)
-	$fileContent = FileRead($data["jsonFile"])
+	$fileContent = FileRead($data["activeJsonFile"])
 	$temp = _JSON_Parse($fileContent)
-	Return $temp
+	$data["cachedVariantArray"] = $temp
 EndFunc   ;==>_JSONLoad
