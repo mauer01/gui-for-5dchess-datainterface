@@ -85,18 +85,18 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], "reset", "reset")
 			If @error = 1 Then MsgBox(16, "Error", "Select a Clock Type to reset.")
 		Case $mainGui["settings"]["cbUndoMove"]
-			_controller_undoMoveToggle($context["data"])
+			$msg = _controller_undoMoveToggle($context["data"])
 		Case $mainGui["settings"]["cbRestartGameOnCrash"]
 		Case $mainGui["settings"]["rAnimationsAlwaysOn"]
-			_controller_animationSetting($context["data"], "on")
+			$msg = _controller_animationSetting($context["data"], "on")
 		Case $mainGui["settings"]["rAnimationsAlwaysOff"]
-			_controller_animationSetting($context["data"], "off")
+			$msg = _controller_animationSetting($context["data"], "off")
 		Case $mainGui["settings"]["rAnimationsIgnore"]
-			_controller_animationSetting($context["data"], "ignore")
+			$msg = _controller_animationSetting($context["data"], "ignore")
 		Case $mainGui["settings"]["bInsertCode"]
-			_controller_trigger($context["data"], ClipGet())
+			$msg = _controller_trigger($context["data"], ClipGet())
 		Case $mainGui["settings"]["bResumeGame"]
-			_controller_trigger($context["data"])
+			$msg = _controller_trigger($context["data"])
 		Case $mainGui["pgn"]["bPgnAdd"]
 		Case $mainGui["pgn"]["bPgnOpenPath"]
 		Case $mainGui["pgn"]["cPgnList"]
@@ -258,7 +258,7 @@ Func _controller_trigger(ByRef $data, $code = False)
 		Return
 	EndIf
 	If Not StringInStr($code, "\:\]") Then
-		Return SetError(1)
+		Return SetError(1, 0, "code format invalid")
 	EndIf
 
 	_optionsOrTriggers($data, 2, $code)
