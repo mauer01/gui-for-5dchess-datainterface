@@ -8,7 +8,7 @@
 #include <WindowsConstants.au3>
 #include <include\controller.au3>
 Func _LoadMainGui(ByRef $context)
-	Local $map = _newMap()
+	Local $keys, $map[]
 	$map["longNullClock"] = "20:00"
 	$map["shortNullClock"] = "5:00"
 	$map["mediumNullClock"] = "10:00"
@@ -26,9 +26,9 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgRemoteJson = GUICtrlCreateLabel("", 8, 66, 0, 0)
-	Local $cRemoteJsons = GUICtrlCreateCombo("No Connection", 8, 66, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $cRemoteJsons = GUICtrlCreateCombo("No Connection", 8, 66, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
 	If MapExists($context.data, "remoteJsonUrls") Then
-		Local $keys = MapKeys($context.data.remoteJsonUrls)
+		$keys = MapKeys($context.data.remoteJsonUrls)
 		GUICtrlSetData($cRemoteJsons, "")
 		GUICtrlSetData($cRemoteJsons, _ArrayToString($keys), $keys[0])
 	EndIf
@@ -36,7 +36,11 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgLocalJson = GUICtrlCreateLabel("", 8, 98, 0, 0)
-	Local $cLocalJsonFiles = GUICtrlCreateCombo("", 8, 98, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $cLocalJsonFiles = GUICtrlCreateCombo("", 8, 98, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	If MapExists($context.data, "jsonFiles") Then
+		GUICtrlSetData($cLocalJsonFiles, "")
+		GUICtrlSetData($cLocalJsonFiles, _ArrayToString($context.data.jsonFiles), $context.data.activeJsonFile)
+	EndIf
 	Local $bLocalJsonFileRemove = GUICtrlCreateButton($context.labels.bLocalJsonFileRemove, 240, 96)
 	$newPos = myControlGetPos($main, $bLocalJsonFileRemove)
 	Local $bLocalJsonFileCopy = GUICtrlCreateButton($context.labels.bLocalJsonFileCopy, $newPos["x"] + 5, $newPos["y"])
@@ -49,7 +53,10 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgVariants = GUICtrlCreateLabel("", 8, 130, 0, 0)
-	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	$variantsAsStrings = _map($context.data.cachedVariantArray, "variantNameAuthorCallback", "")
+	GUICtrlSetData($cListOfVariants, _ArrayToString($variantsAsStrings), $variantsAsStrings[0])
+
 	$newPos = myControlGetPos($main, $cListOfVariants)
 	Local $bRunVariant = GUICtrlCreateButton($context.labels.bRunVariant, $newPos["x"] + 5, $newPos["y"])
 	$newPos = myControlGetPos($main, $bRunVariant)
@@ -239,7 +246,32 @@ Func myControlGetPos($form_id, $control_id, $axis = "x")
 
 	Return $pos
 EndFunc   ;==>myControlGetPos
+Func _updateComboBoxes(ByRef $data, ByRef $main)
+	; Update Remote Jsons ComboBox
+	Local $keys = MapKeys($data["remoteJsonUrls"])
+	Static Local $oldkeys[0]
+	Static Local $oldjson[0]
+	Static Local $oldvariants[0]
+	If MapExists($data, "remoteJsonUrls") And Not _arrayCountEquals($keys, $oldkeys) Then
+		GUICtrlSetData($main["json"]["cRemoteJsons"], "")
+		GUICtrlSetData($main["json"]["cRemoteJsons"], _ArrayToString($keys), $keys[0])
+		$oldkeys = $keys
+	EndIf
+	; Update Local Json Files ComboBox
+	If MapExists($data, "jsonFiles") And Not _arrayCountEquals($data.jsonFiles, $oldjson) Then
+		GUICtrlSetData($main["json"]["cLocalJsonFiles"], "")
+		GUICtrlSetData($main["json"]["cLocalJsonFiles"], _ArrayToString($data.jsonFiles), $data.activeJsonFile)
+		$oldjson = $data["jsonFiles"]
+	EndIf
+	; Update Variant List ComboBox
+	If Not _arrayCountEquals($data["cachedVariantArray"], $oldvariants) Then
+		$variantsAsStrings = _map($data["cachedVariantArray"], "variantNameAuthorCallback", "")
+		GUICtrlSetData($main["json"]["cVariantList"], "")
+		GUICtrlSetData($main["json"]["cVariantList"], _ArrayToString($variantsAsStrings), $variantsAsStrings[0])
+		$oldvariants = $data["cachedVariantArray"]
+	EndIf
 
+EndFunc   ;==>_updateComboBoxes
 
 
 
