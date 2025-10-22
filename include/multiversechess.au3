@@ -5,8 +5,9 @@
 #include <JSON.au3>
 
 
-Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
+Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1, $name = "Name is Important")
 	Local $i_multiverse[]
+	$i_multiverse["Name"] = $name
 	Local $array[0][0]
 	Local $array2[0]
 	$i_multiverse[3] = $array2
@@ -927,7 +928,7 @@ Func _checkVariant($JSON)
 			If Not IsArray($multiversum[$i][$j]) Then ContinueLoop
 			$board = $multiversum[$i][$j]
 			$boardheight = UBound($board)
-			If $boardheight > 8 Then return setError(1,0,"Board bigger than allowed")
+			If $boardheight > 8 Then Return SetError(1, 0, "Board bigger than allowed")
 			$boardwidth = UBound($board, 2)
 			If Not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
 			If $boardheight <> $boardwidth Then
