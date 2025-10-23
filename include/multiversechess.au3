@@ -790,7 +790,6 @@ Func _multiversetovariant($i_multiverse, $variant = "automatically generated", $
 	$i_multiverse[1] = _multiverse_removeemptytimelines($i_multiverse)
 	Local $string = "  {" & @LF & "    " & '"Name": "' & $variant & '",' & @LF & "    " & '"Author": "' & $author & '",' & @LF & "    " & '"Timelines": {' & @LF
 	Local $timelines = UBound($i_multiverse[1], 2) - 1
-	Local $turns = UBound(($i_multiverse[1])) - 1
 	For $i = 0 To $timelines
 		$string &= "    " & '  "' & ($i_multiverse[1])[0][$i] & 'L": [' & @LF & "    " & "   "
 		$endboard = _multiverse_findendboard($i_multiverse, $i)
@@ -908,11 +907,11 @@ EndFunc   ;==>_IsEven
 #EndRegion stupid stuff
 
 
-Func _checkVariant($JSON)
+Func _checkVariant($JSON, $break = False)
 	$initialKeys = MapKeys($JSON)
-	If Not _some($initialKeys, "StringInStr", "Name") Then Return "No Name"
-	If Not _some($initialKeys, "StringInStr", "Author") Then Return "No Author"
-	If Not _some($initialKeys, "StringInStr", "Timelines") Then Return "No Timelines"
+	If Not _some($initialKeys, "StringInStr", "Author") Then Return SetError(1, 0, "No Author")
+	If Not _some($initialKeys, "StringInStr", "Name") Then Return SetError(1, 0, "No Name")
+	If Not _some($initialKeys, "StringInStr", "Timelines") Then Return SetError(1, 0, "No Timelines")
 	$timelines = MapKeys($JSON["Timelines"])
 	$counting = 0
 	For $line In $timelines
@@ -921,6 +920,7 @@ Func _checkVariant($JSON)
 		EndIf
 	Next
 	If Not ($counting = UBound($timelines)) Then Return "Ungültige Zeitliniennamen"
+	If $break Then Return True
 	Local $multiverse = _multiverse_create("variant", $JSON)
 	$multiversum = $multiverse[1]
 	For $i = 0 To UBound($multiversum) - 1
