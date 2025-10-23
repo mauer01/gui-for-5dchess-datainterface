@@ -1,10 +1,11 @@
 #include-once
+#include <GUIConstantsEx.au3>
 #include <datainterfaceService.au3>
 #include <moreArray.au3>
 #include <multiversechess.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
-	Local $nMsg, $msg, $filepath, $filename
+	Local $nMsg, $msg, $filepath, $filename, $type, $multiverse
 
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
@@ -25,36 +26,78 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			EndIf
 
 		Case $mainGui["json"]["bAddVariantfromClip"]
-			_controller_addVariant($context["data"], _multiverse_create("pgn", ClipGet()))
+			$msg = _controller_addVariant($context["data"], ClipGet(), InputBox("Enter variant name", "Enter a Name for the variant", "Variant from Clipboard"))
 		Case $mainGui["json"]["bAddVariantFromFile"]
-			$filepath = FileOpenDialog("Select PGN File", "", "PGN Files (*.pgn;*.txt)|All Files (*.*)")
+			$filepath = FileOpenDialog("Select PGN or JSON File", "", "PGN Files (*.pgn;*.txt)|JSON Files (*.json)")
 			If @error Then
 				MsgBox(16, "Error", "No file selected")
 				Return
 			EndIf
-			$msg = _controller_addVariant($context["data"], _multiverse_create("pgn", $filepath))
-			If @error Then
-				ConsoleWrite("Error adding variant: " & @error & " - " & @extended & @CRLF & $msg & @CRLF)
-			EndIf
-
+			$msg = _controller_addVariant($context["data"], FileRead($filepath), StringTrimRight($filepath, StringMid($filepath, StringInStr($filepath, "\", 0, -1)) + 1))
 		Case $mainGui["json"]["bRemoteJsonDownload"]
 			$msg = _controller_downloadVariants($context["data"], False, GUICtrlRead($mainGui["json"]["cRemoteJsons"]))
 		Case $mainGui["json"]["cLocalJsonFiles"]
 			_changeActiveJsonFile($context["data"], GUICtrlRead($mainGui["json"]["cLocalJsonFiles"]))
 			IniWrite($context.data.ini.path, "Data", "ActiveJsonFile", $context["data"]["activeJsonFile"])
 		Case $mainGui["json"]["bLocalJsonFileRemove"]
+			If MsgBox(4, "Confirm", "Are you sure you want to delete this JSON file?") = 6 Then
+				FileDelete($context["data"]["ressourceDir"] & "\" & GUICtrlRead($mainGui["json"]["cLocalJsonFiles"]) & ".json")
+			EndIf
+			_updateJsonFiles($context["data"])
+			_changeActiveJsonFile($context["data"], $context.data.jsonFiles[0])
 		Case $mainGui["json"]["bLocalJsonFileCopy"]
+			Local $filecopy = StringReplace($context["data"]["activeJsonFilePath"], ".json", "_copy.json")
+			If FileExists($filecopy) Then
+				MsgBox(16, "Error", "A copy of this file already exists.")
+				Return
+			EndIf
+			FileCopy($context["data"]["activeJsonFilePath"], $filecopy)
+			_updateJsonFiles($context["data"])
+			$msg = _changeActiveJsonFile($context["data"], StringReplace($filecopy, ".json", ""))
 		Case $mainGui["json"]["bLocalJsonFileRename"]
+			Local $input = InputBox("Enter new name for JSON file", "", $context["data"]["activeJsonFile"])
+			$input = StringReplace($input, ".json", "")
+			If _some($context["data"]["jsonFiles"], "_equalityCallback", $input) Then
+				MsgBox(16, "Error", "A JSON file with that name already exists.")
+				Return
+			EndIf
+			$msg = FileMove($context["data"]["activeJsonFilePath"], $context["data"]["ressourceDir"] & "\" & $input & ".json")
+			_updateJsonFiles($context["data"])
+			$msg = _changeActiveJsonFile($context["data"], $input)
 		Case $mainGui["json"]["bLocalJsonFileBackup"]
+			$msg = DirCopy($context["data"]["ressourceDir"], FileSelectFolder("select a folder to backup your jsons files to", ""), 1)
 		Case $mainGui["json"]["bOpenJsonFolder"]
-			ShellExecute("explorer.exe", $context["data"]["ressourceDir"])
+			$msg = ShellExecute("explorer.exe", $context["data"]["ressourceDir"])
 		Case $mainGui["json"]["bRunVariant"]
+			Local $variantKey = GUICtrlRead($mainGui["json"]["cListOfVariants"])
+			Local $variant = $context["data"]["cachedVariantMap"][$variantKey]
+			$msg = _runVariant($context["data"], $variant)
 		Case $mainGui["json"]["bVariantRemove"]
+			If MsgBox(4, "Confirm", "Are you sure you want to remove this variant?") = 7 Then
+				Return
+			EndIf
+			$msg = _controller_removeVariant($context["data"], GUICtrlRead($mainGui["json"]["cListOfVariants"]))
+
 		Case $mainGui["json"]["bVariantEdit"]
 		Case $mainGui["json"]["baddVariantsFromJsonFile"]
+			$filepath = FileOpenDialog("Select JSON File", $context["data"]["ressourceDir"], "JSON Files (*.json)")
+			If @error Then
+				MsgBox(16, "Error", "No file selected")
+				Return
+			EndIf
+			$msg = _forEach(_JSON_Parse(FileRead($filepath)), "_controller_addVariantOverload", $context["data"])
 		Case $mainGui["settings"]["cClocks"]
 			Local $settingmap = _newMap()
 			$type = GUICtrlRead($mainGui["settings"]["cClocks"])
+			If $type == $context.labels.cClocks Then Return
+			Static Local $aklsdfjlkasdjflkasjdfkl
+			If Not $aklsdfjlkasdjflkasjdfkl Then
+				GUICtrlSetState($mainGui["settings"]["iClockTime"], $GUI_ENABLE)
+				GUICtrlSetState($mainGui["settings"]["iClockDelay"], $GUI_ENABLE)
+				$aklsdfjlkasdjflkasjdfkl = True
+				GUICtrlSetData($mainGui["settings"]["cClocks"], "")
+				GUICtrlSetData($mainGui["settings"]["cClocks"], $context.labels.cClocksChoices, $type)
+			EndIf
 			$keys = MapKeys($context["data"]["settings"])
 			$settingmap["S"] = _newMap()
 			$settingmap["S"]["timer"] = $keys[1]
@@ -66,12 +109,13 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$settingmap["L"]["timer"] = $keys[5]
 			$settingmap["L"]["increment"] = $keys[6]
 			GUICtrlSetData($mainGui["settings"]["iClockTime"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["timer"]])
-			GUICtrlSetData($mainGui["settings"]["iClockDelay"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["increment"]])
+			$msg = GUICtrlSetData($mainGui["settings"]["iClockDelay"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["increment"]])
 		Case $mainGui["settings"]["bClockSet"]
 			Local $time = GUICtrlRead($mainGui["settings"]["iClockTime"])
 			Local $delay = GUICtrlRead($mainGui["settings"]["iClockDelay"])
-			Local $type = GUICtrlRead($mainGui["settings"]["cClocks"])
-			If Not _some(MapKeys($mainGui["settings"]["Timers"]), "stringinstr", $type) = -1 Then
+			$type = GUICtrlRead($mainGui["settings"]["cClocks"])
+			$keys = MapKeys($mainGui["settings"]["Timers"])
+			If Not _some($keys, "stringinstr", $type) Then
 				MsgBox(16, "Error", "Choose a valid clock type.")
 				Return
 			EndIf
@@ -81,12 +125,29 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 		Case $mainGui["settings"]["bClockReset"]
-			Local $type = GUICtrlRead($mainGui["settings"]["cClocks"])
+			$type = GUICtrlRead($mainGui["settings"]["cClocks"])
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], "reset", "reset")
 			If @error = 1 Then MsgBox(16, "Error", "Select a Clock Type to reset.")
 		Case $mainGui["settings"]["cbUndoMove"]
 			$msg = _controller_undoMoveToggle($context["data"])
 		Case $mainGui["settings"]["cbRestartGameOnCrash"]
+			If $context["option"]["gameLocation"] = "" Then
+				Local $location = _ProcessGetLocation("5dchesswithmultiversetimetravel.exe")
+				If @error = 1 Then
+					MsgBox(16, "Error", "5D Chess with Multiverse Time Travel is not running. Please start the game first.")
+				ElseIf @error = 2 Then
+					MsgBox(16, "Error", "Unable to get location of 5D Chess with Multiverse Time Travel automatically. Please set the game location in settings first.")
+					$location = FileOpenDialog("Select 5D Chess with Multiverse Time Travel Executable", "", "Executable Files (*.exe)|All Files (*.*)")
+					If @error Then
+						MsgBox(16, "Error", "No file selected. Cannot enable Restart Game on Crash.")
+						GUICtrlSetData($mainGui["settings"]["cbRestartGameOnCrash"], $GUI_UNCHECKED)
+						Return
+					EndIf
+				EndIf
+				$context["option"]["gameLocation"] = $location
+				IniWrite("gui for datainterface.ini", "Data", "gamelocation", $location)
+			EndIf
+			$context["option"]["keepgameon"] = Not $context["option"]["keepgameon"]
 		Case $mainGui["settings"]["rAnimationsAlwaysOn"]
 			$msg = _controller_animationSetting($context["data"], "on")
 		Case $mainGui["settings"]["rAnimationsAlwaysOff"]
@@ -148,14 +209,14 @@ Func _controller_changeTimer(ByRef $context, $type, $time = Null, $delay = Null)
 		_settingOptions($data, $map[$type], $time)
 		_waitForResponse($data, "Action executed. Returning to menu")
 		_settingOptions($data, $map[$type] + 1, $delay)
-		$context["data"]["settings"][$keytimer] = $time
-		$context["data"]["settings"][$keyinc] = $delay
+		$context["data"]["settings"][$keytimer] = $time == "reset" ? "" : $time
+		$context["data"]["settings"][$keyinc] = $delay == "reset" ? "" : $delay
 	ElseIf $time Then
 		_settingOptions($data, $map[$type], $time)
-		$context["data"]["settings"][$keytimer] = $time
+		$context["data"]["settings"][$keytimer] = $time == "reset" ? "" : $time
 	ElseIf $delay Then
 		_settingOptions($data, $map[$type] + 1, $delay)
-		$context["data"]["settings"][$keyinc] = $delay
+		$context["data"]["settings"][$keyinc] = $delay == "reset" ? "" : $delay
 	Else
 		Return SetError(6, 0, "No time or delay provided")
 	EndIf
@@ -167,6 +228,8 @@ Func _checkString($string, $exceptions = "")
 		Return SetError(1, 0, "string must be in a numeric or follow a format")
 	EndIf
 EndFunc   ;==>_checkString
+
+
 
 Func _controller_undoMoveToggle(ByRef $data)
 	Static $toggled = False
@@ -193,8 +256,16 @@ Func _controller_animationSetting(ByRef $data, $setting)
 	_settingOptions($data, 1, $setting)
 EndFunc   ;==>_controller_animationSetting
 
-Func _controller_removeVariant(ByRef $data, $variantId)
+Func _controller_removeVariant(ByRef $data, $variant)
+	Local $keys = MapKeys($data["cachedVariantMap"]), $variantId
+	For $i = 0 To UBound($keys) - 1
+		If $keys[$i] = $variant Then
+			$variantId = $i + 1
+			ExitLoop
+		EndIf
+	Next
 	_removeVariantFromJson($data, $variantId)
+	_JSONLoad($data)
 EndFunc   ;==>_controller_removeVariant
 
 
@@ -207,15 +278,37 @@ Func _controller_runPGN(ByRef $data, $pgn)
 EndFunc   ;==>_controller_runPGN
 
 
-
-Func _controller_addVariant(ByRef $data, $multiverse)
-	If Not MapExists($multiverse, "Name") Then
-		Return SetError(1, 0, "name missing")
+Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
+	If MapExists($fenPgnOrJson, "Name") Then
+		$msg = _checkVariant($fenPgnOrJson, True)
+		If @error Then
+			Return SetError(@error, 0, $msg)
+		EndIf
+		_addVariantToJson($data, _JSON_MYGenerate($fenPgnOrJson))
+		Return
 	EndIf
-	$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $multiverse["Name"], "pgn to variant"))
-	_addVariantToJson($data, $variant)
+	If StringInStr($fenPgnOrJson, "{") Then
+		$variant = _JSON_Parse($fenPgnOrJson)
+		$msg = _checkVariant($variant, True)
+		If @error Then
+			Return SetError(@error, 0, $msg)
+		EndIf
+		_addVariantToJson($data, _JSON_MYGenerate($variant))
+		Return
+	EndIf
+	If StringInStr($fenPgnOrJson, '"[') Then
+		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
+		$multiverse["Name"] = $name
+		$variant = _JSON_MYGenerate(_multiversetovariant($fenPgnOrJson, $fenPgnOrJson["Name"], "pgn to variant"))
+		_addVariantToJson($data, $variant)
+		Return
+	EndIf
+	Return SetError(1, 0, "Input not recognized as valid variant, json, or pgn")
 EndFunc   ;==>_controller_addVariant
 
+Func _controller_addVariantOverload($multiverse, ByRef $data)
+	Return _controller_addVariant($data, $multiverse, $multiverse["Name"])
+EndFunc   ;==>_controller_addVariantOverload
 
 
 Func _controller_downloadVariants(ByRef $data, $cacheOnly = False, $variantfiles = "all")
