@@ -1,6 +1,7 @@
 
 #include-once
 #include <Array.au3>
+#include <JSON.au3>
 Func _some(ByRef $list, $callback, $arg)
 	For $item In $list
 		If Call($callback, $item, $arg) Then
@@ -45,8 +46,8 @@ EndFunc   ;==>_every
 
 Func _forEach($list, $callback, $arg = "")
 	For $item In $list
-		Call($callback, $item, $arg)
-		If @error Then Return SetError(@error)
+		$msg = Call($callback, $item, $arg)
+		If @error Then Return SetError(@error, 0, _JSON_generate($item) & ": " & $msg)
 	Next
 EndFunc   ;==>_forEach
 
@@ -67,6 +68,7 @@ EndFunc   ;==>_someStringinStringcallback
 
 Func _map($list, $callback, $arg = "")
 	Local $newList[0]
+	If Not IsArray($list) Or UBound($list) = 0 Then Return SetError(1, 0, "_map: first argument is not an array")
 	For $item In $list
 		_ArrayAdd($newList, Call($callback, $item, $arg))
 	Next
