@@ -59,16 +59,16 @@ EndFunc   ;==>_unZip
 
 Func _ProcessGetLocation($sProc = @ScriptFullPath)
 	Local $iPID = ProcessExists($sProc)
-	If $iPID = 0 Then Return SetError(1, 0, -1)
+	If $iPID = 0 Then Return SetError(1, 0, "process not running")
 
 	Local $aProc = DllCall('kernel32.dll', 'hwnd', 'OpenProcess', 'int', BitOR(0x0400, 0x0010), 'int', 0, 'int', $iPID)
-	If $aProc[0] = 0 Then Return SetError(1, 0, -1)
+	If $aProc[0] = 0 Then Return SetError(1, 0, "unable to open process")
 
 	Local $vStruct = DllStructCreate('int[1024]')
 	DllCall('psapi.dll', 'int', 'EnumProcessModules', 'hwnd', $aProc[0], 'ptr', DllStructGetPtr($vStruct), 'int', DllStructGetSize($vStruct), 'int*', 0)
 
 	Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
-	If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
+	If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, "unable to get process location")
 	Return $aReturn[3]
 EndFunc   ;==>_ProcessGetLocation
 
@@ -88,3 +88,8 @@ Func _LoadLanguage($language = Null)
 EndFunc   ;==>_LoadLanguage
 
 
+Func _KeepGameOn($location)
+	If Not ProcessExists("5dchesswithmultiversetimetravel.exe") Then
+		ShellExecute($location)
+	EndIf
+EndFunc   ;==>_KeepGameOn
