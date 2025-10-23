@@ -95,6 +95,9 @@ Func main()
 		EndIf
 		_checkIsRunning($context["data"])
 		_updateComboBoxes($context["data"], $main)
+		If $context["option"]["keepgameon"] Then
+			_KeepGameOn($context["option"]["gameLocation"])
+		EndIf
 	Until $error And Not $msg
 	_cleanexit($context["data"])
 	Return SetError(2, 0, "Uncaught Exit")
@@ -103,6 +106,8 @@ EndFunc   ;==>main
 
 Func loadContext()
 	Local $context = _newMap()
+	$context["option"] = _newMap()
+	$context["option"]["keepgameon"] = False
 	$context["ini"] = _newMap()
 	$context["ini"]["path"] = "gui for datainterface.ini"
 	If Not FileExists($context["ini"]["path"]) Then
@@ -111,6 +116,11 @@ Func loadContext()
 	IniReadSection("gui for datainterface.ini", "Data")
 	$context["ini"]["data"] = _twodimarraytoMap(IniReadSection("gui for datainterface.ini", "Data"))
 	If Not MapExists($context["ini"]["data"], "Interface") Then Return SetError(1, 0, "force setting up datainterface")
+	If MapExists($context["ini"]["data"], "gamelocation") Then
+		$context["option"]["gameLocation"] = $context["ini"]["data"]["gamelocation"]
+	Else
+		$context["option"]["gameLocation"] = ""
+	EndIf
 	$context["data"] = _datainterfaceSetup($context["ini"], $context["ini"]["data"]["Interface"])
 	If @error = 1 Then
 		Return SetError(1, 0, "force setting up datainterface")
