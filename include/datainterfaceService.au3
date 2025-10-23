@@ -183,9 +183,13 @@ Func _runPGN(ByRef $data, $pgn)
 EndFunc   ;==>_runPGN
 
 Func _runVariant(ByRef $data, $variant)
+	Local $runnablevariant[1] = [$variant]
+	FileWrite(@ScriptDir & "\variant.json", _JSON_generate($runnablevariant))
+	FileMove(@ScriptDir & "\variant.json", $data["jsonFile"], 1)
+	FileDelete(@ScriptDir & "\variant.json")
 	$run = $data["pid"]
 	StdinWrite($run, "1" & @LF)
-	StdinWrite($run, $variant & @LF)
+	StdinWrite($run, "1" & @LF)
 EndFunc   ;==>_runVariant
 
 
@@ -196,7 +200,7 @@ Func updateJSONVariants(ByRef $data, $JSON)
 	$h_temp = FileOpen($__tempFile, 2)
 	FileWrite($h_temp, _JSON_MYGenerate($JSON))
 	FileClose($h_temp)
-	FileMove($__tempFile, $data["jsonFile"], 1)
+	FileMove($__tempFile, $data["activeJsonFilePath"], 1)
 
 EndFunc   ;==>updateJSONVariants
 
@@ -207,9 +211,8 @@ EndFunc   ;==>_JSON_MYGenerate
 
 Func _addVariantToJson(ByRef $data, $variant)
 	Local $h_file
-	_FileReadToArray($data["activeJsonFile"], $h_file)
+	_FileReadToArray($data["activeJsonFilePath"], $h_file)
 	$h_temp = FileOpen($__tempFile, 2)
-	GUISetState(@SW_DISABLE)
 	For $i = 1 To $h_file[0] - 1
 		If $i = $h_file[0] - 1 Then
 			FileWriteLine($h_temp, $h_file[$i] & ",")
@@ -221,14 +224,14 @@ Func _addVariantToJson(ByRef $data, $variant)
 	FileWrite($h_temp, $variant & @LF & "}" & @LF)
 	FileWriteLine($h_temp, $h_file[$i])
 	FileClose($h_temp)
-	FileMove($__tempFile, $data["activeJsonFile"], 1)
+	FileMove($__tempFile, $data["activeJsonFilePath"], 1)
+	_JSONLoad($data)
 EndFunc   ;==>_addVariantToJson
 
 Func _removeVariantFromJson(ByRef $data, $variant)
 	Local $h_file, $skip = 0, $string = ""
-	_FileReadToArray($data["activeJsonFile"], $h_file)
+	_FileReadToArray($data["activeJsonFilePath"], $h_file)
 	$k = 0
-	GUISetState(@SW_DISABLE)
 	For $i = 1 To $h_file[0] - 1
 		If StringInStr($h_file[$i], "Name") > 0 Then
 			$k += 1
@@ -248,7 +251,7 @@ Func _removeVariantFromJson(ByRef $data, $variant)
 	WEnd
 	$string &= @LF & "]"
 	FileWrite($__tempFile, $string)
-	FileMove($__tempFile, $data["jsonFile"], 1)
+	FileMove($__tempFile, $data["activeJsonFilePath"], 1)
 	GUISetState(@SW_ENABLE)
 EndFunc   ;==>_removeVariantFromJson
 
@@ -329,7 +332,7 @@ Func _cacheJsonUrls(ByRef $data)
 EndFunc   ;==>_cacheJsonUrls
 
 Func _requestDatainterface()
-	Local $JSON, $file, $data
+	Local $JSON, $file
 	$file = InetRead("https://api.github.com/repos/GHXX/FiveDChessDataInterface/releases/latest", 1)
 	If @error Then
 		Return SetError(1, 0, "Couldnt fetch latest release info from github")
@@ -353,13 +356,17 @@ EndFunc   ;==>_requestDatainterface
 
 
 Func _JSONLoad(ByRef $data)
-	$data["cachedVariants"] = _newMap()
+	$data["cachedVariantMap"] = _newMap()
 	Local $path = $data["activeJsonFilePath"]
 	Local $fileContent = FileRead($path)
 	Local $temp = _JSON_Parse($fileContent)
 	Local $keys = _map($temp, "variantNameAuthorCallback", "")
 	For $i = 0 To UBound($keys) - 1
-		$data["cachedVariants"][$keys[$i]] = $temp[$i]
+		$key = $keys[$i]
+		While MapExists($data["cachedVariantMap"], $key)
+			$key &= "--duplicate"
+		WEnd
+		$data["cachedVariantMap"][$keys[$i]] = $temp[$i]
 	Next
 EndFunc   ;==>_JSONLoad
 
