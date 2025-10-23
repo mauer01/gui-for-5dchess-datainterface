@@ -8,13 +8,7 @@
 #include <WindowsConstants.au3>
 #include <include\controller.au3>
 Func _LoadMainGui(ByRef $context)
-	Local $keys, $map[]
-	$map["longNullClock"] = "20:00"
-	$map["shortNullClock"] = "5:00"
-	$map["mediumNullClock"] = "10:00"
-	$map["longNullDelay"] = "10"
-	$map["shortNullDelay"] = "3"
-	$map["mediumNullDelay"] = "5"
+	Local $keys
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
 	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
@@ -54,8 +48,8 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	Local $cgVariants = GUICtrlCreateLabel("", 8, 130, 0, 0)
 	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
-	$mapKeys = MapKeys($context.data.cachedVariants)
-	GUICtrlSetData($cListOfVariants, _ArrayToString($mapKeys), $mapKeys[0])
+	$mapKeys = MapKeys($context.data.cachedVariantMap)
+	GUICtrlSetData($cListOfVariants, _ArrayToString($mapKeys))
 
 	$newPos = myControlGetPos($main, $cListOfVariants)
 	Local $bRunVariant = GUICtrlCreateButton($context.labels.bRunVariant, $newPos["x"] + 5, $newPos["y"])
@@ -77,10 +71,12 @@ Func _LoadMainGui(ByRef $context)
 	GUICtrlCreateTabItem($context.labels.tSettings)
 	GUIStartGroup()
 	Local $cgClocks = GUICtrlCreateLabel("", 8, 32, 0, 0)
-	Local $cClocks = GUICtrlCreateCombo($context.labels.cClocks, 8, 32, 145, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $cClocks = GUICtrlCreateCombo($context.labels.cClocks, 8, 32, 145, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
 	GUICtrlSetData(-1, $context.labels.cClocksChoices)
 	Local $iClockTime = GUICtrlCreateInput($context.labels.iClockTime, 8, 56, 65, 21)
+	GUICtrlSetState(-1, $GUI_DISABLE)
 	Local $iClockDelay = GUICtrlCreateInput($context.labels.iClockDelay, 88, 56, 65, 21)
+	GUICtrlSetState(-1, $GUI_DISABLE)
 	Local $bClockSet = GUICtrlCreateButton($context.labels.bClockSet, 160, 56)
 	Local $bClockReset = GUICtrlCreateButton($context.labels.bClockReset, 160, 32)
 	GUICtrlCreateLabel($context.labels.Label1, 76, 58)
@@ -261,8 +257,8 @@ Func _updateComboBoxes(ByRef $data, ByRef $main)
 		GUICtrlSetData($main["json"]["cLocalJsonFiles"], _ArrayToString($data.jsonFiles), $data.activeJsonFile)
 		$oldjson = $data["jsonFiles"]
 	EndIf
-	If Not _arrayCountEquals(MapKeys($data["cachedVariants"]), $oldvariants) Then
-		$mapKeys = MapKeys($data["cachedVariants"])
+	If Not _arrayCountEquals(MapKeys($data["cachedVariantMap"]), $oldvariants) Then
+		$mapKeys = MapKeys($data["cachedVariantMap"])
 		GUICtrlSetData($main["json"]["cListOfVariants"], "")
 		GUICtrlSetData($main["json"]["cListOfVariants"], _ArrayToString($mapKeys), $mapKeys[0])
 		$oldvariants = $mapKeys
