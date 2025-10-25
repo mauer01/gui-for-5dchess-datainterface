@@ -27,11 +27,8 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				FileCopy($filepath, $context["data"]["ressourceDir"] & "\" & $filename)
 			EndIf
 		Case $mainGui["json"]["bAddVariantfromClip"]
-			$msg = _controller_addVariant($context["data"], ClipGet(), InputBox("Enter variant name", "Enter a Name for the variant", "Variant from Clipboard"))
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			$msg = _controller_addVariant($context["data"], ClipGet())
+			Return basicError(@error, $msg)
 		Case $mainGui["json"]["bAddVariantFromFile"]
 			$filepath = FileOpenDialog("Select PGN or JSON File", "", "PGN Files (*.pgn;*.txt)|JSON Files (*.json)")
 			If @error Then
@@ -39,10 +36,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _controller_addVariant($context["data"], FileRead($filepath), StringTrimRight($filepath, StringMid($filepath, StringInStr($filepath, "\", 0, -1)) + 1))
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			Return basicError(@error, $msg)
 		Case $mainGui["json"]["bRemoteJsonDownload"]
 			$msg = _controller_downloadVariants($context["data"], False, GUICtrlRead($mainGui["json"]["cRemoteJsons"]))
 		Case $mainGui["json"]["cLocalJsonFiles"]
@@ -114,7 +108,6 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				GUICtrlSetData($mainGui["settings"]["cClocks"], $context.labels.cClocksChoices, $type)
 			EndIf
 			$keys = MapKeys($context["data"]["settings"])
-
 			$settingmap["S"] = _newMap()
 			$settingmap["S"]["timer"] = $keys == True ? $keys[1] : ""
 			$settingmap["S"]["increment"] = $keys == True ? $keys[2] : ""
@@ -136,10 +129,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], $time, $delay)
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			Return basicError(@error, $msg)
 		Case $mainGui["settings"]["bClockReset"]
 			$type = GUICtrlRead($mainGui["settings"]["cClocks"])
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], "reset", "reset")
@@ -183,15 +173,9 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _addPgnToMap($context["pgnRepository"], $filepath)
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			Return basicError(@error, $msg)
 			$msg = _savePgnMapinCsv($context["pgnRepository"])
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnOpenPath"]
 			$filepath = FileOpenDialog("Select PGN File", "", "PGN Files (*.pgn;*.txt)|All Files (*.*)")
 			If @error Then
@@ -212,10 +196,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$msg = _controller_runPGN($context["data"], $context["pgnRepository"]["data"][$filename], _
 					StringSplit(GUICtrlRead($mainGui["pgn"]["cMoveList"]), ".", 2)[0], _
 					GUICtrlRead($mainGui["pgn"]["cbBlackIncluded"]) == $GUI_CHECKED)
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnRemove"]
 			$filename = GUICtrlRead($mainGui["pgn"]["cPgnList"])
 			$msg = _removePgnFromMap($context["pgnRepository"], $filename)
@@ -224,10 +205,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _savePgnMapinCsv($context["pgnRepository"])
-			If @error Then
-				MsgBox(16, "Error", $msg)
-				Return
-			EndIf
+			Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnEdit"]
 
 		Case $mainGui["pgn"]["bPgnAddClipboard"]
@@ -356,9 +334,8 @@ Func _controller_runPGN(ByRef $data, $pgnMap, $moveNumber = 1, $blackIncluded = 
 EndFunc   ;==>_controller_runPGN
 
 
-Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
+Func _controller_addVariant(ByRef $data, $fenPgnOrJson)
 	If MapExists($fenPgnOrJson, "Name") Then
-
 		$msg = _checkVariant($fenPgnOrJson, True)
 		If @error Then
 			Return SetError(@error, 0, $msg)
@@ -367,6 +344,7 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 		Return
 	EndIf
 	If StringInStr($fenPgnOrJson, '[Board') Then
+		_DebugOut($fenPgnOrJson)
 		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
 		$multiverse["Name"] = $name
 		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $name, "pgn to variant"))
@@ -375,6 +353,7 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 	EndIf
 	If StringInStr($fenPgnOrJson, "{") Then
 		$variant = _JSON_Parse($fenPgnOrJson)
+		jsondebug($variant)
 		$msg = _checkVariant($variant, True)
 		$error = @error
 		If $error Then
@@ -450,3 +429,11 @@ Func _timetoSeconds($time)
 EndFunc   ;==>_timetoSeconds
 
 
+
+
+Func basicError($msg)
+	If @error Then
+		MsgBox(16, "Error", $msg)
+	EndIf
+	Return
+EndFunc   ;==>basicError
