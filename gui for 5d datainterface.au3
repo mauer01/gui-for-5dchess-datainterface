@@ -20,7 +20,7 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgRemoteJson = GUICtrlCreateLabel("", 8, 66, 0, 0)
-	Local $cRemoteJsons = GUICtrlCreateCombo("No Connection", 8, 66, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	Local $cRemoteJsons = GUICtrlCreateCombo("No Connection", 8, 66, 225, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 	If MapExists($context.data, "remoteJsonUrls") Then
 		$keys = MapKeys($context.data.remoteJsonUrls)
 		GUICtrlSetData($cRemoteJsons, "")
@@ -30,7 +30,7 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgLocalJson = GUICtrlCreateLabel("", 8, 98, 0, 0)
-	Local $cLocalJsonFiles = GUICtrlCreateCombo("", 8, 98, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	Local $cLocalJsonFiles = GUICtrlCreateCombo("", 8, 98, 225, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 	If MapExists($context.data, "jsonFiles") Then
 		GUICtrlSetData($cLocalJsonFiles, "")
 		GUICtrlSetData($cLocalJsonFiles, _ArrayToString($context.data.jsonFiles), $context.data.activeJsonFile)
@@ -47,7 +47,7 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgVariants = GUICtrlCreateLabel("", 8, 130, 0, 0)
-	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	Local $cListOfVariants = GUICtrlCreateCombo("", 8, 130, 225, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 	$mapKeys = MapKeys($context.data.cachedVariantMap)
 	GUICtrlSetData($cListOfVariants, _ArrayToString($mapKeys))
 
@@ -71,7 +71,7 @@ Func _LoadMainGui(ByRef $context)
 	GUICtrlCreateTabItem($context.labels.tSettings)
 	GUIStartGroup()
 	Local $cgClocks = GUICtrlCreateLabel("", 8, 32, 0, 0)
-	Local $cClocks = GUICtrlCreateCombo($context.labels.cClocks, 8, 32, 145, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	Local $cClocks = GUICtrlCreateCombo($context.labels.cClocks, 8, 32, 145, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 	GUICtrlSetData(-1, $context.labels.cClocksChoices)
 	Local $iClockTime = GUICtrlCreateInput($context.labels.iClockTime, 8, 56, 65, 21)
 	GUICtrlSetState(-1, $GUI_DISABLE)
@@ -116,7 +116,7 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgListPgns = GUICtrlCreateLabel("", 8, 96, 0, 0)
-	Local $cPgnList = GUICtrlCreateCombo("", 8, 96, 217, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	Local $cPgnList = GUICtrlCreateCombo("", 8, 96, 217, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 	$pgnKeys = MapKeys($context.pgnRepository["data"])
 	If Not $pgnKeys Then
 		GUICtrlSetData(-1, "No PGNs saved", "No PGNs saved")
@@ -130,7 +130,7 @@ Func _LoadMainGui(ByRef $context)
 	Local $bPgnEdit = GUICtrlCreateButton($context.labels.bPgnEdit, $newPos["x"] + 5, $newPos["y"])
 	GUIStartGroup()
 	GUIStartGroup()
-	$cMoveList = GUICtrlCreateCombo("", 8, 128, 217, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	$cMoveList = GUICtrlCreateCombo("", 8, 128, 217, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST))
 	$cbBlackIncluded = GUICtrlCreateCheckbox($context.labels.cbBlackIncluded, 232, 128)
 	GUIStartGroup()
 	GUICtrlCreateTabItem("")
@@ -252,17 +252,20 @@ Func _updateComboBoxes(ByRef $data, ByRef $main)
 	Static Local $oldkeys[0]
 	Static Local $oldjson[0]
 	Static Local $oldvariants[0]
-	If MapExists($data, "remoteJsonUrls") And Not _arrayCountEquals($keys, $oldkeys) Then
+	If (MapExists($data, "remoteJsonUrls") And Not _arrayCountEquals($keys, $oldkeys)) Or GUICtrlRead($main["json"]["cRemoteJsons"]) = "" Then
 		GUICtrlSetData($main["json"]["cRemoteJsons"], "")
 		GUICtrlSetData($main["json"]["cRemoteJsons"], _ArrayToString($keys), $keys[0])
 		$oldkeys = $keys
 	EndIf
-	If MapExists($data, "jsonFiles") And Not _arrayCountEquals($data.jsonFiles, $oldjson) Then
+	If (MapExists($data, "jsonFiles") And Not _arrayCountEquals($data.jsonFiles, $oldjson)) Or GUICtrlRead($main["json"]["cLocalJsonFiles"]) = "" Then
 		GUICtrlSetData($main["json"]["cLocalJsonFiles"], "")
 		GUICtrlSetData($main["json"]["cLocalJsonFiles"], _ArrayToString($data.jsonFiles), $data.activeJsonFile)
 		$oldjson = $data["jsonFiles"]
 	EndIf
-	If Not _arrayCountEquals(MapKeys($data["cachedVariantMap"]), $oldvariants) Then
+	If Not _arrayCountEquals(MapKeys($data["cachedVariantMap"]), $oldvariants) Or GUICtrlRead($main["json"]["cListOfVariants"]) = "" Then
+		If GUICtrlRead($main["json"]["cLocalJsonFiles"]) Then
+			_changeActiveJsonFile($data, GUICtrlRead($main["json"]["cLocalJsonFiles"]))
+		EndIf
 		$mapKeys = MapKeys($data["cachedVariantMap"])
 		GUICtrlSetData($main["json"]["cListOfVariants"], "")
 		If UBound($mapKeys) > 0 Then
