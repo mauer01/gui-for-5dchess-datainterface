@@ -3,6 +3,7 @@
 #include <datainterfaceService.au3>
 #include <moreArray.au3>
 #include <multiversechess.au3>
+#include <pgnRepository.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
 	Local $nMsg, $msg, $filepath, $filename, $type, $multiverse
@@ -39,12 +40,18 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 		Case $mainGui["json"]["cLocalJsonFiles"]
 			_changeActiveJsonFile($context["data"], GUICtrlRead($mainGui["json"]["cLocalJsonFiles"]))
 			IniWrite($context.data.ini.path, "Data", "ActiveJsonFile", $context["data"]["activeJsonFile"])
+			_updateComboBoxes($context["data"], $mainGui)
 		Case $mainGui["json"]["bLocalJsonFileRemove"]
+			If UBound($context["data"]["jsonFiles"]) = 1 Then
+				MsgBox(16, "Error", "Cannot delete the last JSON file.")
+				Return
+			EndIf
 			If MsgBox(4, "Confirm", "Are you sure you want to delete this JSON file?") = 6 Then
 				FileDelete($context["data"]["ressourceDir"] & "\" & GUICtrlRead($mainGui["json"]["cLocalJsonFiles"]) & ".json")
 			EndIf
 			_updateJsonFiles($context["data"])
 			_changeActiveJsonFile($context["data"], $context.data.jsonFiles[0])
+			_updateComboBoxes($context["data"], $mainGui)
 		Case $mainGui["json"]["bLocalJsonFileCopy"]
 			Local $filecopy = StringReplace($context["data"]["activeJsonFilePath"], ".json", "_copy.json")
 			If FileExists($filecopy) Then
@@ -159,12 +166,63 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 		Case $mainGui["settings"]["bResumeGame"]
 			$msg = _controller_trigger($context["data"])
 		Case $mainGui["pgn"]["bPgnAdd"]
+			$filepath = GUICtrlRead($mainGui["pgn"]["iPgnLoaderPath"])
+			If Not FileExists($filepath) Then
+				MsgBox(16, "Error", "File does not exist.")
+				Return
+			EndIf
+			$msg = _addPgnToMap($context["pgnRepository"], $filepath)
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
+			$msg = _savePgnMapinCsv($context["pgnRepository"])
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
 		Case $mainGui["pgn"]["bPgnOpenPath"]
+			$filepath = FileOpenDialog("Select PGN File", "", "PGN Files (*.pgn;*.txt)|All Files (*.*)")
+			If @error Then
+				MsgBox(16, "Error", "No file selected.")
+				Return
+			EndIf
+			GUICtrlSetData($mainGui["pgn"]["iPgnLoaderPath"], $filepath)
 		Case $mainGui["pgn"]["cPgnList"]
+
+			_updateCgPgnMetaDatagroup($context["pgnRepository"], $mainGui)
+
 		Case $mainGui["pgn"]["bPgnRun"]
+			$filename = GUICtrlRead($mainGui["pgn"]["cPgnList"])
+			If Not MapExists($context["pgnRepository"]["data"], $filename) Then
+				MsgBox(16, "Error", "PGN not found in repository.")
+				Return
+			EndIf
+			$msg = _controller_runPGN($context["data"], $context["pgnRepository"]["data"][$filename], _
+					StringSplit(GUICtrlRead($mainGui["pgn"]["cMoveList"]), ".", 2)[0], _
+					GUICtrlRead($mainGui["pgn"]["cbBlackIncluded"]) == $GUI_CHECKED)
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
 		Case $mainGui["pgn"]["bPgnRemove"]
+			$filename = GUICtrlRead($mainGui["pgn"]["cPgnList"])
+			$msg = _removePgnFromMap($context["pgnRepository"], $filename)
+			If Not $msg Then
+				MsgBox(16, "Error", "PGN not found in repository.")
+				Return
+			EndIf
+			$msg = _savePgnMapinCsv($context["pgnRepository"])
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
 		Case $mainGui["pgn"]["bPgnEdit"]
+
 		Case $mainGui["pgn"]["bPgnAddClipboard"]
+			$data = ClipGet()
+			_addpgntomap($context["pgnRepository"], $data)
+			$msg = _savePgnMapinCsv($context["pgnRepository"])
 	EndSwitch
 	If @error Then Return SetError(@error, 0, "uncaught error" & @CRLF & "Potentially an Errormessage: " & $msg)
 	Return
@@ -177,9 +235,9 @@ Func _controller_changeTimer(ByRef $context, $type, $time = Null, $delay = Null)
 		Return SetError(1, 0, "Type must be L, M, or S")
 	EndIf
 	_checkString($time, $except)
-	If @error Then Return SetError(2, 0, "Time is not in either a : split format or in milliseconds or reset")
+	If @error Then Return SetError(2, 0, "Time is not in either a : split format or in seconds")
 	_checkString($delay, $except)
-	If @error Then Return SetError(3, 0, "Delay is not in either a : split format or in milliseconds or reset")
+	If @error Then Return SetError(3, 0, "Delay is not in either a : split format or in seconds")
 	Local $map[], $settingmap[]
 	$map["L"] = 6
 	$map["M"] = 4
@@ -222,11 +280,12 @@ Func _controller_changeTimer(ByRef $context, $type, $time = Null, $delay = Null)
 	EndIf
 EndFunc   ;==>_controller_changeTimer
 
-Func _checkString($string, $exceptions = "")
+Func _checkString($string, $exceptions)
 	If $string = "" Then Return
-	If Not StringIsDigit($string) And Not _some($exceptions, "stringinstr", $string) Then
-		Return SetError(1, 0, "string must be in a numeric or follow a format")
+	If IsNumber($string) Or _some($exceptions, "stringinstr", $string) Then
+		Return
 	EndIf
+	Return SetError(1, 0, "string must be numeric or follow a format")
 EndFunc   ;==>_checkString
 
 
@@ -269,9 +328,15 @@ Func _controller_removeVariant(ByRef $data, $variant)
 EndFunc   ;==>_controller_removeVariant
 
 
-Func _controller_runPGN(ByRef $data, $pgn)
+Func _controller_runPGN(ByRef $data, $pgnMap, $moveNumber = 1, $blackIncluded = True)
+	$maxMoves = UBound($pgnMap["moves"]) - 1
+	If $moveNumber < UBound($pgnMap["moves"]) Then
+		_ArrayDelete($pgnMap["moves"], $moveNumber & "-" & $maxMoves)
+		$maxMoves = UBound($pgnMap["moves"]) - 1
+	EndIf
+	$pgn = StringTrimRight(_fromMapToPGN($pgnMap), 2)
 	If ProcessExists("5dchesswithmultiversetimetravel.exe") Then
-		_runPGN($data, $pgn)
+		Return _runPGN($data, $pgn, $blackIncluded)
 	Else
 		Return SetError(1, 0, "game not running")
 	EndIf
