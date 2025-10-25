@@ -6,14 +6,18 @@ Func _loadPgnRepository()
 	Local $pgnRepository[]
 	$pgnRepository["path"] = @ScriptDir & "\savedpgns.csv"
 	$pgnRepository["data"] = _loadCsv($pgnRepository)
+	$pgnRepository["lastAddedPgn"] = ""
 	Return $pgnRepository
 EndFunc   ;==>_loadPgnRepository
 
 
 Func _loadCsv(ByRef $pgnRepository)
+	If Not FileExists($pgnRepository["path"]) Then
+		Return _newMap()
+	EndIf
 	$data = FileReadToArray($pgnRepository["path"])
 	$linecount = @extended
-	If Not FileExists($pgnRepository["path"]) Then
+	If $linecount = 1 Then
 		Return _newMap()
 	EndIf
 	Local $map[]
@@ -36,9 +40,10 @@ Func _loadCsv(ByRef $pgnRepository)
 	Return $map
 EndFunc   ;==>_loadCsv
 
-Func _addPgnToMap(ByRef $pgnRepository, $filepath)
-	Local $pgnMap = _pgnAsMap($filepath)
-	Local $filename = $pgnMap["filename"]
+Func _addPgnToMap(ByRef $pgnRepository, $filepath, $filename = False)
+	Local $pgnMap = _pgnAsMap($filepath, $filename)
+	If @error Then Return SetError(@error, 0, "Failed to parse PGN file: " & $filepath)
+	$filename = $pgnMap["filename"]
 	MapRemove($pgnMap, "filename")
 	If MapExists($pgnRepository["data"], $filename) Then
 		Local $count = 2
@@ -49,6 +54,7 @@ Func _addPgnToMap(ByRef $pgnRepository, $filepath)
 		WEnd
 	EndIf
 	$pgnRepository["data"][$filename] = $pgnMap
+	$pgnRepository["lastAddedPgn"] = $filename
 EndFunc   ;==>_addPgnToMap
 
 Func _removePgnFromMap(ByRef $pgnRepository, $filename)
@@ -85,18 +91,23 @@ Func _savePgnMapinCsv(ByRef $pgnRepository)
 	Return True
 EndFunc   ;==>_savePgnMapinCsv
 
-Func _pgnAsMap($filepath)
-	$filename = StringTrimLeft($filepath, StringInStr($filepath, "\", 0, -1))
+Func _pgnAsMap($filedataorpath, $filename)
+	Local $file
+	If FileExists($filedataorpath) Then
+		$filepath = $filedataorpath
+		$file = FileReadToArray($filepath)
+		$linecount = @extended
+		$filename = StringTrimLeft($filepath, StringInStr($filepath, "\", 0, -1))
+	Else
+		$file = StringSplit($filedataorpath, @CRLF, 2)
+		$linecount = UBound($file)
+	EndIf
 	Local $map[]
 	$map["filename"] = $filename
 	$map["tags"] = _newMap()
 	$map["fen"] = _newArray()
 	$map["moves"] = _newArray()
-	$file = FileReadToArray($filepath)
-	$linecount = @extended
-
 	Local $inMoves = False
-
 	For $i = 0 To $linecount - 1
 		$line = StringStripWS($file[$i], 3)
 
@@ -127,6 +138,20 @@ Func _pgnAsMap($filepath)
 				_ArrayAdd($map["moves"], $line)
 			EndIf
 		EndIf
+	Next
+	For $key In MapKeys($map)
+		Switch $key
+			Case "filename"
+				If $map[$key] = "" Then
+					Return SetError(1, 0, "Filename not found or is empty")
+				EndIf
+			Case "fen"
+				ContinueCase
+			Case "moves"
+				If UBound($map[$key]) = 0 Then
+					Return SetError(1, 0, "Generation of pgn object failed")
+				EndIf
+		EndSwitch
 	Next
 	Return $map
 EndFunc   ;==>_pgnAsMap
