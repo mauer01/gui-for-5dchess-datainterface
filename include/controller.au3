@@ -1,12 +1,13 @@
 #include-once
 #include <GUIConstantsEx.au3>
+#include <..\gui For 5d datainterface.au3>
 #include <datainterfaceService.au3>
 #include <moreArray.au3>
 #include <multiversechess.au3>
 #include <pgnRepository.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
-	Local $nMsg, $msg, $filepath, $filename, $type, $multiverse
+	Local $nMsg, $msg, $filepath, $filename, $type
 
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
@@ -352,6 +353,13 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 		_addVariantToJson($data, _JSON_MYGenerate($fenPgnOrJson))
 		Return
 	EndIf
+	If StringInStr($fenPgnOrJson, '"[Board') Then
+		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
+		$multiverse["Name"] = $name
+		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $name, "pgn to variant"))
+		_addVariantToJson($data, $variant)
+		Return
+	EndIf
 	If StringInStr($fenPgnOrJson, "{") Then
 		$variant = _JSON_Parse($fenPgnOrJson)
 		$msg = _checkVariant($variant, True)
@@ -359,13 +367,6 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 			Return SetError(@error, 0, $msg)
 		EndIf
 		_addVariantToJson($data, _JSON_MYGenerate($variant))
-		Return
-	EndIf
-	If StringInStr($fenPgnOrJson, '"[') Then
-		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
-		$multiverse["Name"] = $name
-		$variant = _JSON_MYGenerate(_multiversetovariant($fenPgnOrJson, $fenPgnOrJson["Name"], "pgn to variant"))
-		_addVariantToJson($data, $variant)
 		Return
 	EndIf
 	Return SetError(1, 0, "Input not recognized as valid variant, json, or pgn")
