@@ -117,7 +117,13 @@ Func _LoadMainGui(ByRef $context)
 	GUIStartGroup()
 	GUIStartGroup()
 	Local $cgListPgns = GUICtrlCreateLabel("", 8, 96, 0, 0)
-	Local $cPgnList = GUICtrlCreateCombo("", 8, 96, 217, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	Local $cPgnList = GUICtrlCreateCombo("", 8, 96, 217, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
+	$pgnKeys = MapKeys($context.pgnRepository["data"])
+	If Not $pgnKeys Then
+		GUICtrlSetData(-1, "No PGNs saved", "No PGNs saved")
+	Else
+		GUICtrlSetData(-1, _ArrayToString($pgnKeys), $pgnKeys[0])
+	EndIf
 	Local $bPgnRun = GUICtrlCreateButton($context.labels.bPgnRun, 232, 96)
 	$newPos = myControlGetPos($main, $bPgnRun)
 	Local $bPgnRemove = GUICtrlCreateButton($context.labels.bPgnRemove, $newPos["x"] + 5, $newPos["y"])
@@ -266,5 +272,15 @@ Func _updateComboBoxes(ByRef $data, ByRef $main)
 
 EndFunc   ;==>_updateComboBoxes
 
+Func updatePgnCombo(ByRef $pgnRepository, $main)
+	Static Local $oldPgns[0]
+	Static Local $oldPgnSelection = ""
+	Local $pgnKeys = MapKeys($pgnRepository["data"])
+	If Not _arrayCountEquals($pgnKeys, $oldPgns) Then
+		GUICtrlSetData($main["pgn"]["cPgnList"], "")
+		GUICtrlSetData($main["pgn"]["cPgnList"], _ArrayToString($pgnKeys), $oldPgnSelection)
+		$oldPgns = $pgnKeys
+	EndIf
 
+EndFunc   ;==>updatePgnCombo
 
