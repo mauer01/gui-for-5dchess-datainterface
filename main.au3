@@ -59,11 +59,10 @@ Func main()
 		ElseIf $res = 7 Then
 			$msg = FileSelectFolder("Select folder containing 5D Chess Data Interface", @WorkingDir)
 			If @error Then Return SetError(1, 0, "folder selection Failed")
-			$testLoad = _datainterfaceSetup($context["ini"], $msg)
-			If @error Then Return SetError(@error, 0, $testLoad)
 		ElseIf $res = 2 Then
 			Return True ; exit the program
 		EndIf
+		$msg = StringInStr($msg, "Resources") ? $msg : $msg & "\Resources"
 		IniWrite("gui for datainterface.ini", "Data", "Interface", $msg)
 		Return False ; restart main to load new config
 	ElseIf $error Then
