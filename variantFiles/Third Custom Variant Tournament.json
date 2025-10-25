@@ -15,7 +15,7 @@
             ]
         },
         "CosmeticTurnOffset": -1,
-        "GameBuilderOverride": "GameBuilderOdd"
+        "GameBuilderOverride": "GameBuilderEven"
     },
     {
         "Name": "bunker",
@@ -166,7 +166,7 @@
                 "udrbrrdu/pppppppp/8/8/8/8/PPPPPPPP/UDRBRRDU"
             ]
         },
-        "GameBuilderOverride": "GameBuilderOdd"
+        "GameBuilderOverride": "GameBuilderEven"
     },
     {
         "Name": "Custom - Caged Queen",
