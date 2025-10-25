@@ -1,9 +1,10 @@
+#include-once
 #include <moreArray.au3>
 #include <JSON.au3>
 
 Func _loadPgnRepository()
 	Local $pgnRepository[]
-	$pgnRepository["path"] = "savedpgns.csv"
+	$pgnRepository["path"] = @ScriptDir & "\savedpgns.csv"
 	$pgnRepository["data"] = _loadCsv($pgnRepository)
 	Return $pgnRepository
 EndFunc   ;==>_loadPgnRepository
@@ -50,37 +51,34 @@ Func _addPgnToMap(ByRef $pgnRepository, $filepath)
 	$pgnRepository["data"][$filename] = $pgnMap
 EndFunc   ;==>_addPgnToMap
 
+Func _removePgnFromMap(ByRef $pgnRepository, $filename)
+	If MapExists($pgnRepository["data"], $filename) Then
+		MapRemove($pgnRepository["data"], $filename)
+		Return True
+	Else
+		Return False
+	EndIf
+EndFunc   ;==>_removePgnFromMap
+
 Func _savePgnMapinCsv(ByRef $pgnRepository)
 	Local $pgnMap = $pgnRepository["data"]
 	Local $file = FileOpen($pgnRepository["path"], 2)
-	If $file = -1 Then
+	If ($file = -1) Or @error Then
 		Return SetError(1, 0, "Failed to open file for writing: " & $pgnRepository["path"])
 	EndIf
-
-
 	FileWriteLine($file, "filename;tags;fen;moves")
-
-
+	If @error Then Return SetError(1, 0, "Failed to write to file: " & $pgnRepository["path"])
 	For $filename In MapKeys($pgnMap)
 		Local $pgnData = $pgnMap[$filename]
-
-
 		Local $tagsJson = _JSON_GenerateCompact($pgnData["tags"])
-
-
 		Local $fenJson = _JSON_GenerateCompact($pgnData["fen"])
-
-
 		Local $movesJson = _JSON_GenerateCompact($pgnData["moves"])
-
-
 		$tagsJson = StringReplace($tagsJson, '"', '""')
 		$fenJson = StringReplace($fenJson, '"', '""')
 		$movesJson = StringReplace($movesJson, '"', '""')
-
-
 		Local $csvLine = '"' & $filename & '";"' & $tagsJson & '";"' & $fenJson & '";"' & $movesJson & '"'
 		FileWriteLine($file, $csvLine)
+		If @error Then Return SetError(1, 0, "Failed to write to file: " & $pgnRepository["path"])
 	Next
 
 	FileClose($file)
@@ -132,4 +130,18 @@ Func _pgnAsMap($filepath)
 	Next
 	Return $map
 EndFunc   ;==>_pgnAsMap
+
+Func _fromMapToPGN($pgnMap)
+	Local $pgnText = ""
+	For $tagName In MapKeys($pgnMap["tags"])
+		$pgnText &= "[" & $tagName & ' "' & $pgnMap["tags"][$tagName] & '"]' & @CRLF
+	Next
+	For $fen In $pgnMap["fen"]
+		$pgnText &= "[" & $fen & "]" & @CRLF
+	Next
+	For $move In $pgnMap["moves"]
+		$pgnText &= $move & @CRLF
+	Next
+	Return $pgnText
+EndFunc   ;==>_fromMapToPGN
 
