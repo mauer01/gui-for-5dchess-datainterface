@@ -131,7 +131,7 @@ Func _LoadMainGui(ByRef $context)
 	Local $bPgnEdit = GUICtrlCreateButton($context.labels.bPgnEdit, $newPos["x"] + 5, $newPos["y"])
 	GUIStartGroup()
 	GUIStartGroup()
-	$cMoveList = GUICtrlCreateCombo("", 8, 128, 217, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+	$cMoveList = GUICtrlCreateCombo("", 8, 128, 217, 25, BitOR($CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
 	$cbBlackIncluded = GUICtrlCreateCheckbox($context.labels.cbBlackIncluded, 232, 128)
 	GUIStartGroup()
 	GUICtrlCreateTabItem("")
@@ -266,21 +266,34 @@ Func _updateComboBoxes(ByRef $data, ByRef $main)
 	If Not _arrayCountEquals(MapKeys($data["cachedVariantMap"]), $oldvariants) Then
 		$mapKeys = MapKeys($data["cachedVariantMap"])
 		GUICtrlSetData($main["json"]["cListOfVariants"], "")
-		GUICtrlSetData($main["json"]["cListOfVariants"], _ArrayToString($mapKeys), $mapKeys[0])
+		If UBound($mapKeys) > 0 Then
+			GUICtrlSetData($main["json"]["cListOfVariants"], _ArrayToString($mapKeys), $mapKeys[0])
+		EndIf
 		$oldvariants = $mapKeys
 	EndIf
 
 EndFunc   ;==>_updateComboBoxes
 
-Func updatePgnCombo(ByRef $pgnRepository, $main)
+Func _updatePgnCombo(ByRef $pgnRepository, $main)
 	Static Local $oldPgns[0]
-	Static Local $oldPgnSelection = ""
+	Local $oldPgnSelection = GUICtrlRead($main["pgn"]["cPgnList"])
 	Local $pgnKeys = MapKeys($pgnRepository["data"])
+	If $oldPgnSelection = "No PGNs saved" Or $oldPgnSelection = "" And UBound($pgnKeys) > 0 Then
+		$oldPgnSelection = $pgnKeys[0]
+	EndIf
 	If Not _arrayCountEquals($pgnKeys, $oldPgns) Then
 		GUICtrlSetData($main["pgn"]["cPgnList"], "")
 		GUICtrlSetData($main["pgn"]["cPgnList"], _ArrayToString($pgnKeys), $oldPgnSelection)
 		$oldPgns = $pgnKeys
+		_updateCgPgnMetaDatagroup($pgnRepository, $main)
 	EndIf
+EndFunc   ;==>_updatePgnCombo
 
-EndFunc   ;==>updatePgnCombo
-
+Func _updateCgPgnMetaDatagroup(ByRef $pgnRepository, $main)
+	Local $selectedPgn = GUICtrlRead($main["pgn"]["cPgnList"])
+	If MapExists($pgnRepository["data"], $selectedPgn) Then
+		GUICtrlSetData($main["pgn"]["cMoveList"], "")
+		Local $moves = $pgnRepository["data"][$selectedPgn]["moves"]
+		GUICtrlSetData($main["pgn"]["cMoveList"], _ArrayToString($moves), $moves[0])
+	EndIf
+EndFunc   ;==>_updateCgPgnMetaDatagroup
