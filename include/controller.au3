@@ -344,16 +344,15 @@ Func _controller_replaceVariant(ByRef $data, $input, $variantnumber, ByRef $full
 EndFunc   ;==>_controller_replaceVariant
 
 
-
 Func _controller_trigger(ByRef $data, $code = False)
 	If Not $code Then
 		_optionsOrTriggers($data, 3)
 		Return
 	EndIf
-	If Not StringInStr($code, "\:\]") Then
+	If Not StringInStr($code, ":") Then
 		Return SetError(1, 0, "code format invalid")
 	EndIf
-
+	$code = StringReplace($code, "~1", "")
 	_optionsOrTriggers($data, 2, $code)
 EndFunc   ;==>_controller_trigger
 
