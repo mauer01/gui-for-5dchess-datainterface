@@ -168,13 +168,17 @@ Func _waitForResponse(ByRef $data, $response)
 		If @error Then Return SetError(1, 0, "Datainterface not running anymore")
 	WEnd
 EndFunc   ;==>_waitForResponse
-Func _runPGN(ByRef $data, $pgn)
+Func _runPGN(ByRef $data, $pgn, $blackincluded)
 	$run = $data["pid"]
 	StdinWrite($run, "3" & @LF)
 	_waitForResponse($data, "Discord")
 	$pgn = StringSplit($pgn, @LF, 2)
 	For $line In $pgn
-		StdinWrite($run, $line & @LF)
+		If _isLastOne($line, $pgn) And Not $blackincluded Then
+			StdinWrite($run, StringSplit($line, "/", 2)[0] & @LF)
+		Else
+			StdinWrite($run, $line & @LF)
+		EndIf
 		Sleep(10)
 	Next
 	StdinWrite($run, @LF)
