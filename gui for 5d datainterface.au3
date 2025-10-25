@@ -252,6 +252,10 @@ Func _updateComboBoxes(ByRef $data, ByRef $main)
 	Static Local $oldkeys[0]
 	Static Local $oldjson[0]
 	Static Local $oldvariants[0]
+	$defaultvariant = $data["lastVariantAdded"] <> "" ? $data["lastVariantAdded"] : $keys[0]
+	$defaultjson = $data["lastJsonFileAdded"] <> "" ? $data["lastJsonFileAdded"] : $data.activeJsonFile
+	$data["lastVariantAdded"] = ""
+	$data["lastJsonFileAdded"] = ""
 	If (MapExists($data, "remoteJsonUrls") And Not _arrayCountEquals($keys, $oldkeys)) Or GUICtrlRead($main["json"]["cRemoteJsons"]) = "" Then
 		GUICtrlSetData($main["json"]["cRemoteJsons"], "")
 		GUICtrlSetData($main["json"]["cRemoteJsons"], _ArrayToString($keys), $keys[0])
@@ -279,13 +283,15 @@ EndFunc   ;==>_updateComboBoxes
 Func _updatePgnCombo(ByRef $pgnRepository, $main)
 	Static Local $oldPgns[0]
 	Local $oldPgnSelection = GUICtrlRead($main["pgn"]["cPgnList"])
+	$default = $pgnRepository["lastAddedPgn"] <> "" ? $pgnRepository["lastAddedPgn"] : $oldPgnSelection
+	$pgnRepository["lastAddedPgn"] = ""
 	Local $pgnKeys = MapKeys($pgnRepository["data"])
 	If $oldPgnSelection = "No PGNs saved" Or $oldPgnSelection = "" And UBound($pgnKeys) > 0 Then
 		$oldPgnSelection = $pgnKeys[0]
 	EndIf
 	If Not _arrayCountEquals($pgnKeys, $oldPgns) Then
 		GUICtrlSetData($main["pgn"]["cPgnList"], "")
-		GUICtrlSetData($main["pgn"]["cPgnList"], _ArrayToString($pgnKeys), $oldPgnSelection)
+		GUICtrlSetData($main["pgn"]["cPgnList"], _ArrayToString($pgnKeys), $default)
 		$oldPgns = $pgnKeys
 		_updateCgPgnMetaDatagroup($pgnRepository, $main)
 	EndIf
