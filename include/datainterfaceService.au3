@@ -51,13 +51,13 @@ Func _loadDataInterface($filepath, $activeFile)
 	EndIf
 	$msg = _updateJsonFiles($data)
 	If @error = 1 Then
-		FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\guiJsonVariants.json", 1)
-		_changeActiveJsonFile($data, "guiJsonVariants.json")
+		FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\original.json", 1)
+		_changeActiveJsonFile($data, "original.json")
 		_updateJsonFiles($data)
 	ElseIf @error Then
 		Return SetError(@error, 0, $msg)
 	EndIf
-	If Not _some($data["jsonFiles"], "stringinstr", $activeFile) Then
+	If Not _some($data["jsonFiles"], "stringinstr", $data["activeJsonFile"]) Then
 		$data["activeJsonFile"] = $data.jsonFiles[0]
 	EndIf
 	_JSONLoad($data)
@@ -226,7 +226,7 @@ Func _addVariantToJson(ByRef $data, $variant)
 	FileWrite($h_temp, $variant & @LF & "}" & @LF)
 	FileWriteLine($h_temp, $h_file[$i])
 	FileClose($h_temp)
-	FileMove($__tempFile, $data["activeJsonFilePath"], 1)
+	$msg = FileMove($__tempFile, $data["activeJsonFilePath"], 1)
 	_JSONLoad($data)
 EndFunc   ;==>_addVariantToJson
 
@@ -360,12 +360,14 @@ Func _JSONLoad(ByRef $data)
 	$data["cachedVariantMap"] = _newMap()
 	Local $path = $data["activeJsonFilePath"]
 	Local $fileContent = FileRead($path)
-	Local $temp = _JSON_Parse($fileContent)
+	Local $temp = _JSON_Parse(StringRegExpReplace($fileContent, ",\s*(?=[}\]])", ""))
 	Local $keys = _map($temp, "variantNameAuthorCallback", "")
 	For $i = 0 To UBound($keys) - 1
 		$key = $keys[$i]
+		$a = 2
 		While MapExists($data["cachedVariantMap"], $key)
-			$key &= "--duplicate"
+			$key = $key & "_" & $a
+			$a += 1
 		WEnd
 		$data["cachedVariantMap"][$keys[$i]] = $temp[$i]
 	Next
