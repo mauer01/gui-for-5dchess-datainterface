@@ -229,7 +229,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 	Return
 EndFunc   ;==>_frontController
 
-Func _controller_changeTimer(ByRef $context, $type, $time = Null, $delay = Null)
+Func _controller_changeTimer(ByRef $context, $type, $time, $delay)
 	Local $data = $context["data"]
 	Local $except[2] = ["reset", ":"]
 	If $type <> "L" And $type <> "M" And $type <> "S" Then
@@ -283,12 +283,14 @@ EndFunc   ;==>_controller_changeTimer
 
 Func _checkString($string, $exceptions)
 	If $string = "" Then Return
-	If IsNumber($string) Or _some($exceptions, "stringinstr", $string) Then
+	If StringIsAlNum($string) Or _some($exceptions, "stringinstroverload", $string) Then
 		Return
 	EndIf
 	Return SetError(1, 0, "string must be numeric or follow a format")
 EndFunc   ;==>_checkString
-
+Func stringinstroverload($s, $substr)
+	Return StringInStr($substr, $s)
+EndFunc   ;==>stringinstroverload
 
 
 Func _controller_undoMoveToggle(ByRef $data)
