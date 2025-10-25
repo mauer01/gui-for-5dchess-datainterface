@@ -173,9 +173,9 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _addPgnToMap($context["pgnRepository"], $filepath)
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 			$msg = _savePgnMapinCsv($context["pgnRepository"])
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnOpenPath"]
 			$filepath = FileOpenDialog("Select PGN File", "", "PGN Files (*.pgn;*.txt)|All Files (*.*)")
 			If @error Then
@@ -209,8 +209,17 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 		Case $mainGui["pgn"]["bPgnEdit"]
 
 		Case $mainGui["pgn"]["bPgnAddClipboard"]
-			$data = ClipGet()
-			_addpgntomap($context["pgnRepository"], $data)
+			Local $clipdata = ClipGet()
+			If Not StringInStr($clipdata, "1.") Then
+				MsgBox(16, "Error", "No valid moves found")
+				Return
+			EndIf
+			If Not StringRegExp($clipdata, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
+				MsgBox(16, "Error", "Couldn't find FENS in clipboard data")
+				Return
+			EndIf
+			$msg = _addpgntomap($context["pgnRepository"], $clipdata, InputBox("enter a Name", "enter a name for the pgn"))
+			If @error Then basicError(@error, $msg)
 			$msg = _savePgnMapinCsv($context["pgnRepository"])
 	EndSwitch
 	If @error Then Return SetError(@error, 0, "uncaught error" & @CRLF & "Potentially an Errormessage: " & $msg)
@@ -334,7 +343,7 @@ Func _controller_runPGN(ByRef $data, $pgnMap, $moveNumber = 1, $blackIncluded = 
 EndFunc   ;==>_controller_runPGN
 
 
-Func _controller_addVariant(ByRef $data, $fenPgnOrJson)
+Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name = False, $author = False)
 	If MapExists($fenPgnOrJson, "Name") Then
 		$msg = _checkVariant($fenPgnOrJson, True)
 		If @error Then
@@ -343,17 +352,16 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson)
 		_addVariantToJson($data, _JSON_MYGenerate($fenPgnOrJson))
 		Return
 	EndIf
-	If StringInStr($fenPgnOrJson, '[Board') Then
-		_DebugOut($fenPgnOrJson)
+	If StringRegExp($fenPgnOrJson, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
 		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
-		$multiverse["Name"] = $name
+		$multiverse["Name"] = $name == False ? InputBox("Enter Variant Name", "Variant Name:") : $name
+		$multiverse["Author"] = $author == False ? InputBox("Enter Variant Author", "Variant Author:") : $author
 		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $name, "pgn to variant"))
 		_addVariantToJson($data, $variant)
 		Return
 	EndIf
 	If StringInStr($fenPgnOrJson, "{") Then
 		$variant = _JSON_Parse($fenPgnOrJson)
-		jsondebug($variant)
 		$msg = _checkVariant($variant, True)
 		$error = @error
 		If $error Then
@@ -431,9 +439,8 @@ EndFunc   ;==>_timetoSeconds
 
 
 
-Func basicError($msg)
-	If @error Then
-		MsgBox(16, "Error", $msg)
+Func basicError($errorcode, $msg)
+	If $errorcode Then
+		MsgBox(16, "Error: " & $errorcode, $msg)
 	EndIf
-	Return
 EndFunc   ;==>basicError
