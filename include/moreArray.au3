@@ -130,3 +130,21 @@ Func _newArray()
 	Local $__emptyArray[0] = []
 	Return $__emptyArray
 EndFunc   ;==>_newArray
+
+
+Func _isLastOne($item, ByRef $array)
+	If IsArray($array) Then
+		Return $array[UBound($array) - 1] = $item
+	EndIf
+	If IsMap($array) Then
+		Return $item = _MapValues($array)[UBound(_MapValues($array)) - 1]
+	EndIf
+EndFunc   ;==>_isLastOne
+
+Func _MapValues(ByRef $map)
+	Local $values[0]
+	For $key In MapKeys($map)
+		_ArrayAdd($values, $map[$key])
+	Next
+	Return $values
+EndFunc   ;==>_MapValues
