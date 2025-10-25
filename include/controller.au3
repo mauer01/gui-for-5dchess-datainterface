@@ -26,9 +26,12 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			If FileExists($filepath) Then
 				FileCopy($filepath, $context["data"]["ressourceDir"] & "\" & $filename)
 			EndIf
-
 		Case $mainGui["json"]["bAddVariantfromClip"]
 			$msg = _controller_addVariant($context["data"], ClipGet(), InputBox("Enter variant name", "Enter a Name for the variant", "Variant from Clipboard"))
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
 		Case $mainGui["json"]["bAddVariantFromFile"]
 			$filepath = FileOpenDialog("Select PGN or JSON File", "", "PGN Files (*.pgn;*.txt)|JSON Files (*.json)")
 			If @error Then
@@ -36,6 +39,10 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _controller_addVariant($context["data"], FileRead($filepath), StringTrimRight($filepath, StringMid($filepath, StringInStr($filepath, "\", 0, -1)) + 1))
+			If @error Then
+				MsgBox(16, "Error", $msg)
+				Return
+			EndIf
 		Case $mainGui["json"]["bRemoteJsonDownload"]
 			$msg = _controller_downloadVariants($context["data"], False, GUICtrlRead($mainGui["json"]["cRemoteJsons"]))
 		Case $mainGui["json"]["cLocalJsonFiles"]
@@ -107,15 +114,16 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				GUICtrlSetData($mainGui["settings"]["cClocks"], $context.labels.cClocksChoices, $type)
 			EndIf
 			$keys = MapKeys($context["data"]["settings"])
+
 			$settingmap["S"] = _newMap()
-			$settingmap["S"]["timer"] = $keys[1]
-			$settingmap["S"]["increment"] = $keys[2]
+			$settingmap["S"]["timer"] = $keys == True ? $keys[1] : ""
+			$settingmap["S"]["increment"] = $keys == True ? $keys[2] : ""
 			$settingmap["M"] = _newMap()
-			$settingmap["M"]["timer"] = $keys[3]
-			$settingmap["M"]["increment"] = $keys[4]
+			$settingmap["M"]["timer"] = $keys == True ? $keys[3] : ""
+			$settingmap["M"]["increment"] = $keys == True ? $keys[4] : ""
 			$settingmap["L"] = _newMap()
-			$settingmap["L"]["timer"] = $keys[5]
-			$settingmap["L"]["increment"] = $keys[6]
+			$settingmap["L"]["timer"] = $keys == True ? $keys[5] : ""
+			$settingmap["L"]["increment"] = $keys == True ? $keys[6] : ""
 			GUICtrlSetData($mainGui["settings"]["iClockTime"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["timer"]])
 			$msg = GUICtrlSetData($mainGui["settings"]["iClockDelay"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["increment"]])
 		Case $mainGui["settings"]["bClockSet"]
@@ -143,6 +151,8 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Local $location = _ProcessGetLocation("5dchesswithmultiversetimetravel.exe")
 				If @error = 1 Then
 					MsgBox(16, "Error", "5D Chess with Multiverse Time Travel is not running. Please start the game first.")
+					GUICtrlSetState($mainGui["settings"]["cbRestartGameOnCrash"], $GUI_UNCHECKED)
+					Return
 				ElseIf @error = 2 Then
 					MsgBox(16, "Error", "Unable to get location of 5D Chess with Multiverse Time Travel automatically. Please set the game location in settings first.")
 					$location = FileOpenDialog("Select 5D Chess with Multiverse Time Travel Executable", "", "Executable Files (*.exe)|All Files (*.*)")
@@ -245,14 +255,14 @@ Func _controller_changeTimer(ByRef $context, $type, $time, $delay)
 	$map["S"] = 2
 	$keys = MapKeys($context["data"]["settings"])
 	$settingmap["S"] = _newMap()
-	$settingmap["S"]["timer"] = $keys[1]
-	$settingmap["S"]["increment"] = $keys[2]
+	$settingmap["S"]["timer"] = $keys == True ? $keys[1] : ""
+	$settingmap["S"]["increment"] = $keys == True ? $keys[2] : ""
 	$settingmap["M"] = _newMap()
-	$settingmap["M"]["timer"] = $keys[3]
-	$settingmap["M"]["increment"] = $keys[4]
+	$settingmap["M"]["timer"] = $keys ? $keys[3] : ""
+	$settingmap["M"]["increment"] = $keys == True ? $keys[4] : ""
 	$settingmap["L"] = _newMap()
-	$settingmap["L"]["timer"] = $keys[5]
-	$settingmap["L"]["increment"] = $keys[6]
+	$settingmap["L"]["timer"] = $keys == True ? $keys[5] : ""
+	$settingmap["L"]["increment"] = $keys == True ? $keys[6] : ""
 	If StringInStr($time, ":") Then
 		$time = _timetoSeconds($time)
 		If @error Then Return SetError(4, 0, "Time format invalid")
@@ -348,6 +358,7 @@ EndFunc   ;==>_controller_runPGN
 
 Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 	If MapExists($fenPgnOrJson, "Name") Then
+
 		$msg = _checkVariant($fenPgnOrJson, True)
 		If @error Then
 			Return SetError(@error, 0, $msg)
@@ -355,7 +366,7 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 		_addVariantToJson($data, _JSON_MYGenerate($fenPgnOrJson))
 		Return
 	EndIf
-	If StringInStr($fenPgnOrJson, '"[Board') Then
+	If StringInStr($fenPgnOrJson, '[Board') Then
 		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
 		$multiverse["Name"] = $name
 		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $name, "pgn to variant"))
@@ -365,8 +376,9 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name)
 	If StringInStr($fenPgnOrJson, "{") Then
 		$variant = _JSON_Parse($fenPgnOrJson)
 		$msg = _checkVariant($variant, True)
-		If @error Then
-			Return SetError(@error, 0, $msg)
+		$error = @error
+		If $error Then
+			Return SetError($error, 0, $msg)
 		EndIf
 		_addVariantToJson($data, _JSON_MYGenerate($variant))
 		Return
