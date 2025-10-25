@@ -37,6 +37,8 @@ Func _loadDataInterface($filepath, $activeFile)
 	$data["activeJsonFile"] = $activeFile
 	$data["activeJsonFilePath"] = $data["ressourceDir"] & "\" & $activeFile & ".json"
 	$data["jsonFileLastChanged"] = ""
+	$data["lastJsonFileAdded"] = ""
+	$data["lastVariantAdded"] = ""
 	$data["log"] = ""
 	$data["crashed"] = False
 	$data["pid"] = ""
