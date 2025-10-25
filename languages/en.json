@@ -1,6 +1,6 @@
 {
   "main": "Gui for Datainterface",
-  "tJsonLoader": "JSON Loader",
+  "tJsonLoader": "Variant Loader",
   "bAddJsonFile": "Add",
   "bRemoteJsonDownload": "Download",
   "bLocalJsonFileRemove": "Remove",

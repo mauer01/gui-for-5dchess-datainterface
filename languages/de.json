@@ -1,6 +1,6 @@
 {
   "main": "GUI für Datenschnittstelle",
-  "tJsonLoader": "JSON laden",
+  "tJsonLoader": "Varianten laden",
   "bAddJsonFile": "Hinzufügen",
   "bRemoteJsonDownload": "Herunterladen",
   "bLocalJsonFileRemove": "Entfernen",
