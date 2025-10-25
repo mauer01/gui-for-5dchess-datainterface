@@ -17,10 +17,12 @@
 #include <include\datainterfaceService.au3>
 #include <include\JSON.au3>
 #include <include\moreArray.au3>
+#include <include\pgnRepository.au3>
 
 #cs
 githublink for complete source = https://github.com/mauer01/gui-for-5dchess-datainterface
 #ce
+OnAutoItExitRegister("myExit")
 While 1
 	$exit = main()
 	$errorcode = @error
@@ -33,6 +35,11 @@ While 1
 		Exit
 	EndIf
 WEnd
+
+Func myExit()
+	_CloseAllDatainterfaces()
+	Exit
+EndFunc   ;==>myExit
 
 
 
@@ -133,5 +140,6 @@ Func loadContext()
 	Else
 		$context["labels"] = _loadLanguage()
 	EndIf
+	$context["pgnRepository"] = _loadPgnRepository()
 	Return $context
 EndFunc   ;==>loadContext

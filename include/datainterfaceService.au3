@@ -85,7 +85,6 @@ Func _updateJsonFiles(ByRef $data)
 EndFunc   ;==>_updateJsonFiles
 
 Func _runDataInterface(ByRef $data)
-	OnAutoItExitRegister("_CloseAllDatainterfaces")
 	$pid = Run($data["filePath"], $data["workingDir"], @SW_HIDE, BitOR($STDOUT_CHILD, $STDIN_CHILD, $STDERR_CHILD))
 	$data["pid"] = $pid
 	$data["isRunning"] = True
@@ -99,7 +98,6 @@ Func _cleanExit(ByRef $data)
 		$data["isRunning"] = False
 		_ProcessClose($data["pid"])
 		_ArrayDelete($__PIDArray, _ArraySearch($__PIDArray, $data["pid"]))
-		If UBound($__PIDArray) = 0 Then OnAutoItExitUnRegister("_CloseAllDatainterfaces")
 	EndIf
 EndFunc   ;==>_cleanExit
 Func _checkIsRunning(ByRef $data, $justexist = False)
@@ -254,7 +252,6 @@ Func _removeVariantFromJson(ByRef $data, $variant)
 	FileMove($__tempFile, $data["activeJsonFilePath"], 1)
 	GUISetState(@SW_ENABLE)
 EndFunc   ;==>_removeVariantFromJson
-
 Func _ProcessClose($pid)
 	If _ProcessGetName($pid) = "DataInterfaceConsole.exe" Then
 		ProcessClose($pid)
