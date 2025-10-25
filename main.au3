@@ -102,6 +102,7 @@ Func main()
 		EndIf
 		_checkIsRunning($context["data"])
 		_updateComboBoxes($context["data"], $main)
+		_updatePgnCombo($context["pgnRepository"], $main)
 		If $context["option"]["keepgameon"] Then
 			_KeepGameOn($context["option"]["gameLocation"])
 		EndIf
