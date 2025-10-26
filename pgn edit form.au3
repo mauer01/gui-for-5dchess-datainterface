@@ -10,12 +10,13 @@
 Func cb($Param, $list)
 	Return $Param & ": " & $list[$Param]
 EndFunc   ;==>cb
-Func pgneditForm(ByRef $pgnData)
+Func pgneditForm(ByRef $pgnData, $parentwin = 0)
+	GUISetState(@SW_DISABLE, $parentwin)
 	Local $moveIndex, $fenIndex, $tagIndex, $tagsselected = False, $fenselected = False, $movesselected = False
 	Local $tags = _map(MapKeys($pgnData["tags"]), "cb", $pgnData["tags"])
 	_DebugOut(_JSON_generate($pgnData))
 	Local $selectedTag = $pgnData["tags"][MapKeys($pgnData["tags"])[0]]
-	$fPgnEditor = GUICreate("Pgn Editor", 518, 220, 538, 544)
+	$fPgnEditor = GUICreate("Pgn Editor", 518, 220, 538, 544, -1, -1, $parentwin)
 	GUICtrlCreateGroup("[] Tags", 8, 8, 505, 57)
 	$Input1 = GUICtrlCreateInput("", 16, 52, 449, 21)
 	$bTagSet = GUICtrlCreateButton("Set", 472, 40, 35, 25)
@@ -28,7 +29,7 @@ Func pgneditForm(ByRef $pgnData)
 	GUICtrlSetData($cFens, _ArrayToString($pgnData["fen"]))
 	GUICtrlCreateGroup("Moves", 8, 148, 505, 57)
 	$Input3 = GUICtrlCreateInput("", 16, 192, 449, 21)
-	$bMoveSet = GUICtrlCreateButton("Set", 472, 160, 35, 25)
+	$bMoveSet = GUICtrlCreateButton("Set", 472, 175, 35, 25)
 	$cMoves = GUICtrlCreateCombo("Moves", 16, 164, 449, 25, BitOR($WS_VSCROLL, $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL))
 	GUICtrlSetData($cMoves, _ArrayToString($pgnData["moves"]))
 	GUISetState(@SW_SHOW, $fPgnEditor)
@@ -38,6 +39,8 @@ Func pgneditForm(ByRef $pgnData)
 		Switch $nMsg
 			Case $GUI_EVENT_CLOSE
 				GUIDelete($fPgnEditor)
+				GUISetState(@SW_ENABLE, $parentwin)
+				GUISetState(@SW_RESTORE, $parentwin)
 				Return
 
 			Case $bTagSet
