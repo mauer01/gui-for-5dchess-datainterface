@@ -200,10 +200,10 @@ EndFunc   ;==>_runVariant
 
 
 
-Func updateJSONVariants(ByRef $data, $JSON)
+Func updateJSONVariants(ByRef $data)
 
 	$h_temp = FileOpen($__tempFile, 2)
-	FileWrite($h_temp, _JSON_MYGenerate($JSON))
+	FileWrite($h_temp, _JSON_MYGenerate(_mapValues($data["cachedVariantMap"])))
 	FileClose($h_temp)
 	FileMove($__tempFile, $data["activeJsonFilePath"], 1)
 
