@@ -5,8 +5,9 @@
 #include <JSON.au3>
 
 
-Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
+Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1, $name = "Name is Important")
 	Local $i_multiverse[]
+	$i_multiverse["Name"] = $name
 	Local $array[0][0]
 	Local $array2[0]
 	$i_multiverse[3] = $array2
@@ -81,7 +82,7 @@ Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1)
 				$fens[3] = StringReplace($fens[3], "b", "2")
 				$board = _createboard("custom", $fens[0])
 				_multiverse_setboard($i_multiverse, $board, $fens[1], $fens[2], StringLeft($fens[3], 1))
-				$i_multiverse[0].gamebuilder = 1
+				$i_multiverse[0].gamebuilder = $i_multiverse[0].gamebuilder == 0 ? 1 : $i_multiverse[0].gamebuilder
 				If ($fens[1] == "+0" Or $fens[1] == "-0") Then $i_multiverse[0].gamebuilder = 2
 			Next
 			$i_multiverse[0].boardheight = UBound($board)
@@ -789,7 +790,6 @@ Func _multiversetovariant($i_multiverse, $variant = "automatically generated", $
 	$i_multiverse[1] = _multiverse_removeemptytimelines($i_multiverse)
 	Local $string = "  {" & @LF & "    " & '"Name": "' & $variant & '",' & @LF & "    " & '"Author": "' & $author & '",' & @LF & "    " & '"Timelines": {' & @LF
 	Local $timelines = UBound($i_multiverse[1], 2) - 1
-	Local $turns = UBound(($i_multiverse[1])) - 1
 	For $i = 0 To $timelines
 		$string &= "    " & '  "' & ($i_multiverse[1])[0][$i] & 'L": [' & @LF & "    " & "   "
 		$endboard = _multiverse_findendboard($i_multiverse, $i)
@@ -907,11 +907,11 @@ EndFunc   ;==>_IsEven
 #EndRegion stupid stuff
 
 
-Func _checkVariant($JSON)
+Func _checkVariant($JSON, $break = False)
 	$initialKeys = MapKeys($JSON)
-	If Not _some($initialKeys, "StringInStr", "Name") Then Return "No Name"
-	If Not _some($initialKeys, "StringInStr", "Author") Then Return "No Author"
-	If Not _some($initialKeys, "StringInStr", "Timelines") Then Return "No Timelines"
+	If Not _some($initialKeys, "StringInStr", "Author") Then Return SetError(1, 0, "No Author")
+	If Not _some($initialKeys, "StringInStr", "Name") Then Return SetError(1, 0, "No Name")
+	If Not _some($initialKeys, "StringInStr", "Timelines") Then Return SetError(1, 0, "No Timelines")
 	$timelines = MapKeys($JSON["Timelines"])
 	$counting = 0
 	For $line In $timelines
@@ -920,6 +920,7 @@ Func _checkVariant($JSON)
 		EndIf
 	Next
 	If Not ($counting = UBound($timelines)) Then Return "Ungültige Zeitliniennamen"
+	If $break Then Return True
 	Local $multiverse = _multiverse_create("variant", $JSON)
 	$multiversum = $multiverse[1]
 	For $i = 0 To UBound($multiversum) - 1
@@ -927,7 +928,7 @@ Func _checkVariant($JSON)
 			If Not IsArray($multiversum[$i][$j]) Then ContinueLoop
 			$board = $multiversum[$i][$j]
 			$boardheight = UBound($board)
-			If $boardheight > 8 Then MsgBox(0, "", "")
+			If $boardheight > 8 Then Return SetError(1, 0, "Board bigger than allowed")
 			$boardwidth = UBound($board, 2)
 			If Not IsDeclared("oldboardheight") Then $oldboardheight = $boardheight
 			If $boardheight <> $boardwidth Then
