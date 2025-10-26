@@ -82,7 +82,7 @@ Func _multiverse_create($mode = "t0", $opt = "", $opt2 = -1, $opt3 = 1, $name = 
 				$fens[3] = StringReplace($fens[3], "b", "2")
 				$board = _createboard("custom", $fens[0])
 				_multiverse_setboard($i_multiverse, $board, $fens[1], $fens[2], StringLeft($fens[3], 1))
-				$i_multiverse[0].gamebuilder = 1
+				$i_multiverse[0].gamebuilder = $i_multiverse[0].gamebuilder == 0 ? 1 : $i_multiverse[0].gamebuilder
 				If ($fens[1] == "+0" Or $fens[1] == "-0") Then $i_multiverse[0].gamebuilder = 2
 			Next
 			$i_multiverse[0].boardheight = UBound($board)
