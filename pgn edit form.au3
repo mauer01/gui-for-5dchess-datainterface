@@ -6,7 +6,7 @@
 #include <GuiComboBox.au3>
 #include <include\pgnRepository.au3>
 #include <include\moreArray.au3>
-#include <debug.au3>
+
 Func cb($Param, $list)
 	Return $Param & ": " & $list[$Param]
 EndFunc   ;==>cb
@@ -14,7 +14,7 @@ Func pgneditForm(ByRef $pgnData, $parentwin = 0)
 	GUISetState(@SW_DISABLE, $parentwin)
 	Local $moveIndex, $fenIndex, $tagIndex, $tagsselected = False, $fenselected = False, $movesselected = False
 	Local $tags = _map(MapKeys($pgnData["tags"]), "cb", $pgnData["tags"])
-	_DebugOut(_JSON_generate($pgnData))
+
 	Local $selectedTag = $pgnData["tags"][MapKeys($pgnData["tags"])[0]]
 	$fPgnEditor = GUICreate("Pgn Editor", 518, 220, 538, 544, -1, -1, $parentwin)
 	GUICtrlCreateGroup("[] Tags", 8, 8, 505, 57)
@@ -50,7 +50,7 @@ Func pgneditForm(ByRef $pgnData, $parentwin = 0)
 				_GUICtrlComboBox_DeleteString($cTags, $tagIndex)
 				_GUICtrlComboBox_InsertString($cTags, $tagKey & ": " & GUICtrlRead($Input1), $tagIndex)
 				_GUICtrlComboBox_SetCurSel($cTags, $tagIndex)
-				_DebugOut(_JSON_generate($pgnData))
+
 
 			Case $bfenSet
 				$fenIndex = _GUICtrlComboBox_GetCurSel($cFens)

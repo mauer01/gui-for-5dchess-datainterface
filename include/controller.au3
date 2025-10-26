@@ -6,6 +6,7 @@
 #include <multiversechess.au3>
 #include <pgnRepository.au3>
 #include <..\pgn edit form.au3>
+#include <..\json edit form.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
 	Local $nMsg, $msg, $filepath, $filename, $type
@@ -98,6 +99,16 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$msg = _controller_removeVariant($context["data"], GUICtrlRead($mainGui["json"]["cListOfVariants"]))
 
 		Case $mainGui["json"]["bVariantEdit"]
+			Local $variantKey = GUICtrlRead($mainGui["json"]["cListOfVariants"])
+			Local $variant = $context["data"]["cachedVariantMap"][$variantKey]
+			$newJson = jsonEditForm($variant, $mainGui["form"])
+			Local $extended = @extended
+			If $extended Then
+				$msg = _controller_replaceVariant($context["data"], $newJson, $variantKey)
+			Else
+				$msg = _controller_addVariant($context["data"], $newJson, False, False, True)
+			EndIf
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["json"]["baddVariantsFromJsonFile"]
 			$filepath = FileOpenDialog("Select JSON File", $context["data"]["ressourceDir"], "JSON Files (*.json)")
 			If @error Then
@@ -223,9 +234,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				MsgBox(16, "Error", "PGN not found in repository.")
 				Return
 			EndIf
-			GUISetState(@SW_DISABLE, $mainGui["form"])
-			$msg = pgneditForm($context["pgnRepository"]["data"][$filename])
-			GUISetState(@SW_ENABLE, $mainGui["form"])
+			$msg = pgneditForm($context["pgnRepository"]["data"][$filename], $mainGui["form"])
 			If @error Then Return basicError(@error, $msg)
 			$msg = _savePgnMapinCsv($context["pgnRepository"])
 			If @error Then Return basicError(@error, $msg)
@@ -364,19 +373,25 @@ Func _controller_runPGN(ByRef $data, $pgnMap, $moveNumber = 1, $blackIncluded = 
 EndFunc   ;==>_controller_runPGN
 
 
-Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name = False, $author = False)
+Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name = False, $author = False, $overwrite = False)
 	If MapExists($fenPgnOrJson, "Name") Then
 		$msg = _checkVariant($fenPgnOrJson, True)
 		If @error Then
 			Return SetError(@error, 0, $msg)
 		EndIf
-		_addVariantToJson($data, _JSON_MYGenerate($fenPgnOrJson))
+		If Not $overwrite Then
+			ensureuniquename($data, $fenPgnOrJson)
+			_addVariantToJson($data, _JSON_MYGenerate($fenPgnOrJson))
+		EndIf
+		$data["cachedVariantMap"][$fenPgnOrJson["Name"] & " by " & $fenPgnOrJson["Author"]] = $fenPgnOrJson
+		updateJsonVariants($data)
 		Return
 	EndIf
 	If StringRegExp($fenPgnOrJson, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
 		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
 		$multiverse["Name"] = $name == False ? InputBox("Enter Variant Name", "Variant Name:") : $name
 		$multiverse["Author"] = $author == False ? InputBox("Enter Variant Author", "Variant Author:") : $author
+		ensureuniquename($data, $multiverse)
 		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $name, "pgn to variant"))
 		_addVariantToJson($data, $variant)
 		Return
@@ -388,11 +403,23 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name = False, $author =
 		If $error Then
 			Return SetError($error, 0, $msg)
 		EndIf
+		ensureuniquename($data, $variant)
 		_addVariantToJson($data, _JSON_MYGenerate($variant))
 		Return
 	EndIf
 	Return SetError(1, 0, "Input not recognized as valid variant, json, or pgn")
 EndFunc   ;==>_controller_addVariant
+
+Func ensureuniquename(ByRef $data, ByRef $fenPgnOrJson)
+	Local $i = 2
+	While MapExists($data["cachedVariantMap"], $fenPgnOrJson["Name"] & " by " & $fenPgnOrJson["Author"])
+		$fenPgnOrJson["Name"] = $fenPgnOrJson["Name"] & "_" & $i
+		$i += 1
+	WEnd
+	Return
+EndFunc   ;==>ensureuniquename
+
+
 
 Func _controller_addVariantOverload($multiverse, ByRef $data)
 	Return _controller_addVariant($data, $multiverse, $multiverse["Name"])
@@ -420,14 +447,16 @@ Func _controller_downloadVariants(ByRef $data, $cacheOnly = False, $variantfiles
 EndFunc   ;==>_controller_downloadVariants
 
 
-Func _controller_replaceVariant(ByRef $data, $input, $variantnumber, ByRef $fullJSON)
-	$newJSON = _JSON_Parse($input)
-	$check = _checkVariant($newJSON)
+Func _controller_replaceVariant(ByRef $data, $input, $variantnumber)
+	$check = _checkVariant($input)
 	If IsString($check) Then
 		Return SetError(1, 0, $check)         ; variant not valid
 	EndIf
-	$fullJSON[$variantnumber - 1] = $newJSON
-	updateJSONVariants($data, $fullJSON)
+	MapRemove($data["cachedVariantMap"], $variantnumber)
+	$variantnumber = $input["Name"] & " by " & $input["Author"]
+	$data["cachedVariantMap"][$variantnumber] = $input
+
+	updateJSONVariants($data)
 	Return True
 EndFunc   ;==>_controller_replaceVariant
 
