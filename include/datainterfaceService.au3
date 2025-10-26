@@ -363,7 +363,7 @@ Func _JSONLoad(ByRef $data)
 	$data["cachedVariantMap"] = _newMap()
 	Local $path = $data["activeJsonFilePath"]
 	Local $fileContent = FileRead($path)
-	Local $temp = _JSON_Parse(StringRegExpReplace($fileContent, ",\s*(?=[}\]])", ""))
+	Local $temp = _JSON_Parse($fileContent)
 	Local $keys = _map($temp, "variantNameAuthorCallback", "")
 	For $i = 0 To UBound($keys) - 1
 		$key = $keys[$i]
