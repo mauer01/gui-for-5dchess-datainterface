@@ -80,6 +80,15 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 		Case $mainGui["json"]["bRunVariant"]
 			Local $variantKey = GUICtrlRead($mainGui["json"]["cListOfVariants"])
 			Local $variant = $context["data"]["cachedVariantMap"][$variantKey]
+			If _countNameOccurrences($context["data"]["jsonFile"]) > 1 Then ; makes sure the jsonVariants file doesnt get overwritten when it still has other variants
+				Local $backupname = "jsonVariantsGUIOriginalbackup.json"
+				Local $backupcount = 0
+				While FileExists($context["data"]["jsonResourceDir"] & "\" & $backupname)
+					$backupname = $backupcount & "_" & $backupname
+					$backupcount += 1
+				WEnd
+				FileCopy($context["data"]["jsonFile"], StringReplace($context["data"]["jsonFile"], ".json", "GUIOriginalbackup.json"))
+			EndIf
 			$msg = _runVariant($context["data"], $variant)
 		Case $mainGui["json"]["bVariantRemove"]
 			If MsgBox(4, "Confirm", "Are you sure you want to remove this variant?") = 7 Then
@@ -444,3 +453,23 @@ Func basicError($errorcode, $msg)
 		MsgBox(16, "Error: " & $errorcode, $msg)
 	EndIf
 EndFunc   ;==>basicError
+
+
+Func _countNameOccurrences($filepath)
+	If Not FileExists($filepath) Then Return 0
+
+	Local $fileContent = FileRead($filepath)
+	If @error Then Return 0
+
+	; Count occurrences of "Name" (case sensitive)
+	Local $count = 0
+	Local $pos = 1
+	While True
+		$pos = StringInStr($fileContent, '"Name"', 0, 1, $pos)
+		If $pos = 0 Then ExitLoop
+		$count += 1
+		$pos += 1
+	WEnd
+
+	Return $count
+EndFunc   ;==>_countNameOccurrences

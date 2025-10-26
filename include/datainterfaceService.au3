@@ -53,7 +53,8 @@ Func _loadDataInterface($filepath, $activeFile)
 	EndIf
 	$msg = _updateJsonFiles($data)
 	If @error = 1 Then
-		FileCopy($data["jsonFile"], $data["workingDir"] & "\Resources\original.json", 1)
+		FileMove($data["jsonFile"], $data["workingDir"] & "\Resources\original.json", 1)
+		FileClose(FileOpen($data["jsonFile"], 2))
 		_changeActiveJsonFile($data, "original.json")
 		_updateJsonFiles($data)
 	ElseIf @error Then
