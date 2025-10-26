@@ -48,13 +48,17 @@ Config keys: ()
 
 - Data Interface
   - Run/stop the interface using the configured Resources folder.
+  - Clocks are settable in seconds or in HH:MM:SS format
+  - Undo Move locks the undo button so it cant deactivate after pressing it
+  - Insert room Code auto inserts the discord private match code from the clipboard
+  - Resume game will resume offline games if they concluded due to draw / checkmate
   - Keep Game On can relaunch the game if it closes.
 
 - PGN / FEN workflow
-  - Load from Clipboard or open a .txt in 5dpgn format (FEN on top, moves below), or a FEN that includes [Board].
-  - Choose the last move to include.
-  - Add/Update creates or updates an entry in the GUI’s JSON library.
-  - When running via the Data Interface, the GUI emits a JsonVariants.json for the interface to consume (backing up any in-use file first).
+  - Load from Clipboard or open a .txt in 5dpgn format (FEN on top, moves below).
+  - You have to specify at what move the pgn loader should go and if blacks last move should be taken with
+  - Add/Update creates or updates an entry in the GUI’s library, Pgns will be saved in a csv file in the same dir, with ; as the seperator (because,... it was easier).
+  - When running via the Data Interface, the GUI emits a JsonVariants.json for the interface to consume (backing it up first if it has 2 or more variants in it).
 
 - PGN Editor (modal)
   - Edit:
@@ -72,10 +76,6 @@ Config keys: ()
 
 - Variants from external designers (e.g., web tools) can be pasted and refined here.
 
-## Troubleshooting
-
-- If the main window minimizes after closing an editor, update to the latest build; the GUI restores and re-enables the main window when modal editors close.
-
 ## Contributing
 
 Issues and PRs are welcome. You can also contact via Discord.
@@ -90,7 +90,8 @@ Issues and PRs are welcome. You can also contact via Discord.
   - https://github.com/penteract/5D-PGN-Recorder
   - https://github.com/CrazyPenguin0111/5D-PGN-Recorder
   - https://github.com/NKID00/5DChessRecorderCrossplatform/
-
+- Of course the lovely 5DChessCommunity: [http](https://5dchesswithmultiversetimetravel.com/discord)
+  
 ## License
 
 MIT
