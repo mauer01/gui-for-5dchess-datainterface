@@ -148,3 +148,14 @@ Func _MapValues(ByRef $map)
 	Next
 	Return $values
 EndFunc   ;==>_MapValues
+
+
+Func _MapArraySet(ByRef $map, $key, $idx, $val) ; Autoit is FUN
+	Local $arr = $map[$key]
+	If IsArray($arr) And $idx >= 0 And $idx < UBound($arr) Then
+		$arr[$idx] = $val
+		$map[$key] = $arr
+		Return True
+	EndIf
+	Return False
+EndFunc   ;==>_MapArraySet
