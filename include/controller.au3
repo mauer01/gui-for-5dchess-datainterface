@@ -5,6 +5,7 @@
 #include <moreArray.au3>
 #include <multiversechess.au3>
 #include <pgnRepository.au3>
+#include <..\pgn edit form.au3>
 
 Func _frontController(ByRef $context, ByRef $mainGui)
 	Local $nMsg, $msg, $filepath, $filename, $type
@@ -28,7 +29,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			EndIf
 		Case $mainGui["json"]["bAddVariantfromClip"]
 			$msg = _controller_addVariant($context["data"], ClipGet())
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["json"]["bAddVariantFromFile"]
 			$filepath = FileOpenDialog("Select PGN or JSON File", "", "PGN Files (*.pgn;*.txt)|JSON Files (*.json)")
 			If @error Then
@@ -36,7 +37,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _controller_addVariant($context["data"], FileRead($filepath), StringTrimRight($filepath, StringMid($filepath, StringInStr($filepath, "\", 0, -1)) + 1))
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["json"]["bRemoteJsonDownload"]
 			$msg = _controller_downloadVariants($context["data"], False, GUICtrlRead($mainGui["json"]["cRemoteJsons"]))
 		Case $mainGui["json"]["cLocalJsonFiles"]
@@ -138,7 +139,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], $time, $delay)
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["settings"]["bClockReset"]
 			$type = GUICtrlRead($mainGui["settings"]["cClocks"])
 			$msg = _controller_changeTimer($context, $mainGui["settings"]["Timers"][$type], "reset", "reset")
@@ -205,7 +206,7 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$msg = _controller_runPGN($context["data"], $context["pgnRepository"]["data"][$filename], _
 					StringSplit(GUICtrlRead($mainGui["pgn"]["cMoveList"]), ".", 2)[0], _
 					GUICtrlRead($mainGui["pgn"]["cbBlackIncluded"]) == $GUI_CHECKED)
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnRemove"]
 			$filename = GUICtrlRead($mainGui["pgn"]["cPgnList"])
 			$msg = _removePgnFromMap($context["pgnRepository"], $filename)
@@ -214,9 +215,20 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 				Return
 			EndIf
 			$msg = _savePgnMapinCsv($context["pgnRepository"])
-			Return basicError(@error, $msg)
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnEdit"]
 
+			$filename = GUICtrlRead($mainGui["pgn"]["cPgnList"])
+			If Not MapExists($context["pgnRepository"]["data"], $filename) Then
+				MsgBox(16, "Error", "PGN not found in repository.")
+				Return
+			EndIf
+			GUISetState(@SW_DISABLE, $mainGui["form"])
+			$msg = pgneditForm($context["pgnRepository"]["data"][$filename])
+			GUISetState(@SW_ENABLE, $mainGui["form"])
+			If @error Then Return basicError(@error, $msg)
+			$msg = _savePgnMapinCsv($context["pgnRepository"])
+			If @error Then Return basicError(@error, $msg)
 		Case $mainGui["pgn"]["bPgnAddClipboard"]
 			Local $clipdata = ClipGet()
 			If Not StringInStr($clipdata, "1.") Then
