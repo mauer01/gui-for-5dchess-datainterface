@@ -90,7 +90,7 @@ Issues and PRs are welcome. You can also contact via Discord.
   - https://github.com/penteract/5D-PGN-Recorder
   - https://github.com/CrazyPenguin0111/5D-PGN-Recorder
   - https://github.com/NKID00/5DChessRecorderCrossplatform/
-- Of course the lovely 5DChessCommunity: [http](https://5dchesswithmultiversetimetravel.com/discord)
+- Of course the lovely 5DChessCommunity: [https://5dchesswithmultiversetimetravel.com/discord](https://5dchesswithmultiversetimetravel.com/discord)
   
 ## License
 
