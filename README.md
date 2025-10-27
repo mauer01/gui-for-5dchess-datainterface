@@ -20,7 +20,7 @@ Windows GUI to manage GHXX’s FiveDChessDataInterface and quickly turn PGN/FEN 
 
 ## Requirements
 
-- Windows | Linux (with ProtonHax: [http](https://github.com/CrazyPenguin0111/5D-Chess-Data-Interface-Linux/))
+- Windows | Linux (with ProtonHax: [https://github.com/CrazyPenguin0111/5D-Chess-Data-Interface-Linux/](https://github.com/CrazyPenguin0111/5D-Chess-Data-Interface-Linux/))
 - 5D Chess With Multiverse Time Travel (Steam install)
 - GHXX FiveDChessDataInterface
   - The GUI can auto-setup the Data Interface into: %LocalAppData%\GuiDataInterface\Datainterface
@@ -85,7 +85,7 @@ Issues and PRs are welcome. You can also contact via Discord.
 - AutoIt community
 - 5D Chess variant designers and tools
 - GHXX Data Interface: https://github.com/GHXX/FiveDChessDataInterface
-- Linux Version: [http](https://github.com/CrazyPenguin0111/5D-Chess-Data-Interface-Linux/)
+- Linux Version: [https://github.com/CrazyPenguin0111/5D-Chess-Data-Interface-Linux/](https://github.com/CrazyPenguin0111/5D-Chess-Data-Interface-Linux/)
 - PGN recorders:
   - https://github.com/penteract/5D-PGN-Recorder
   - https://github.com/CrazyPenguin0111/5D-PGN-Recorder
