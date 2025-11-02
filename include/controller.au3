@@ -105,6 +105,8 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			Local $extended = @extended
 			If $extended Then
 				$msg = _controller_replaceVariant($context["data"], $newJson, $variantKey)
+			ElseIf Not $newJson Then
+				Return
 			Else
 				$msg = _controller_addVariant($context["data"], $newJson, False, False, True)
 			EndIf
