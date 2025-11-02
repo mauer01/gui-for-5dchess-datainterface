@@ -24,6 +24,9 @@ Func _datainterfaceSetup($ini, $localPath = False)
 		$localPath = _ArrayToString($localPath, "\", 1, $localPath[0] - 1)
 	EndIf
 	$data = _loadDataInterface(StringTrimRight($localPath, 10), $ini.data.activeJsonFile)
+	If @error Then
+		Return SetError(@error, 0, $data)
+	EndIf
 	Return $data
 EndFunc   ;==>_datainterfaceSetup
 Func _loadDataInterface($filepath, $activeFile)
@@ -50,6 +53,8 @@ Func _loadDataInterface($filepath, $activeFile)
 	If FileExists($data["workingDir"] & "\settings.json") Then
 		$fileContent = FileRead($data["workingDir"] & "\settings.json")
 		$data["settings"] = _JSON_Parse($fileContent)
+	Else
+		Return SetError(1, 0, "settings.json not found")
 	EndIf
 	$msg = _updateJsonFiles($data)
 	If @error = 1 Then
@@ -69,6 +74,7 @@ EndFunc   ;==>_loadDataInterface
 
 Func _updateJsonFiles(ByRef $data)
 	Local $files = _FileListToArray($data["workingDir"] & "\Resources", "*.json", 1, 1)
+	If @error Then Return SetError(@error, 0, "Couldnt read json files from resource folder")
 	If $files[0] = 1 And StringInStr($files[1], "jsonVariants.json") Then
 		Return SetError(1, 0, "Only normal jsonVariants.json file found, no variant files present")
 	EndIf
