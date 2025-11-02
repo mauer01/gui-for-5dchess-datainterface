@@ -50,11 +50,20 @@ Func _loadDataInterface($filepath, $activeFile)
 	$data["lastFileList"] = _newArray()
 	$data["settings"] = _newMap()
 	$data["cachedVariantMap"] = _newMap()
-	If FileExists($data["workingDir"] & "\settings.json") Then
-		$fileContent = FileRead($data["workingDir"] & "\settings.json")
+	Local $settingspath = $data["workingDir"] & "\settings.json"
+	If FileExists($settingspath) Then
+		$fileContent = FileRead($settingspath)
 		$data["settings"] = _JSON_Parse($fileContent)
 	Else
-		Return SetError(1, 0, "settings.json not found")
+		$data["settings"] = _newMap()
+		$data["settings"]["ForceTimetravelAnimationValue"] = "ignore"
+		$data["settings"]["Clock1BaseTime"] = Null
+		$data["settings"]["Clock1Increment"] = Null
+		$data["settings"]["Clock2BaseTime"] = Null
+		$data["settings"]["Clock2Increment"] = Null
+		$data["settings"]["Clock3BaseTime"] = Null
+		$data["settings"]["Clock3Increment"] = Null
+		FileWrite($settingspath, _JSON_generate($data["settings"]))
 	EndIf
 	$msg = _updateJsonFiles($data)
 	If @error = 1 Then
@@ -74,7 +83,7 @@ EndFunc   ;==>_loadDataInterface
 
 Func _updateJsonFiles(ByRef $data)
 	Local $files = _FileListToArray($data["workingDir"] & "\Resources", "*.json", 1, 1)
-	If @error Then Return SetError(@error, 0, "Couldnt read json files from resource folder")
+	If @error Then Return SetError(2, 0, "Couldnt read json files from resource folder")
 	If $files[0] = 1 And StringInStr($files[1], "jsonVariants.json") Then
 		Return SetError(1, 0, "Only normal jsonVariants.json file found, no variant files present")
 	EndIf
