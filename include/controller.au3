@@ -295,7 +295,8 @@ Func _controller_changeTimer(ByRef $context, $type, $time, $delay)
 	$keytimer = $settingmap[$type]["timer"]
 	If ($time And $delay) Then
 		_settingOptions($data, $map[$type], $time)
-		_waitForResponse($data, "Action executed. Returning to menu")
+		$msg = _waitForResponse($data, "Action executed. Returning to menu")
+		If @error Then Return SetError(@error, 0, $msg)
 		_settingOptions($data, $map[$type] + 1, $delay)
 		$context["data"]["settings"][$keytimer] = $time == "reset" ? "" : $time
 		$context["data"]["settings"][$keyinc] = $delay == "reset" ? "" : $delay

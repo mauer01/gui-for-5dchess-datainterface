@@ -99,7 +99,8 @@ Func main()
 			_cleanexit($context["data"])
 			Return False
 		EndIf
-		_checkIsRunning($context["data"])
+		$msg = _checkIsRunning($context["data"])
+		If @error Then Return SetError(@error, @extended, $msg)
 		_updateComboBoxes($context["data"], $main)
 		_updatePgnCombo($context["pgnRepository"], $main)
 		If $context["option"]["keepgameon"] Then

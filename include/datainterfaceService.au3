@@ -131,9 +131,20 @@ Func _checkIsRunning(ByRef $data, $justexist = False)
 		$err = StderrRead($data["pid"])
 		$data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
 		ConsoleWrite($new)
+		If StringInStr($new, "Select an action from the following") Then
+			MsgBox(0, "", $new)
+			If Not (StringInStr($new, "[1] Load Predefined Variant [OFFLINE]") And _
+					StringInStr($new, "[2] Load Predefined Variant [ONLINE]") And _
+					StringInStr($new, "[3] Parse Game From PGN") And _
+					StringInStr($new, "[4] Manage Persistent Settings") And _
+					StringInStr($new, "[5] Ephemeral Settings and Triggers")) Then
+				Return SetError(1, 0, "Version missmatch")
+			EndIf
+		EndIf
+
 		$data["log"] = StringRight($data["log"], 1000)
 	Else
-		Return _datainterface_crashed($data)
+		Return SetError(1, 0, _datainterface_crashed($data))
 	EndIf
 EndFunc   ;==>_checkIsRunning
 Func _datainterface_crashed(ByRef $data)
@@ -189,7 +200,8 @@ EndFunc   ;==>_waitForResponse
 Func _runPGN(ByRef $data, $pgn, $blackincluded)
 	$run = $data["pid"]
 	StdinWrite($run, "3" & @LF)
-	_waitForResponse($data, "Discord")
+	$msg = _waitForResponse($data, "Discord")
+	If @error Then Return SetError(@error, 0, $msg)
 	$pgn = StringSplit($pgn, @LF, 2)
 	For $line In $pgn
 		If _isLastOne($line, $pgn) And Not $blackincluded Then
