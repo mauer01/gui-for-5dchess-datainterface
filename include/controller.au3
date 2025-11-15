@@ -119,29 +119,21 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			EndIf
 			$msg = _forEach(_JSON_Parse(FileRead($filepath)), "_controller_addVariantOverload", $context["data"])
 		Case $mainGui["settings"]["cClocks"]
-			Local $settingmap = _newMap()
 			$type = GUICtrlRead($mainGui["settings"]["cClocks"])
 			If $type == $context.labels.cClocks Then Return
-			Static Local $aklsdfjlkasdjflkasjdfkl
-			If Not $aklsdfjlkasdjflkasjdfkl Then
+			If GUICtrlGetState($mainGui["settings"]["iClockTime"]) = 144 Then
 				GUICtrlSetState($mainGui["settings"]["iClockTime"], $GUI_ENABLE)
 				GUICtrlSetState($mainGui["settings"]["iClockDelay"], $GUI_ENABLE)
-				$aklsdfjlkasdjflkasjdfkl = True
 				GUICtrlSetData($mainGui["settings"]["cClocks"], "")
 				GUICtrlSetData($mainGui["settings"]["cClocks"], $context.labels.cClocksChoices, $type)
 			EndIf
-			$keys = MapKeys($context["data"]["settings"])
-			$settingmap["S"] = _newMap()
-			$settingmap["S"]["timer"] = $keys == True ? $keys[1] : ""
-			$settingmap["S"]["increment"] = $keys == True ? $keys[2] : ""
-			$settingmap["M"] = _newMap()
-			$settingmap["M"]["timer"] = $keys == True ? $keys[3] : ""
-			$settingmap["M"]["increment"] = $keys == True ? $keys[4] : ""
-			$settingmap["L"] = _newMap()
-			$settingmap["L"]["timer"] = $keys == True ? $keys[5] : ""
-			$settingmap["L"]["increment"] = $keys == True ? $keys[6] : ""
-			GUICtrlSetData($mainGui["settings"]["iClockTime"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["timer"]])
-			$msg = GUICtrlSetData($mainGui["settings"]["iClockDelay"], $context["data"]["settings"][$settingmap[$mainGui["settings"]["Timers"][$type]]["increment"]])
+			Local $letter = $mainGui["settings"]["Timers"][$type]
+			Local $key[]
+			$key["L"] = "Clock3"
+			$key["M"] = "Clock2"
+			$key["S"] = "Clock1"
+			GUICtrlSetData($mainGui["settings"]["iClockTime"], $context["data"]["settings"][$key[$letter] & "BaseTime"])
+			$msg = GUICtrlSetData($mainGui["settings"]["iClockDelay"], $context["data"]["settings"][$key[$letter] & "Increment"])
 		Case $mainGui["settings"]["bClockSet"]
 			Local $time = GUICtrlRead($mainGui["settings"]["iClockTime"])
 			Local $delay = GUICtrlRead($mainGui["settings"]["iClockDelay"])
