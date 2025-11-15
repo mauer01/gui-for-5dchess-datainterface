@@ -11,6 +11,7 @@ Func _LoadMainGui(ByRef $context)
 	Local $keys
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
 	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
+	;TODO a little status bar under the tab
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
 	GUICtrlCreateTabItem($context.labels.tJsonLoader)
 	GUIStartGroup()
