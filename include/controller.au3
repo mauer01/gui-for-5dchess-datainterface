@@ -179,6 +179,11 @@ Func _frontController(ByRef $context, ByRef $mainGui)
 			$msg = _controller_animationSetting($context["data"], "ignore")
 		Case $mainGui["settings"]["bInsertCode"]
 			$msg = _controller_trigger($context["data"], ClipGet())
+			If @error Then
+				basicError(@error, $msg)
+				Return
+			EndIf
+
 		Case $mainGui["settings"]["bResumeGame"]
 			$msg = _controller_trigger($context["data"])
 		Case $mainGui["pgn"]["bPgnAdd"]
@@ -379,10 +384,10 @@ Func _controller_addVariant(ByRef $data, $fenPgnOrJson, $name = False, $author =
 	EndIf
 	If StringRegExp($fenPgnOrJson, "(?s).*\[((?:[a-zA-Z\*\d]+\/){7}[a-zA-Z\*\d]+):(\d+):(\d+):([wb])\].*") Then
 		$multiverse = _multiverse_create("pgn", $fenPgnOrJson)
-		$multiverse["Name"] = $name == False ? InputBox("Enter Variant Name", "Variant Name:") : $name
-		$multiverse["Author"] = $author == False ? InputBox("Enter Variant Author", "Variant Author:") : $author
+		$multiverse["Name"] = (not $name) ? InputBox("Enter Variant Name", "Variant Name:") : $name
+		$multiverse["Author"] = (not $author) ? InputBox("Enter Variant Author", "Variant Author:") : $author
 		ensureuniquename($data, $multiverse)
-		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse, $name, "pgn to variant"))
+		$variant = _JSON_MYGenerate(_multiversetovariant($multiverse))
 		_addVariantToJson($data, $variant)
 		Return
 	EndIf
