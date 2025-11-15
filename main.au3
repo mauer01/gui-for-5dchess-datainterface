@@ -83,7 +83,7 @@ Func main()
 		_cleanexit($context["data"])
 		Return SetError(@error, @extended, $main)
 	EndIf
-
+	$context["data"]["guiStatusOutput"] = $main["form"]["iStatusCode"]
 	Do
 		_updateJsonFiles($context["data"])
 		$msg = _frontController($context, $main)
