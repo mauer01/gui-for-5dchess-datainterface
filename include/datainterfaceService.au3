@@ -132,7 +132,6 @@ Func _checkIsRunning(ByRef $data, $justexist = False)
 		$data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
 		ConsoleWrite($new)
 		If StringInStr($new, "Select an action from the following") Then
-			MsgBox(0, "", $new)
 			If Not (StringInStr($new, "[1] Load Predefined Variant [OFFLINE]") And _
 					StringInStr($new, "[2] Load Predefined Variant [ONLINE]") And _
 					StringInStr($new, "[3] Parse Game From PGN") And _
