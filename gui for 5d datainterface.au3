@@ -10,8 +10,13 @@
 Func _LoadMainGui(ByRef $context)
 	Local $keys
 	#Region ### START Koda GUI section ### Form=.\kodaForms\main.kxf
-	Local $main = GUICreate($context.labels.main, 604, 210, 1140, 268)
-	;TODO a little status bar under the tab
+	Local $main = GUICreate($context.labels.main, 604, 230, 1140, 268)
+	Local $lStatusSign = GUICtrlCreateLabel($context.labels.lStatusSign & ":", 0, 210)
+	$newPos = myControlGetPos($main, $lStatusSign, "x")
+	Local $iStatusCode = GUICtrlCreateLabel("idle", $newPos["x"], 210, 600 - $newPos["x"], 21)
+	_makeConsoleLabel($iStatusCode)
+	_makeConsoleLabel($lStatusSign)
+
 	Local $tab = GUICtrlCreateTab(0, 0, 601, 209)
 	GUICtrlCreateTabItem($context.labels.tJsonLoader)
 	GUIStartGroup()
@@ -141,15 +146,7 @@ Func _LoadMainGui(ByRef $context)
 	Local $formMap[]
 	$formMap["main"] = $main
 	$formMap["tab"] = $tab
-	#cs
-		  "ForceTimetravelAnimationValue": "always_off",
-	 "Clock1BaseTime": null,
-	 "Clock1Increment": null,
-	 "Clock2BaseTime": null,
-	 "Clock2Increment": null,
-	 "Clock3BaseTime": null,
-	 "Clock3Increment": null
-	#ce
+	$formMap["iStatusCode"] = $iStatusCode
 	If MapExists($context.data, "settings") Then
 		If (MapExists($context.data.settings, "ForceTimetravelAnimationValue")) Then
 			Switch $context.data.settings.ForceTimetravelAnimationValue
@@ -230,7 +227,6 @@ Func _LoadMainGui(ByRef $context)
 	$ctrlMap["json"] = $jsonMap
 	$ctrlMap["settings"] = $settingsMap
 	$ctrlMap["pgn"] = $pgnMap
-
 	; return the assembled control map
 	Return $ctrlMap
 EndFunc   ;==>_LoadMainGui
@@ -306,3 +302,9 @@ Func _updateCgPgnMetaDatagroup(ByRef $pgnRepository, $main)
 		GUICtrlSetData($main["pgn"]["cMoveList"], _ArrayToString($moves), $moves[0])
 	EndIf
 EndFunc   ;==>_updateCgPgnMetaDatagroup
+
+Func _makeConsoleLabel($ctrl)
+	GUICtrlSetBkColor($ctrl, 0x000000)
+	GUICtrlSetColor($ctrl, 0xFFFFFF)
+	GUICtrlSetFont($ctrl, 8.5, 700, 0, "Segoe UI")
+EndFunc   ;==>_makeConsoleLabel
