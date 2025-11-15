@@ -264,16 +264,7 @@ Func _controller_changeTimer(ByRef $context, $type, $time, $delay)
 	$map["L"] = 6
 	$map["M"] = 4
 	$map["S"] = 2
-	$keys = MapKeys($context["data"]["settings"])
-	$settingmap["S"] = _newMap()
-	$settingmap["S"]["timer"] = $keys == True ? $keys[1] : ""
-	$settingmap["S"]["increment"] = $keys == True ? $keys[2] : ""
-	$settingmap["M"] = _newMap()
-	$settingmap["M"]["timer"] = $keys ? $keys[3] : ""
-	$settingmap["M"]["increment"] = $keys == True ? $keys[4] : ""
-	$settingmap["L"] = _newMap()
-	$settingmap["L"]["timer"] = $keys == True ? $keys[5] : ""
-	$settingmap["L"]["increment"] = $keys == True ? $keys[6] : ""
+
 	If StringInStr($time, ":") Then
 		$time = _timetoSeconds($time)
 		If @error Then Return SetError(4, 0, "Time format invalid")
@@ -283,8 +274,12 @@ Func _controller_changeTimer(ByRef $context, $type, $time, $delay)
 		$delay = _timetoSeconds($delay)
 		If @error Then Return SetError(5, 0, "Delay format invalid")
 	EndIf
-	$keyinc = $settingmap[$type]["increment"]
-	$keytimer = $settingmap[$type]["timer"]
+	Local $key[]
+	$key["L"] = "Clock3"
+	$key["M"] = "Clock2"
+	$key["S"] = "Clock1"
+	$keyinc = $key[$type] & "Increment"
+	$keytimer = $key[$type] & "BaseTime"
 	If ($time And $delay) Then
 		_settingOptions($data, $map[$type], $time)
 		$msg = _waitForResponse($data, "Action executed. Returning to menu")
