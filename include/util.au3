@@ -41,7 +41,8 @@ Global Const $standardLang = _JSON_Parse('{' & @CRLF & _
 		'    "bPgnRun": "Run",' & @CRLF & _
 		'    "bPgnRemove": "Remove",' & @CRLF & _
 		'    "bPgnEdit": "Edit",' & @CRLF & _
-		'	 "cbBlackIncluded": "Black Included"' & @CRLF & _
+		'	 "cbBlackIncluded": "Black Included",' & @CRLF & _
+		'	 "lStatusSign": "Status"' & @CRLF & _
 		'}')
 Func _unZip($sZipFile, $sDestFolder)
 	If Not FileExists($sZipFile) Then Return SetError(1)    ; source file does not exists
