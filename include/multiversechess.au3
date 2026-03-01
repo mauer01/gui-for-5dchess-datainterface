@@ -785,7 +785,9 @@ Func _multiverse_removeemptytimelines($i_multiverse)
 	Return ($i_multiverse[1])
 EndFunc   ;==>_multiverse_removeemptytimelines
 
-Func _multiversetovariant($i_multiverse, $variant = "automatically generated", $author = "mauer01s crazy progammingskillz")
+Func _multiversetovariant($i_multiverse)
+	$author = $i_multiverse["Author"] ? $i_multiverse["Author"] : "Unknown"
+	$variant = $i_multiverse["Name"] ? $i_multiverse["Name"] : "Multiverse Variant"
 	If $i_multiverse["brokenWhite"] Then $variant &= ":noWhiteMove"
 	$i_multiverse[1] = _multiverse_removeemptytimelines($i_multiverse)
 	Local $string = "  {" & @LF & "    " & '"Name": "' & $variant & '",' & @LF & "    " & '"Author": "' & $author & '",' & @LF & "    " & '"Timelines": {' & @LF

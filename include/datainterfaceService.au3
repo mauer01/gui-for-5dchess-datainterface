@@ -24,6 +24,9 @@ Func _datainterfaceSetup($ini, $localPath = False)
 		$localPath = _ArrayToString($localPath, "\", 1, $localPath[0] - 1)
 	EndIf
 	$data = _loadDataInterface(StringTrimRight($localPath, 10), $ini.data.activeJsonFile)
+	If @error Then
+		Return SetError(@error, 0, $data)
+	EndIf
 	Return $data
 EndFunc   ;==>_datainterfaceSetup
 Func _loadDataInterface($filepath, $activeFile)
@@ -47,9 +50,20 @@ Func _loadDataInterface($filepath, $activeFile)
 	$data["lastFileList"] = _newArray()
 	$data["settings"] = _newMap()
 	$data["cachedVariantMap"] = _newMap()
-	If FileExists($data["workingDir"] & "\settings.json") Then
-		$fileContent = FileRead($data["workingDir"] & "\settings.json")
+	Local $settingspath = $data["workingDir"] & "\settings.json"
+	If FileExists($settingspath) Then
+		$fileContent = FileRead($settingspath)
 		$data["settings"] = _JSON_Parse($fileContent)
+	Else
+		$data["settings"] = _newMap()
+		$data["settings"]["ForceTimetravelAnimationValue"] = "ignore"
+		$data["settings"]["Clock1BaseTime"] = Null
+		$data["settings"]["Clock1Increment"] = Null
+		$data["settings"]["Clock2BaseTime"] = Null
+		$data["settings"]["Clock2Increment"] = Null
+		$data["settings"]["Clock3BaseTime"] = Null
+		$data["settings"]["Clock3Increment"] = Null
+		FileWrite($settingspath, _JSON_generate($data["settings"]))
 	EndIf
 	$msg = _updateJsonFiles($data)
 	If @error = 1 Then
@@ -69,6 +83,7 @@ EndFunc   ;==>_loadDataInterface
 
 Func _updateJsonFiles(ByRef $data)
 	Local $files = _FileListToArray($data["workingDir"] & "\Resources", "*.json", 1, 1)
+	If @error Then Return SetError(2, 0, "Couldnt read json files from resource folder")
 	If $files[0] = 1 And StringInStr($files[1], "jsonVariants.json") Then
 		Return SetError(1, 0, "Only normal jsonVariants.json file found, no variant files present")
 	EndIf
@@ -116,9 +131,19 @@ Func _checkIsRunning(ByRef $data, $justexist = False)
 		$err = StderrRead($data["pid"])
 		$data["log"] &= "Error:" & $err & @LF & "Out:" & @LF & $new
 		ConsoleWrite($new)
+		If StringInStr($new, "Select an action from the following") Then
+			If Not (StringInStr($new, "[1] Load Predefined Variant [OFFLINE]") And _
+					StringInStr($new, "[2] Load Predefined Variant [ONLINE]") And _
+					StringInStr($new, "[3] Parse Game From PGN") And _
+					StringInStr($new, "[4] Manage Persistent Settings") And _
+					StringInStr($new, "[5] Ephemeral Settings and Triggers")) Then
+				Return SetError(1, 0, "Version missmatch")
+			EndIf
+			_statusOutput($data, "idle")
+		EndIf
 		$data["log"] = StringRight($data["log"], 1000)
 	Else
-		Return _datainterface_crashed($data)
+		Return SetError(1, 0, _datainterface_crashed($data))
 	EndIf
 EndFunc   ;==>_checkIsRunning
 Func _datainterface_crashed(ByRef $data)
@@ -126,6 +151,7 @@ Func _datainterface_crashed(ByRef $data)
 		$data["wasRunning"] = False
 		$data["crashed"] = True
 		FileWrite(@ScriptDir & "\" & $data["pid"] & "-log.txt", $data["log"])
+		_statusOutput($data, "Datainterface Console crashed, please restart gui.")
 		Return SetError(1, 0, "Datainterface closed unexpectidly Logfile might provide data")
 	EndIf
 	Return SetError(1, 0, "Datainterface is not running")
@@ -145,6 +171,7 @@ EndFunc   ;==>_CloseAllDatainterfaces
 
 Func _settingOptions(ByRef $data, $setting, $opt, $sleep = 100)
 	$run = $data["pid"]
+	_statusOutput($data, "changing setting")
 	StdinWrite($run, "4" & @LF)
 	Sleep($sleep)
 	StdinWrite($run, "" & $setting & @LF)
@@ -153,6 +180,7 @@ Func _settingOptions(ByRef $data, $setting, $opt, $sleep = 100)
 EndFunc   ;==>_settingOptions
 
 Func _optionsOrTriggers(ByRef $data, $setting, $opt = False, $sleep = 100)
+	_statusOutput($data, "changing options")
 	$run = $data["pid"]
 	StdinWrite($run, "5" & @LF)
 	Sleep($sleep)
@@ -161,10 +189,12 @@ Func _optionsOrTriggers(ByRef $data, $setting, $opt = False, $sleep = 100)
 	If $opt Then StdinWrite($run, "" & $opt & @LF)
 EndFunc   ;==>_optionsOrTriggers
 
-Func _waitForResponse(ByRef $data, $response)
+Func _waitForResponse(ByRef $data, $response, $statusmsg = "processing...")
 	$new = StdoutRead($data["pid"])
 	While Not StringInStr($new, $response)
 		$new = StdoutRead($data["pid"], True)
+		if GUIGetMsg() = -3 then exit
+		_statusOutput($data, $statusmsg)
 		ConsoleWrite($new)
 		Sleep(10)
 		_checkIsRunning($data, True)
@@ -174,7 +204,9 @@ EndFunc   ;==>_waitForResponse
 Func _runPGN(ByRef $data, $pgn, $blackincluded)
 	$run = $data["pid"]
 	StdinWrite($run, "3" & @LF)
-	_waitForResponse($data, "Discord")
+	$msg = _waitForResponse($data, "Discord", "waiting for new game to start")
+	_statusOutput($data, "receiving pgn data")
+	If @error Then Return SetError(@error, 0, $msg)
 	$pgn = StringSplit($pgn, @LF, 2)
 	For $line In $pgn
 		If _isLastOne($line, $pgn) And Not $blackincluded Then
@@ -195,6 +227,7 @@ Func _runVariant(ByRef $data, $variant)
 	$run = $data["pid"]
 	StdinWrite($run, "1" & @LF)
 	StdinWrite($run, "1" & @LF)
+	_statusOutput($data, "waiting for game to start")
 EndFunc   ;==>_runVariant
 
 
@@ -360,6 +393,7 @@ EndFunc   ;==>_requestDatainterface
 
 
 Func _JSONLoad(ByRef $data)
+	_statusOutput($data, "loading Variants from Json file")
 	$data["cachedVariantMap"] = _newMap()
 	Local $path = $data["activeJsonFilePath"]
 	Local $fileContent = FileRead($path)
@@ -374,6 +408,7 @@ Func _JSONLoad(ByRef $data)
 		WEnd
 		$data["cachedVariantMap"][$keys[$i]] = $temp[$i]
 	Next
+	_statusOutput($data, "idle")
 EndFunc   ;==>_JSONLoad
 
 
@@ -381,3 +416,9 @@ Func variantNameAuthorCallback($e, $string)
 	Local $fullstring = $e.Name & " by " & $e.Author & $string
 	Return $fullstring
 EndFunc   ;==>variantNameAuthorCallback
+
+
+
+Func _statusOutput($data, $message)
+	if MapExists($data, "guiStatusOutput") then	GUICtrlSetData($data["guiStatusOutput"], $message)
+EndFunc   ;==>_statusOutput
