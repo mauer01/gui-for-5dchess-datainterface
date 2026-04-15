@@ -1,7 +1,7 @@
 {
   "standard": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/standard.json",
   "Extra Variants": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/Extra Variants.json",
-  "First Custom Tournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/firstCustomTournament.json",
-  "Second Custom Tournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/secondCustomTournament.json",
+  "First Custom Tournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/First Custom Tournament.json",
+  "Second Custom Tournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/Second Custom Tournament.json",
   "Third Custom Variant Tournament": "https://raw.githubusercontent.com/mauer01/gui-for-5dchess-datainterface/refs/heads/main/variantFiles/Third Custom Variant Tournament.json"
 }
