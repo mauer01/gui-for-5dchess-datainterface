@@ -1,0 +1,99 @@
+[
+{
+  "Name": "Timeline Advantage for Queen",
+  "Author": "Mage",
+  "Timelines": {
+    "0L": [
+      null,
+      "rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+      "rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+    ]
+  },
+  "CosmeticTurnOffset": -1,
+  "GameBuilderOverride": "GameBuilderEven"
+},
+{
+  "Name": "Exiled Kings draw",
+  "Author": "Mauer01",
+  "Timelines": {
+    "0L": [
+      null,
+      null,
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB2BNR"
+    ],
+    "+1L": [
+      null,
+      null,
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1B1R"
+    ],
+    "+2L": [
+      null,
+      "8/8/4N3/8/8/8/8/8"
+    ]
+  },
+  "CosmeticTurnOffset": -1,
+  "GameBuilderOverride": "GameBuilderOdd"
+},
+{
+  "Name": "old ass standard exiling line",
+  "Author": "pgn to variant",
+  "Timelines": {
+    "0L": [
+      null,
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+      "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR",
+      "rnbqkb1r/pppppppp/5n2/8/8/4P3/PPPP1PPP/RNBQKBNR",
+      "rnbqkb1r/pppppppp/5n2/8/8/4PN2/PPPP1PPP/RNBQKB1R",
+      "rnbqkb1r/pppp1ppp/4pn2/8/8/4PN2/PPPP1PPP/RNBQKB1R",
+      "rnbqkb1r/pppp1ppp/4pn2/8/8/2P1PN2/PP1P1PPP/RNBQKB1R",
+      "rnbqkb1r/pp1p1ppp/2p1pn2/8/8/2P1PN2/PP1P1PPP/RNBQKB1R",
+      "rnbqkb1r/pp1p1ppp/2p1pn2/8/8/1QP1PN2/PP1P1PPP/RNB1KB1R",
+      "rnb1kb1r/pp1p1ppp/1qp1pn2/8/8/1QP1PN2/PP1P1PPP/RNB1KB1R",
+      "rnb1kb1r/pp1p1ppp/1qp1pn2/8/8/2P1PN2/PP1P1PPP/RNB1KB1R"
+    ],
+    "1L": [
+      null,
+      null,
+      null,
+      "rnbqkbnr/pppppQpp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+      "rnbq1bnr/pppppkpp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+      "rnbq1bnr/pppppkpp/8/8/8/5N2/PPPPPPPP/RNBQKB1R",
+      "rnbq1b1r/pppppkpp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R",
+      "rnbq1b1r/pppppkpp/5n2/8/8/8/PPPPPPPP/RNBQKB1R"
+    ],
+    "2L": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      "rnbq1bnr/pppppkpp/8/5N2/8/8/PPPPPPPP/RNBQKBNR"
+    ]
+  },
+  "CosmeticTurnOffset": -1,
+  "GameBuilderOverride": "GameBuilderOdd"
+},
+{
+  "Name": "Timeline Range",
+  "Author": "Ezzeth",
+  "Timelines": {
+    "-1L": [
+      null,
+      "u1bnyb1u/w1wwww1w/1w4w1/8/8/8/1PPPPPP1/1R4R1",
+      "u1bnyb1u/w1wwww1w/1w4w1/8/8/8/1PPPPPP1/1R4R1"
+    ],
+    "0L": [
+      null,
+      "2nnnn2/c1wwww1c/8/8/8/8/C1WWWW1C/2NNNN2",
+      "2nnnn2/c1wwww1c/8/8/8/8/C1WWWW1C/2NNNN2"
+    ],
+    "+1L": [
+      null,
+      "1r4r1/1pppppp1/8/8/8/1W4W1/W1WWWW1W/U1BNYB1U",
+      "1r4r1/1pppppp1/8/8/8/1W4W1/W1WWWW1W/U1BNYB1U"
+    ]
+  },
+  "CosmeticTurnOffset": -1
+}
+]
